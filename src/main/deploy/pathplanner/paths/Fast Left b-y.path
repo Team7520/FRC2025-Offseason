@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": -1.0,
-        "y": 7.0
+        "x": 3.867,
+        "y": 3.297
       },
       "prevControl": null,
       "nextControl": {
-        "x": 0.0,
-        "y": 7.0
+        "x": 3.196703091187564,
+        "y": 2.813210848823337
       },
       "isLocked": false,
       "linkedName": null
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 1.0,
+        "y": 1.1
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 2.020837117090075,
+        "y": 1.887513700317006
       },
       "nextControl": null,
       "isLocked": false,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 55.0
   },
   "reversed": false,
-  "folder": null,
+  "folder": "3 Coral Auto Paths",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 59.99999999999999
   },
-  "useDefaultConstraints": true
+  "useDefaultConstraints": false
 }
