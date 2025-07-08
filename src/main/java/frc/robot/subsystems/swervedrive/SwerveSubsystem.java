@@ -17,12 +17,19 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
+
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModulePosition;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -59,6 +66,10 @@ public class SwerveSubsystem extends SubsystemBase
 {
   //Change these names based on actual camera names
   public AprilTagSystem aprilTagSystem = new AprilTagSystem("Camera1", "Camera2", "Camera3", "Camera4");
+
+  //Matrix for Pose Estimator, tune values here
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(5));
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0., 0., Units.degreesToRadians(10));
 
   /**
    * Swerve drive object.
@@ -114,6 +125,15 @@ public class SwerveSubsystem extends SubsystemBase
     }
     setupPathPlanner();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
+
+    final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+        Constants.kinematics,
+        Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(),
+        stateStdDevs,
+        visionMeasurementStdDevs
+    );
   }
 
   /**
@@ -130,7 +150,7 @@ public class SwerveSubsystem extends SubsystemBase
                                   new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
                                              Rotation2d.fromDegrees(0)));
   }
-
+  
   /**
    * Setup the photon vision class.
    */
