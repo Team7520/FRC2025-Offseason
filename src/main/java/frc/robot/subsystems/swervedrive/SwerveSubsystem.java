@@ -27,11 +27,13 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import java.io.File;
@@ -55,6 +57,8 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 
 public class SwerveSubsystem extends SubsystemBase
 {
+  //Change these names based on actual camera names
+  public AprilTagSystem aprilTagSystem = new AprilTagSystem("Camera1", "Camera2", "Camera3", "Camera4");
 
   /**
    * Swerve drive object.
@@ -143,6 +147,22 @@ public class SwerveSubsystem extends SubsystemBase
     {
       swerveDrive.updateOdometry();
       vision.updatePoseEstimation(swerveDrive);
+    }
+
+    double maxAmb = 0;
+    int bestCam = 0;
+    for(int i = 1; i <= 4; i++) {
+      if (aprilTagSystem.getAmbiguity(i) > maxAmb) {
+        maxAmb = aprilTagSystem.getAmbiguity(i);
+        bestCam = i;
+      }
+    }
+    SmartDashboard.putNumber("Current Camera Used", bestCam);
+    SmartDashboard.putNumber("Max Ambiguity", maxAmb);
+    if(maxAmb > 0.5) {
+      Pose2d updatedPose = aprilTagSystem.getCurrentRobotFieldPose(bestCam);
+    } else {
+      System.out.println("No tag deteced or ambiguity too low: ");
     }
   }
 
