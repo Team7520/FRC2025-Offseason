@@ -159,7 +159,7 @@ public class AprilTagSystem {
     public boolean initiateAprilTagLayout() {
         for (int i = 0; i < 5 && !aprilTagLayoutLoaded; i++) {
             try {            
-                aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2024Crescendo.m_resourceFile);
+                aprilTagFieldLayout = AprilTagFieldLayout.loadFromResource(AprilTagFields.k2025ReefscapeAndyMark.m_resourceFile);
                 apriltags = aprilTagFieldLayout.getTags();
                 aprilTagLayoutLoaded = true;
             } catch (IOException e) {

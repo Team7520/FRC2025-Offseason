@@ -162,13 +162,7 @@ public class SwerveSubsystem extends SubsystemBase
   @Override
   public void periodic()
   {
-    // When vision is enabled we must manually update odometry in SwerveDrive
-    if (visionDriveTest)
-    {
-      swerveDrive.updateOdometry();
-      vision.updatePoseEstimation(swerveDrive);
-    }
-
+    //Find the best camera with the highest ambiguity. Than, update the pose based on that one
     double maxAmb = 0;
     int bestCam = 0;
     for(int i = 1; i <= 4; i++) {
@@ -179,6 +173,9 @@ public class SwerveSubsystem extends SubsystemBase
     }
     SmartDashboard.putNumber("Current Camera Used", bestCam);
     SmartDashboard.putNumber("Max Ambiguity", maxAmb);
+
+    //If ambiuity is above 0.5, update the pose of the robot
+    //This is to prevent the robot from updating the pose when there is no tag detected or the ambiguity is too low
     if(maxAmb > 0.5) {
       Pose2d updatedPose = aprilTagSystem.getCurrentRobotFieldPose(bestCam);
     } else {
