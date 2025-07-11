@@ -16,11 +16,11 @@
   },
   "inverted": {
     "drive": false,
-    "angle": true
+    "angle": false
   },
-  "absoluteEncoderOffset": 6.59,
+  "absoluteEncoderOffset": 318.076172,
   "location": {
-    "front": -11,
-    "left": -11
+    "front": -10.25,
+    "left": -10.25
   }
 }
