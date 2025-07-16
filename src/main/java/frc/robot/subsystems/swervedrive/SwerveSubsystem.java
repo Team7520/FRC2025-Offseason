@@ -55,6 +55,7 @@ import org.photonvision.targeting.PhotonPipelineResult;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
+import swervelib.SwerveModule;
 import swervelib.math.SwerveMath;
 import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
@@ -109,13 +110,13 @@ public class SwerveSubsystem extends SubsystemBase
     {
       throw new RuntimeException(e);
     }
-    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-    swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-    swerveDrive.setAngularVelocityCompensation(true,
-                                               true,
-                                               0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
-    swerveDrive.setModuleEncoderAutoSynchronize(false,
-                                                1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+    // swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+    // swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+    // swerveDrive.setAngularVelocityCompensation(true,
+    //                                            true,
+    //                                            0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+    // swerveDrive.setModuleEncoderAutoSynchronize(false,
+    //                                             1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
     if (visionDriveTest)
     {
@@ -142,15 +143,15 @@ public class SwerveSubsystem extends SubsystemBase
    * @param driveCfg      SwerveDriveConfiguration for the swerve.
    * @param controllerCfg Swerve Controller.
    */
-  public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
-  {
-    swerveDrive = new SwerveDrive(driveCfg,
-                                  controllerCfg,
-                                  Constants.MAX_SPEED,
-                                  new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
-                                             Rotation2d.fromDegrees(0)));
-  }
-  
+  // public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
+  // {
+  //   swerveDrive = new SwerveDrive(driveCfg,
+  //                                 controllerCfg,
+  //                                 Constants.MAX_SPEED,
+  //                                 new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
+  //                                            Rotation2d.fromDegrees(0)));
+  // }
+
   /**
    * Setup the photon vision class.
    */
@@ -181,6 +182,20 @@ public class SwerveSubsystem extends SubsystemBase
     } else {
       System.out.println("No tag deteced or ambiguity too low: ");
     }
+    SwerveModule[] mods = swerveDrive.getModules();
+    SmartDashboard.putNumber("mod 0",mods[0].getAbsolutePosition());
+    SmartDashboard.putNumber("mod 1",mods[1].getAbsolutePosition());
+    SmartDashboard.putNumber("mod 2",mods[2].getAbsolutePosition());
+    SmartDashboard.putNumber("mod 3",mods[3].getAbsolutePosition());
+    SmartDashboard.putNumber("mod 0 abs",mods[0].getAbsoluteEncoder().getAbsolutePosition());
+    SmartDashboard.putNumber("mod 1 abs",mods[1].getAbsoluteEncoder().getAbsolutePosition());
+    SmartDashboard.putNumber("mod 2 abs",mods[2].getAbsoluteEncoder().getAbsolutePosition());
+    SmartDashboard.putNumber("mod 3 abs",mods[3].getAbsoluteEncoder().getAbsolutePosition());
+    
+    SmartDashboard.putNumber("mod 0 drive",mods[0].getDriveMotor().getPosition());
+    SmartDashboard.putNumber("mod 1 drive",mods[1].getDriveMotor().getPosition());
+    SmartDashboard.putNumber("mod 2 drive",mods[2].getDriveMotor().getPosition());
+    SmartDashboard.putNumber("mod 3 drive",mods[3].getDriveMotor().getPosition());
   }
 
   @Override
@@ -224,11 +239,10 @@ public class SwerveSubsystem extends SubsystemBase
           },
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
-              // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
-              // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
-              // Rotation PID constants
+              // PID constants for translation
+              new PIDConstants(7, 0, 0),
+              // PID constants for rotation
+              new PIDConstants(3, 0, 0)
           ),
           config,
           // The robot configuration
