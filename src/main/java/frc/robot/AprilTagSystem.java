@@ -5,6 +5,7 @@
 package frc.robot;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -24,9 +25,7 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-//import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
-//import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -39,27 +38,30 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.robot.Constants;
 
-//import frc.team7520.robot.Constants;
 import java.io.IOException;
 
 /** Add your docs here. */
 public class AprilTagSystem {
+    
+    public static class CameraInfo {
+        public final String name;
+        public final PhotonCamera camera;
+        public boolean isOpen;
+        public final Transform3d robotToCamera;
 
-    private PhotonCamera camera1;
-    private PhotonCamera camera2;
-    private PhotonCamera camera3;
-    private PhotonCamera camera4;
-    private boolean isCamera1Open = false;
-    private boolean isCamera2Open = false;
-    private boolean isCamera3Open = false;
-    private boolean isCamera4Open = false;
+        public CameraInfo(String name, PhotonCamera camera, boolean isOpen, Transform3d robotToCamera) {
+            this.name = name;
+            this.camera = camera;
+            this.isOpen = isOpen;
+            this.robotToCamera = robotToCamera;
+        }
+    }
+
+    private final List<CameraInfo> cameraList = new ArrayList<>();
+    
     private final PipeLineType TYPE = PipeLineType.APRIL_TAG;
-    private boolean isOpen = false;
+    private boolean allOpen = false;
     private boolean facingTarget = false;
-    private String cameraName1;
-    private String cameraName2;
-    private String cameraName3;
-    private String cameraName4;
     private AprilTagFieldLayout aprilTagFieldLayout;
     private List<AprilTag> apriltags;
     private boolean aprilTagLayoutLoaded = false;
@@ -75,79 +77,76 @@ public class AprilTagSystem {
     }
 
     public class PhotonVisionData {
-        public boolean is_vaild;
-        // 2D Mode
-        public double yaw;
-        public double pitch;
-        public double area;
-        public double skew;
-        public double x_dist_2d;
-        public double y_dist_2d;
-        // 3D Mode
-        public int april_tag_id;
-        public double x_distance;
-        public double y_distance;
-        public double z_distance;
-        public double x_rotate;
-        public double y_rotate;
-        public double z_rotate;
-        public double angle_rotate;
-        public double ambiguity;
     }
 
-    public AprilTagSystem(String cameraName1, String cameraName2, String cameraName3, String cameraName4) {
+    public AprilTagSystem() {
+        // Initialize the cameras
+        cameraList.add(new CameraInfo(
+                "FrontRightCam",
+                new PhotonCamera("FrontRightCam"),
+                false,
+                new Transform3d(0., // CAMERA_POS_FOR_ROBOT_X
+                                0.0, // CAMERA_POS_FOR_ROBOT_Y
+                                0.0, // CAMERA_POS_FOR_ROBOT_Z
+                                new Rotation3d(
+                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
+                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
+        ));
+
+        cameraList.add(new CameraInfo(
+                "FrontLeftCam",
+                new PhotonCamera("FrontLeftCam"),
+                false,
+                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+                                0.0, // CAMERA_POS_FOR_ROBOT_Y
+                                0.0, // CAMERA_POS_FOR_ROBOT_Z
+                                new Rotation3d(
+                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
+                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
+        ));
+
+        cameraList.add(new CameraInfo(
+                "BackRightCam",
+                new PhotonCamera("BackRightCam"),
+                false,
+                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+                                0.0, // CAMERA_POS_FOR_ROBOT_Y
+                                0.0, // CAMERA_POS_FOR_ROBOT_Z
+                                new Rotation3d(
+                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
+                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
+        ));
+
+        cameraList.add(new CameraInfo(
+                "BackLeftCam",
+                new PhotonCamera("BackLeftCam"),
+                false,
+                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+                                0.0, // CAMERA_POS_FOR_ROBOT_Y
+                                0.0, // CAMERA_POS_FOR_ROBOT_Z
+                                new Rotation3d(
+                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
+                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
+        ));
         periodic(robotPose);
-        this.cameraName1 = cameraName1; 
-        this.cameraName2 = cameraName2;
-        this.cameraName3 = cameraName3;
-        this.cameraName4 = cameraName4;
-               
-        camera1 = new PhotonCamera(cameraName1);
-        camera2 = new PhotonCamera(cameraName2);
-        camera3 = new PhotonCamera(cameraName3);
-        camera4 = new PhotonCamera(cameraName4);
     }
 
     public void periodic(Pose2d robotPose) {
         this.robotPose = robotPose;
-        if(camera1.isConnected() && camera2.isConnected() && camera3.isConnected() && camera4.isConnected()) {
-            isOpen = true;
-        }
-        SmartDashboard.putBoolean("PHOTONVISION ALL CONNECTED?", isOpen);
-        if(!camera1.isConnected()) {
-            System.out.printf("Failed to open camera 1: %s \n", cameraName1);
-            isCamera1Open = false;
-            SmartDashboard.putBoolean("CAMERA 1 OPEN?", isCamera1Open);
-        } else {
-            isCamera1Open = true;
-            SmartDashboard.putBoolean("CAMERA 1 OPEN?", isCamera1Open);
-        }
-
-        if(!camera2.isConnected()) {
-            System.out.printf("Failed to open camera 2: %s \n", cameraName2);
-            isCamera2Open = false;
-            SmartDashboard.putBoolean("CAMERA 2 OPEN?", isCamera2Open);
-        } else {
-            isCamera2Open = true;
-            SmartDashboard.putBoolean("CAMERA 2 OPEN?", isCamera2Open);
-        }
-
-        if(!camera3.isConnected()) {
-            System.out.printf("Failed to open camera 3: %s \n", cameraName3);
-            isCamera3Open = false;
-            SmartDashboard.putBoolean("CAMERA 3 OPEN?", isCamera3Open);
-        } else {
-            isCamera3Open = true;
-            SmartDashboard.putBoolean("CAMERA 3 OPEN?", isCamera3Open);
-        }
-
-        if(!camera4.isConnected()) {
-            System.out.printf("Failed to open camera 4: %s \n", cameraName4);
-            isCamera4Open = false;
-            SmartDashboard.putBoolean("CAMERA 4 OPEN?", isCamera4Open);
-        } else {
-            isCamera4Open = true;
-            SmartDashboard.putBoolean("CAMERA 4 OPEN?", isCamera4Open);
+        allOpen = true;
+        for(int i = 0; i < cameraList.size(); i++) {
+            if (cameraList.get(i).camera.isConnected()) {
+                cameraList.get(i).isOpen = true;
+            } else {
+                cameraList.get(i).isOpen = false;
+                allOpen = false;
+                System.out.printf("Failed to open camera %d: %s \n", i + 1, cameraList.get(i).name);
+            }
+            SmartDashboard.putBoolean(cameraList.get(i).name + " OPEN?", cameraList.get(i).isOpen);
         }
     }
 
@@ -171,25 +170,21 @@ public class AprilTagSystem {
     }
 
     /**
-     * Returns the ambiugity of the given camera, used to determine which has the most accurate data
+     * Returns the ambiguity of the given camera, used to determine which has the most accurate data
      * @return a double representing the ambiguity of the camera
      */
-    public double getAmbiguity(int camera) {
-        PhotonPipelineResult result = null;
-        if(camera == 1) {
-            result = camera1.getLatestResult();
-        } else if(camera == 2) {
-            result = camera2.getLatestResult();
-        } else if(camera == 3) {
-            result = camera3.getLatestResult();
-        } else if(camera == 4) {
-            result = camera4.getLatestResult();
+    public double getAmbiguity(int cameraIndex) {
+        if (cameraIndex < 0 || cameraIndex >= cameraList.size()) {
+            return -1; // Handle invalid camera index
         }
 
-        if(result == null || !result.hasTargets()) {
-            return -1; // Handle the case where no camera matches or no targets are found
+        CameraInfo cameraInfo = cameraList.get(cameraIndex);
+        PhotonPipelineResult result = cameraInfo.camera.getLatestResult();
+
+        if (result == null || !result.hasTargets()) {
+            return -1; // Handle the case where no targets are found
         }
-        
+
         PhotonTrackedTarget target = result.getBestTarget();
         return target.getPoseAmbiguity();
     }
@@ -198,22 +193,18 @@ public class AprilTagSystem {
      * Returns the capture time, used for pose estimator
      * @return capture time in milliseconds
      */
-    public double getCaptureTime(int camera) {
-        PhotonPipelineResult result = null;
-        if(camera == 1) {
-            result = camera1.getLatestResult();
-        } else if(camera == 2) {
-            result = camera2.getLatestResult();
-        } else if(camera == 3) {
-            result = camera3.getLatestResult();
-        } else if(camera == 4) {
-            result = camera4.getLatestResult();
+    public double getCaptureTime(int cameraIndex) {
+        if (cameraIndex < 0 || cameraIndex >= cameraList.size()) {
+            return -1; // Handle invalid camera index
         }
 
-        if(result == null || !result.hasTargets()) {
-            return -1; // Handle the case where no camera matches or no targets are found
+        CameraInfo cameraInfo = cameraList.get(cameraIndex);
+        PhotonPipelineResult result = cameraInfo.camera.getLatestResult();
+
+        if (result == null || !result.hasTargets()) {
+            return -1; // Handle the case where no targets are found
         }
-        
+
         return result.getTimestampSeconds() * 1000; // Convert seconds to milliseconds
     }
 
@@ -224,18 +215,12 @@ public class AprilTagSystem {
      */
     public Pose2d getCurrentRobotFieldPose(int camera) {
         PhotonPipelineResult result = null;
-        if(camera == 1) {
-            result = camera1.getLatestResult();
-        } else if(camera == 2) {
-            result = camera2.getLatestResult();
-        } else if(camera == 3) {
-            result = camera3.getLatestResult();
-        } else if(camera == 4) {
-            result = camera4.getLatestResult();
+        if (camera >= 0 && camera < cameraList.size()) {
+            result = cameraList.get(camera).camera.getLatestResult();
         }
 
-        if(result == null) {
-            return null; // Handle the case where no camera matches
+        if (result == null || !result.hasTargets()) {
+            return null;
         }
         /* 
          * To avoid confusion regarding whether rotation is applied first or translation, and whether the rotation/translational
@@ -252,34 +237,19 @@ public class AprilTagSystem {
          * 
          * -Robin
          */
-        double CAMERA_POS_FOR_ROBOT_X = -0.254; // Meters
-        double CAMERA_POS_FOR_ROBOT_Y = 0;
-        double CAMERA_POS_FOR_ROBOT_Z = 0.6858;
-        double CAMERA_POS_FOR_ROBOT_ROLL = 0;
-        double CAMERA_POS_FOR_ROBOT_PITCH = -Math.toRadians(35); // Radians
-        double CAMERA_POS_FOR_ROBOT_YAW = Math.PI;
-
-        Transform3d robotToCamera = new Transform3d(CAMERA_POS_FOR_ROBOT_X, 
-                                                    CAMERA_POS_FOR_ROBOT_Y, 
-                                                    CAMERA_POS_FOR_ROBOT_Z, 
-                                                    new Rotation3d(CAMERA_POS_FOR_ROBOT_ROLL,
-                                                    CAMERA_POS_FOR_ROBOT_PITCH,
-                                                    CAMERA_POS_FOR_ROBOT_YAW));
+        Transform3d robotToCamera = cameraList.get(camera).robotToCamera;
         
-        if(result.hasTargets()) {
-            PhotonTrackedTarget target = result.getBestTarget();
-            if (target.getBestCameraToTarget().getX() > MAX_RANGE) {
-                return null;
-            }
-            Pose3d robotPose = PhotonUtils.estimateFieldToRobotAprilTag(
-                target.getBestCameraToTarget(), 
-                aprilTagFieldLayout.getTagPose(target.getFiducialId()).get(), 
-                robotToCamera.inverse());
-            
-            //SmartDashboard.putNumber("Tag X", target.getBestCameraToTarget().getX());
-            //SmartDashboard.putNumber("Tag Y", target.getBestCameraToTarget().getY());
-            return robotPose.toPose2d();            
-        } 
-        return null;
+        PhotonTrackedTarget target = result.getBestTarget();
+        if (target.getBestCameraToTarget().getX() > MAX_RANGE) {
+            return null;
+        }
+        Pose3d robotPose = PhotonUtils.estimateFieldToRobotAprilTag(
+            target.getBestCameraToTarget(), 
+            aprilTagFieldLayout.getTagPose(target.getFiducialId()).get(), 
+            robotToCamera.inverse());
+        //SmartDashboard.putNumber("Tag X", target.getBestCameraToTarget().getX());
+        //SmartDashboard.putNumber("Tag Y", target.getBestCameraToTarget().getY());
+        return robotPose.toPose2d();            
+        
     }
 }

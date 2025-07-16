@@ -66,7 +66,7 @@ import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
 public class SwerveSubsystem extends SubsystemBase
 {
   //Change these names based on actual camera names
-  public AprilTagSystem aprilTagSystem = new AprilTagSystem("Camera1", "Camera2", "Camera3", "Camera4");
+  public AprilTagSystem aprilTagSystem = new AprilTagSystem();
 
   //Matrix for Pose Estimator, tune values here
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(5));
