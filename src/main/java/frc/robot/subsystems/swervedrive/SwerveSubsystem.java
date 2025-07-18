@@ -6,6 +6,17 @@ package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.json.simple.parser.ParseException;
+import org.photonvision.targeting.PhotonPipelineResult;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -20,7 +31,6 @@ import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
 
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
-
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -28,7 +38,6 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
-import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
@@ -43,21 +52,11 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import org.json.simple.parser.ParseException;
-import org.photonvision.targeting.PhotonPipelineResult;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
 import swervelib.SwerveModule;
 import swervelib.math.SwerveMath;
-import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
@@ -163,22 +162,32 @@ public class SwerveSubsystem extends SubsystemBase
   @Override
   public void periodic()
   {
-    //Find the best camera with the highest ambiguity. Than, update the pose based on that one
-    double maxAmb = 0;
-    int bestCam = 0;
-    for(int i = 1; i <= 4; i++) {
-      if (aprilTagSystem.getAmbiguity(i) > maxAmb) {
-        maxAmb = aprilTagSystem.getAmbiguity(i);
-        bestCam = i;
-      }
+    
+    if (!aprilTagSystem.aprilTagLayoutLoaded){
+      aprilTagSystem.initiateAprilTagLayout();
+    }
+    //Find the best camera with the lowest ambiguity. Than, update the pose based on that one
+    double minAmb = 100;
+    int bestCam = -1;
+    for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
+        double amb = aprilTagSystem.getAmbiguity(i);
+        SmartDashboard.putNumber("Ambiguity", amb);
+
+        if (amb >= 0 && amb < minAmb) {
+            minAmb = amb;
+            bestCam = i;
+        }
     }
     SmartDashboard.putNumber("Current Camera Used", bestCam);
-    SmartDashboard.putNumber("Max Ambiguity", maxAmb);
+    SmartDashboard.putNumber("Min Ambiguity", minAmb);
 
-    //If ambiuity is above 0.5, update the pose of the robot
+    //If ambiuity is below 0.5, update the pose of the robot
     //This is to prevent the robot from updating the pose when there is no tag detected or the ambiguity is too low
-    if(maxAmb > 0.5) {
+    if (bestCam != -1 && minAmb < 0.5) {
       Pose2d updatedPose = aprilTagSystem.getCurrentRobotFieldPose(bestCam);
+      if (updatedPose!= null){
+        SmartDashboard.putNumber("updatedPoseX", updatedPose.getX());
+      }
     } else {
       System.out.println("No tag deteced or ambiguity too low: ");
     }

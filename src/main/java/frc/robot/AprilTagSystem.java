@@ -64,8 +64,8 @@ public class AprilTagSystem {
     private boolean facingTarget = false;
     private AprilTagFieldLayout aprilTagFieldLayout;
     private List<AprilTag> apriltags;
-    private boolean aprilTagLayoutLoaded = false;
-    private final double MAX_RANGE = 2; //In meters, anything beyond 2 meters should not be used
+    public boolean aprilTagLayoutLoaded = false;
+    private final double MAX_RANGE = 20; //In meters, anything beyond 2 meters should not be used
     
     private Pose2d robotPose;
     private AprilTag closestTag;
@@ -107,31 +107,31 @@ public class AprilTagSystem {
                                     0)) // CAMERA_POS_FOR_ROBOT_YAW
         ));
 
-        cameraList.add(new CameraInfo(
-                "BackRightCam",
-                new PhotonCamera("BackRightCam"),
-                false,
-                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-                                0.0, // CAMERA_POS_FOR_ROBOT_Y
-                                0.0, // CAMERA_POS_FOR_ROBOT_Z
-                                new Rotation3d(
-                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-                                    Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
-        ));
+        // cameraList.add(new CameraInfo(
+        //         "BackRightCam",
+        //         new PhotonCamera("BackRightCam"),
+        //         false,
+        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
+        //                         new Rotation3d(
+        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
+        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+        //                             Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
+        // ));
 
-        cameraList.add(new CameraInfo(
-                "BackLeftCam",
-                new PhotonCamera("BackLeftCam"),
-                false,
-                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-                                0.0, // CAMERA_POS_FOR_ROBOT_Y
-                                0.0, // CAMERA_POS_FOR_ROBOT_Z
-                                new Rotation3d(
-                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-                                    Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
-        ));
+        // cameraList.add(new CameraInfo(
+        //         "BackLeftCam",
+        //         new PhotonCamera("BackLeftCam"),
+        //         false,
+        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
+        //                         new Rotation3d(
+        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
+        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+        //                             Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
+        // ));
         periodic(robotPose);
     }
 
@@ -150,6 +150,9 @@ public class AprilTagSystem {
         }
     }
 
+    public int getCameraCount() {
+        return cameraList.size();
+    }
     /** 
      * Loads field layout of april tags. The aprilTagFieldLayout field is initiated here because the layout takes a while to load - often crashes
      * if called too soon (such as within class constructor). 
