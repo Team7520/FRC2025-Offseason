@@ -102,13 +102,13 @@ public final class Constants
         public static final double MAX_HEIGHT = 60; // 60 inches
 
         // PID Constants
-        public static final double kP = 0.7; // 0.675
+        public static final double kP = 0.6; // 0.675, new: .7
         public static final double kI = 0.0;
         public static final double kD = 0.0;
         public static final double kIz = 0.0;
-        public static final double kFF = 0.09;
-        public static final double kG = 0;
-        public static final double kA = 0.002;
+        public static final double kFF = 0.00; //.09
+        public static final double kG = 0.355;
+        public static final double kA = 0.000; //.002
 
         // Motion Magic Constants
         public static final double MAX_VELOCITY = 800; // 10 inches per second
@@ -152,7 +152,7 @@ public final class Constants
         public static final double MIN_ANGLE = -246;
 
         // PID Constants
-        public static final double kP = 0.0285;//0.032;
+        public static final double kP = 0.018;//0.032;
         public static final double kI = 0;
         public static final double kD = 0.015;
         public static final double kIz = 0.0;
