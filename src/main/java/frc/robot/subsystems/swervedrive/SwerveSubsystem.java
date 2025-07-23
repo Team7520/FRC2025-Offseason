@@ -43,6 +43,8 @@ import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -51,6 +53,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
@@ -84,6 +87,10 @@ public class SwerveSubsystem extends SubsystemBase
    */
   private       Vision      vision;
 
+  private final SwerveDrivePoseEstimator poseEstimator;
+
+  private final Field2d field = new Field2d();
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -91,6 +98,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public SwerveSubsystem(File directory)
   {
+    Shuffleboard.getTab("Swerve").add("Field", field);
     boolean blueAlliance = false;
     Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
                                                                       Meter.of(4)),
@@ -126,7 +134,7 @@ public class SwerveSubsystem extends SubsystemBase
     setupPathPlanner();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
 
-    final SwerveDrivePoseEstimator poseEstimator = new SwerveDrivePoseEstimator(
+    this.poseEstimator = new SwerveDrivePoseEstimator(
         Constants.kinematics,
         Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
         swerveDrive.getModulePositions(),
@@ -160,51 +168,83 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   @Override
-  public void periodic()
-  {
+  public void periodic() {
     
-    if (!aprilTagSystem.aprilTagLayoutLoaded){
+    // Ensure AprilTag layout is loaded
+    if (!aprilTagSystem.aprilTagLayoutLoaded) {
       aprilTagSystem.initiateAprilTagLayout();
     }
-    //Find the best camera with the lowest ambiguity. Than, update the pose based on that one
-    double minAmb = 100;
-    int bestCam = -1;
+  
+    // Update odometry with gyro and module positions
+    poseEstimator.update(
+        Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
+        swerveDrive.getModulePositions());
+  
+    // Find the camera with lowest ambiguity for best vision measurement
+    double minAmbiguity = Double.MAX_VALUE;
+    int bestCameraIndex = -1;
+  
     for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
-        double amb = aprilTagSystem.getAmbiguity(i);
-        SmartDashboard.putNumber("Ambiguity", amb);
-
-        if (amb >= 0 && amb < minAmb) {
-            minAmb = amb;
-            bestCam = i;
-        }
+      double ambiguity = aprilTagSystem.getAmbiguity(i);
+      SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
+  
+      if (ambiguity >= 0 && ambiguity < minAmbiguity) {
+        minAmbiguity = ambiguity;
+        bestCameraIndex = i;
+      }
     }
-    SmartDashboard.putNumber("Current Camera Used", bestCam);
-    SmartDashboard.putNumber("Min Ambiguity", minAmb);
-
-    //If ambiuity is below 0.5, update the pose of the robot
-    //This is to prevent the robot from updating the pose when there is no tag detected or the ambiguity is too low
-    if (bestCam != -1 && minAmb < 0.5) {
-      Pose2d updatedPose = aprilTagSystem.getCurrentRobotFieldPose(bestCam);
-      if (updatedPose!= null){
-        SmartDashboard.putNumber("updatedPoseX", updatedPose.getX());
+  
+    SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
+    SmartDashboard.putNumber("Min Ambiguity", minAmbiguity);
+  
+    // If we have a valid camera and ambiguity is low enough, fuse vision pose measurement
+    if (bestCameraIndex != -1 && minAmbiguity < 0.5) {
+      Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
+      if (visionPose != null) {
+        double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);
+        double timestampSeconds = captureTimeMillis / 1000.0;
+  
+        // Fuse vision measurement into pose estimator
+        poseEstimator.addVisionMeasurement(visionPose, timestampSeconds);
+  
+        SmartDashboard.putNumber("Vision Pose X", visionPose.getX());
+        SmartDashboard.putNumber("Vision Pose Y", visionPose.getY());
+        SmartDashboard.putNumber("Vision Pose Heading", visionPose.getRotation().getDegrees());
       }
     } else {
-      System.out.println("No tag deteced or ambiguity too low: ");
+      System.out.println("No valid AprilTag detected or ambiguity too high.");
     }
-    SwerveModule[] mods = swerveDrive.getModules();
-    SmartDashboard.putNumber("mod 0",mods[0].getAbsolutePosition());
-    SmartDashboard.putNumber("mod 1",mods[1].getAbsolutePosition());
-    SmartDashboard.putNumber("mod 2",mods[2].getAbsolutePosition());
-    SmartDashboard.putNumber("mod 3",mods[3].getAbsolutePosition());
-    SmartDashboard.putNumber("mod 0 abs",mods[0].getAbsoluteEncoder().getAbsolutePosition());
-    SmartDashboard.putNumber("mod 1 abs",mods[1].getAbsoluteEncoder().getAbsolutePosition());
-    SmartDashboard.putNumber("mod 2 abs",mods[2].getAbsoluteEncoder().getAbsolutePosition());
-    SmartDashboard.putNumber("mod 3 abs",mods[3].getAbsoluteEncoder().getAbsolutePosition());
-    
-    SmartDashboard.putNumber("mod 0 drive",mods[0].getDriveMotor().getPosition());
-    SmartDashboard.putNumber("mod 1 drive",mods[1].getDriveMotor().getPosition());
-    SmartDashboard.putNumber("mod 2 drive",mods[2].getDriveMotor().getPosition());
-    SmartDashboard.putNumber("mod 3 drive",mods[3].getDriveMotor().getPosition());
+  
+    // Publish swerve module diagnostic info
+    SwerveModule[] modules = swerveDrive.getModules();
+    for (int i = 0; i < modules.length; i++) {
+      SmartDashboard.putNumber("Module " + i + " Angle", modules[i].getAbsolutePosition());
+      SmartDashboard.putNumber("Module " + i + " Abs Encoder", modules[i].getAbsoluteEncoder().getAbsolutePosition());
+      SmartDashboard.putNumber("Module " + i + " Drive Motor Pos", modules[i].getDriveMotor().getPosition());
+    }
+  
+    // Publish current estimated robot pose
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
+    SmartDashboard.putNumber("Pose X", estimatedPose.getX());
+    SmartDashboard.putNumber("Pose Y", estimatedPose.getY());
+    SmartDashboard.putNumber("Pose Heading", estimatedPose.getRotation().getDegrees());
+
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
+
+
+    Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+      if (tagPose != null) {
+          // Offset: 1m forward, 0.5m to the RIGHT
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 1, 0.2);
+          SmartDashboard.putString("offsetPose Pose", offsetPose.toString());
+      } else {
+        System.out.println("TAG POSE = null");
+      }
+      
+
+      
+
   }
 
   @Override
@@ -249,7 +289,7 @@ public class SwerveSubsystem extends SubsystemBase
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
               // PID constants for translation
-              new PIDConstants(7, 0, 0),
+              new PIDConstants(2, 0, 0),
               // PID constants for rotation
               new PIDConstants(3, 0, 0)
           ),
@@ -593,7 +633,7 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public Pose2d getPose()
   {
-    return swerveDrive.getPose();
+    return poseEstimator.getEstimatedPosition();
   }
 
   /**

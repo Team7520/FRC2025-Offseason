@@ -34,6 +34,8 @@ import frc.robot.subsystems.RampSubsystem;
 import frc.robot.subsystems.TuskSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
+
+import swervelib.SwerveDrive;
 import swervelib.SwerveInputStream;
 
 /**
@@ -112,6 +114,8 @@ public class RobotContainer
   private final EndEffectorSubsystem endEffector = EndEffectorSubsystem.getInstance();
   private final TuskSubsystem tuskSubsystem = TuskSubsystem.getInstance();
   private final LightingSubsystem lightingSubsystem = LightingSubsystem.getInstance();
+  private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
+
 
   private static final double CONVEYOR_INTAKE_SPEED = 0.1;
   private static double CONVEYOR_EJECT_SPEED = -0.2;
@@ -289,7 +293,7 @@ public class RobotContainer
       driveController.back().whileTrue(Commands.none());
       driveController.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       driveController.rightBumper().onTrue(Commands.none());
-      driveController.b().whileTrue(endEffector.setConveyorSpeedCommand(-0.12));
+      //driveController.b().whileTrue(endEffector.setConveyorSpeedCommand(-0.12));
       operatorController.a().onTrue(elevator.moveToPosition(ElevatorPosition.GROUND));
       operatorController.y().onTrue(new L3Command(elevator, endEffector, 0));
       operatorController.x().onTrue(new L2Command(elevator, endEffector, 0));
@@ -348,6 +352,34 @@ public class RobotContainer
 
 
     }
+
+    driveController.a().onTrue(new InstantCommand(() -> {
+      Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+      if (tagPose != null) {
+          // Offset: 1m forward, 0.5m to the RIGHT
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.5, -0.2);
+          Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
+  
+          new DriveToPoseCommand(robotPose, offsetPose).schedule();
+      }
+    }));
+    
+    driveController.b().onTrue(new InstantCommand(() -> {
+      Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+      System.out.println("B pressed!");
+      if (tagPose != null) {
+        System.out.println("tagPose != null!");
+
+          // Offset: 1m forward, 0.5m to the RIGHT
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.5, 0.2);
+          Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
+  
+          new DriveToPoseCommand(robotPose, offsetPose).schedule();
+      }
+      else{
+        System.out.println("tagPose = null!");
+      }
+    }));
 
   }
 

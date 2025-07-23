@@ -26,6 +26,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
@@ -82,11 +83,11 @@ public class AprilTagSystem {
     public AprilTagSystem() {
         // Initialize the cameras
         cameraList.add(new CameraInfo(
-                "FrontRightCam",
-                new PhotonCamera("FrontRightCam"),
+                "center",
+                new PhotonCamera("center"),
                 false,
-                new Transform3d(0., // CAMERA_POS_FOR_ROBOT_X
-                                0.0, // CAMERA_POS_FOR_ROBOT_Y
+                new Transform3d(0.32, // CAMERA_POS_FOR_ROBOT_X
+                                -0.17, // CAMERA_POS_FOR_ROBOT_Y
                                 0.0, // CAMERA_POS_FOR_ROBOT_Z
                                 new Rotation3d(
                                     0, // CAMERA_POS_FOR_ROBOT_ROLL,
@@ -94,18 +95,18 @@ public class AprilTagSystem {
                                     0)) // CAMERA_POS_FOR_ROBOT_YAW
         ));
 
-        cameraList.add(new CameraInfo(
-                "FrontLeftCam",
-                new PhotonCamera("FrontLeftCam"),
-                false,
-                new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-                                0.0, // CAMERA_POS_FOR_ROBOT_Y
-                                0.0, // CAMERA_POS_FOR_ROBOT_Z
-                                new Rotation3d(
-                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
-        ));
+        // cameraList.add(new CameraInfo(
+        //         "FrontLeftCam",
+        //         new PhotonCamera("FrontLeftCam"),
+        //         false,
+        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
+        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
+        //                         new Rotation3d(
+        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
+        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+        //                             0)) // CAMERA_POS_FOR_ROBOT_YAW
+        // ));
 
         // cameraList.add(new CameraInfo(
         //         "BackRightCam",
@@ -254,5 +255,69 @@ public class AprilTagSystem {
         //SmartDashboard.putNumber("Tag Y", target.getBestCameraToTarget().getY());
         return robotPose.toPose2d();            
         
+    }
+
+        /**
+     * Finds the closest visible AprilTag from all available cameras.
+     * Returns the field-relative pose of that tag.
+     *
+     * @return Pose2d of the closest visible tag, or null if none seen
+     */
+    public Pose2d getClosestTagPose() {
+        if (!aprilTagLayoutLoaded) {
+            initiateAprilTagLayout();
+          }
+        if (!aprilTagLayoutLoaded) {
+            System.out.println("!aprilTagLayoutLoaded");
+            return null;
+        }
+
+        Pose2d closestTagPose = null;
+        double closestDistance = Double.MAX_VALUE;
+
+        for (CameraInfo cam : cameraList) {
+            PhotonPipelineResult result = cam.camera.getLatestResult();
+            if (result == null || !result.hasTargets()) {
+                continue;
+            }
+
+            PhotonTrackedTarget target = result.getBestTarget();
+            if (!aprilTagFieldLayout.getTagPose(target.getFiducialId()).isPresent()) {
+                continue;
+            }
+
+            double distance = target.getBestCameraToTarget().getTranslation().getNorm();
+            if (distance > MAX_RANGE) {
+                continue;
+            }
+
+            Pose3d tagPose = aprilTagFieldLayout.getTagPose(target.getFiducialId()).get();
+            if (distance < closestDistance) {
+                closestDistance = distance;
+                closestTagPose = tagPose.toPose2d();
+                this.closestTag = new AprilTag(target.getFiducialId(), tagPose);
+            }
+        }
+
+        return closestTagPose;
+    }
+
+        /**
+     * Returns a new Pose2d offset from the given tag pose.
+     * 
+     * @param tagPose       The Pose2d of the AprilTag
+     * @param forwardMeters Distance in front of the tag (+ forward, - behind)
+     * @param lateralMeters Distance to the right of the tag (+ right, - left)
+     * @return Offset Pose2d
+     */
+    public Pose2d getOffsetPose(Pose2d tagPose, double forwardMeters, double lateralMeters) {
+        // Construct a transform in the tag's frame: forward + right
+        Transform2d offset = new Transform2d(
+            new Translation2d(forwardMeters, lateralMeters),
+            Rotation2d.fromDegrees(180) // Keep original tag orientation
+        );
+
+        // Apply the transform relative to the tag pose
+        return tagPose.plus(offset);
     }
 }
