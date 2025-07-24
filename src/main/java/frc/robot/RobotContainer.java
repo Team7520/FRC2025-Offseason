@@ -358,24 +358,31 @@ public class RobotContainer
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
           Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, -yOffset);
-          Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
+          Pose2d robotPose = drivebase.getPose();
   
-          new DriveToPoseCommand(robotPose, offsetPose).schedule();
+          new DriveToPoseCommand(
+              robotPose,
+              offsetPose,
+              driveController::getLeftX,  // x input (strafe)
+              driveController::getLeftY   // y input (forward/back)
+          ).schedule();
       }
-    }));
+  }));
     
-    driveController.b().onTrue(new InstantCommand(() -> {
-      Pose2d tagPose = aprilTagSystem.getClosestTagPose();
-      System.out.println("B pressed!");
-      if (tagPose != null) {
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, yOffset);
-          Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
-          new DriveToPoseCommand(robotPose, offsetPose).schedule();
-      }
-      else{
-        System.out.println("tagPose = null!");
-      }
-    }));
+  driveController.b().onTrue(new InstantCommand(() -> {
+    Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+    if (tagPose != null) {
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, yOffset);
+        Pose2d robotPose = drivebase.getPose();
+
+        new DriveToPoseCommand(
+            robotPose,
+            offsetPose,
+            driveController::getLeftX,  // x input (strafe)
+            driveController::getLeftY   // y input (forward/back)
+        ).schedule();
+    }
+}));
 
   }
 

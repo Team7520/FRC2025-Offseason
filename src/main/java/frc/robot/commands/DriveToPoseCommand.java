@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import java.util.List;
+import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.path.GoalEndState;
@@ -13,33 +14,40 @@ import edu.wpi.first.wpilibj2.command.Command;
 
 public class DriveToPoseCommand extends Command {
     private final Command pathCommand;
+    private final DoubleSupplier xInput;
+    private final DoubleSupplier yInput;
+    private final double overrideThreshold = 0.2;
 
-    public DriveToPoseCommand(Pose2d currentPose, Pose2d targetPose) {
+    public DriveToPoseCommand(
+        Pose2d currentPose,
+        Pose2d targetPose,
+        DoubleSupplier xInput,
+        DoubleSupplier yInput
+    ) {
+        this.xInput = xInput;
+        this.yInput = yInput;
 
         List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
             currentPose,
             targetPose
         );
 
-        PathConstraints constraints = new PathConstraints(1, 1, 2 * Math.PI, 4 * Math.PI); // The constraints for this path.
+        PathConstraints constraints = new PathConstraints(1, 1, 2 * Math.PI, 4 * Math.PI);
 
         GoalEndState goalEndState = new GoalEndState(
-            0.0, // end velocity (m/s)
+            0.0,
             targetPose.getRotation()
         );
 
         PathPlannerPath path = new PathPlannerPath(
             waypoints,
             constraints,
-            null,          // ideal start state (null for dynamic start)
-            goalEndState   // your desired end rotation
+            null,
+            goalEndState
         );
         path.preventFlipping = true;
 
-        // Build the command to fo  llow this path
         pathCommand = AutoBuilder.followPath(path);
-
-        addRequirements();
     }
 
     @Override
@@ -49,7 +57,14 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void execute() {
-        pathCommand.execute();
+        // Cancel if joystick input exceeds override threshold
+        if (Math.abs(xInput.getAsDouble()) > overrideThreshold || Math.abs(yInput.getAsDouble()) > overrideThreshold) {
+            System.out.println("DriveToPoseCommand: Joystick override detected. Cancelling path.");
+            pathCommand.cancel();
+            this.cancel();
+        } else {
+            pathCommand.execute();
+        }
     }
 
     @Override
