@@ -86,27 +86,27 @@ public class AprilTagSystem {
                 "center",
                 new PhotonCamera("center"),
                 false,
-                new Transform3d(0.32, // CAMERA_POS_FOR_ROBOT_X
+                new Transform3d(0.33, // CAMERA_POS_FOR_ROBOT_X
                                 -0.17, // CAMERA_POS_FOR_ROBOT_Y
                                 0.0, // CAMERA_POS_FOR_ROBOT_Z
                                 new Rotation3d(
                                     0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
                                     0)) // CAMERA_POS_FOR_ROBOT_YAW
         ));
 
-        // cameraList.add(new CameraInfo(
-        //         "FrontLeftCam",
-        //         new PhotonCamera("FrontLeftCam"),
-        //         false,
-        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
-        //                         new Rotation3d(
-        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
-        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-        //                             0)) // CAMERA_POS_FOR_ROBOT_YAW
-        // ));
+        cameraList.add(new CameraInfo(
+                "right",
+                new PhotonCamera("right"),
+                false,
+                new Transform3d(0.32, // CAMERA_POS_FOR_ROBOT_X
+                                0.16, // CAMERA_POS_FOR_ROBOT_Y
+                                0.0, // CAMERA_POS_FOR_ROBOT_Z
+                                new Rotation3d(
+                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
+                                    Math.toRadians(20), // CAMERA_POS_FOR_ROBOT_PITCH
+                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
+        ));
 
         // cameraList.add(new CameraInfo(
         //         "BackRightCam",

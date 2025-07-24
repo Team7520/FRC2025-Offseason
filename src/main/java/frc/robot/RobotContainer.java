@@ -353,11 +353,11 @@ public class RobotContainer
 
     }
 
+    double yOffset = 0.155;
     driveController.a().onTrue(new InstantCommand(() -> {
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
-          // Offset: 1m forward, 0.5m to the RIGHT
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.5, -0.2);
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, -yOffset);
           Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
   
           new DriveToPoseCommand(robotPose, offsetPose).schedule();
@@ -368,12 +368,8 @@ public class RobotContainer
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       System.out.println("B pressed!");
       if (tagPose != null) {
-        System.out.println("tagPose != null!");
-
-          // Offset: 1m forward, 0.5m to the RIGHT
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.5, 0.2);
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, yOffset);
           Pose2d robotPose = drivebase.getPose(); // Replace with your actual pose method
-  
           new DriveToPoseCommand(robotPose, offsetPose).schedule();
       }
       else{

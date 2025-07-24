@@ -34,10 +34,13 @@ import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
 import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
@@ -64,6 +67,9 @@ import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class SwerveSubsystem extends SubsystemBase
 {
@@ -91,6 +97,23 @@ public class SwerveSubsystem extends SubsystemBase
 
   private final Field2d field = new Field2d();
 
+  
+  StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
+  .getStructTopic("MyPose", Pose2d.struct).publish();
+
+  StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault()
+  .getStructTopic("PathplannerTarget", Pose2d.struct).publish();
+  // StructArrayPublisher<Pose2d> arrayPublisher = NetworkTableInstance.getDefault()
+  //   .getStructArrayTopic("MyPoseArray", Pose2d.struct).publish();
+
+  StructPublisher<Pose3d> pose3dPublisher = NetworkTableInstance.getDefault()
+    .getStructTopic("MyPose3d", Pose3d.struct).publish();
+  
+  StructArrayPublisher<SwerveModuleState> publisherStates = NetworkTableInstance.getDefault()
+    .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+
+  
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -98,7 +121,8 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public SwerveSubsystem(File directory)
   {
-    Shuffleboard.getTab("Swerve").add("Field", field);
+    //Shuffleboard.getTab("Swerve").add("Field", field);
+    SmartDashboard.putData("Field", field);
     boolean blueAlliance = false;
     Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
                                                                       Meter.of(4)),
@@ -236,14 +260,27 @@ public class SwerveSubsystem extends SubsystemBase
     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
           // Offset: 1m forward, 0.5m to the RIGHT
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 1, 0.2);
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, 0.13);
           SmartDashboard.putString("offsetPose Pose", offsetPose.toString());
+          publisher2.set(offsetPose);
       } else {
-        System.out.println("TAG POSE = null");
+        //System.out.println("TAG POSE = null");
       }
-      
 
-      
+
+      publisher.set(getPose());
+      //arrayPublisher.set(new Pose2d[] {getPose(), getPose()});
+      //Pose3d pose = new Pose3d(getPose());
+      Pose3d pose3d = new Pose3d(getPose().getX(),
+                                  getPose().getY(),
+                                  0.0, // Assuming flat ground, Z is 0
+                                  new Rotation3d(0.0, 0.0, getPose().getRotation().getRadians()));
+      pose3dPublisher.set(pose3d);
+
+      publisherStates.set(swerveDrive.getStates());
+
+        
+        
 
   }
 
@@ -291,7 +328,7 @@ public class SwerveSubsystem extends SubsystemBase
               // PID constants for translation
               new PIDConstants(2, 0, 0),
               // PID constants for rotation
-              new PIDConstants(3, 0, 0)
+              new PIDConstants(5, 0, 0)
           ),
           config,
           // The robot configuration
