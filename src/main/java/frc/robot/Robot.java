@@ -5,7 +5,9 @@
 package frc.robot;
 
 import edu.wpi.first.cameraserver.CameraServer;
+import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,6 +57,7 @@ public class Robot extends TimedRobot
       DriverStation.silenceJoystickConnectionWarning(true);
     }
     CameraServer.startAutomaticCapture();// Start the camera server to stream video to the dashboard.
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());// Start Elastic Dashboard Remote Layout Downloading server
   }
 
   /**
