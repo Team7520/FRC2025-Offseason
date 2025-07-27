@@ -8,20 +8,6 @@
         "layouts": [],
         "containers": [
           {
-            "title": "EventName",
-            "x": 512.0,
-            "y": 0.0,
-            "width": 384.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/FMSInfo/EventName",
-              "period": 0.06,
-              "data_type": "string",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "StationNumber",
             "x": 896.0,
             "y": 256.0,
@@ -210,20 +196,6 @@
             }
           },
           {
-            "title": "MatchNumber",
-            "x": 896.0,
-            "y": 0.0,
-            "width": 128.0,
-            "height": 128.0,
-            "type": "Text Display",
-            "properties": {
-              "topic": "/FMSInfo/MatchNumber",
-              "period": 0.06,
-              "data_type": "int",
-              "show_submit_button": false
-            }
-          },
-          {
             "title": "Field",
             "x": 1024.0,
             "y": 0.0,
@@ -256,6 +228,18 @@
               "show_robot_rotation": true,
               "show_desired_states": true,
               "angle_offset": 0.0
+            }
+          },
+          {
+            "title": "FMSInfo",
+            "x": 512.0,
+            "y": 0.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "FMSInfo",
+            "properties": {
+              "topic": "/FMSInfo",
+              "period": 0.06
             }
           }
         ]
