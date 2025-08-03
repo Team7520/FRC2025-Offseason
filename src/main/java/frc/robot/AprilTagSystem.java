@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 
 //import java.util.List;
 
@@ -173,6 +174,10 @@ public class AprilTagSystem {
         return aprilTagLayoutLoaded;
     }
 
+    public AprilTagFieldLayout getAprilTagLayout() {
+        return aprilTagFieldLayout;
+    }
+
     /**
      * Returns the ambiguity of the given camera, used to determine which has the most accurate data
      * @return a double representing the ambiguity of the camera
@@ -319,5 +324,35 @@ public class AprilTagSystem {
 
         // Apply the transform relative to the tag pose
         return tagPose.plus(offset);
+    }
+
+    private static final Set<Integer> reefscapeTagIDs = Set.of(
+    6,7,8,9,10,11,17,18,19,20,21,22
+    );
+
+    public Pose2d getNearestTagPose(Pose2d robotPose) {
+        double minDistance = Double.MAX_VALUE;
+        Pose2d closestPose = null;
+
+        if (!aprilTagLayoutLoaded){
+            initiateAprilTagLayout();
+        }
+        for (AprilTag tag : aprilTagFieldLayout.getTags()) {
+            if (!reefscapeTagIDs.contains(tag.ID)) continue; // filter only reef tags
+
+            Pose2d tagPose = new Pose2d(
+                tag.pose.getX(),
+                tag.pose.getY(),
+                tag.pose.getRotation().toRotation2d()
+            );
+
+            double distance = robotPose.getTranslation().getDistance(tagPose.getTranslation());
+            if (distance < minDistance) {
+                minDistance = distance;
+                closestPose = tagPose;
+            }
+        }
+
+        return closestPose;
     }
 }

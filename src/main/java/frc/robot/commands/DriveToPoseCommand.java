@@ -17,6 +17,7 @@ public class DriveToPoseCommand extends Command {
     private final DoubleSupplier xInput;
     private final DoubleSupplier yInput;
     private final double overrideThreshold = 0.2;
+    private boolean wasCanceled = false;
 
     public DriveToPoseCommand(
         Pose2d currentPose,
@@ -57,23 +58,23 @@ public class DriveToPoseCommand extends Command {
 
     @Override
     public void execute() {
-        // Cancel if joystick input exceeds override threshold
         if (Math.abs(xInput.getAsDouble()) > overrideThreshold || Math.abs(yInput.getAsDouble()) > overrideThreshold) {
-            System.out.println("DriveToPoseCommand: Joystick override detected. Cancelling path.");
-            pathCommand.cancel();
-            this.cancel();
-        } else {
+            System.out.println("DriveToPoseCommand: Joystick override detected. Cancelling.");
+            wasCanceled = true;
+        }
+
+        if (!wasCanceled) {
             pathCommand.execute();
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        pathCommand.end(interrupted);
+        pathCommand.end(interrupted || wasCanceled);
     }
 
     @Override
     public boolean isFinished() {
-        return pathCommand.isFinished();
+        return wasCanceled || pathCommand.isFinished();
     }
 }

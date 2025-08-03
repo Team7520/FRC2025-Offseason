@@ -354,10 +354,11 @@ public class RobotContainer
     }
 
     double yOffset = 0.155;
+    double xOffset = 0.495;
     driveController.a().onTrue(new InstantCommand(() -> {
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, -yOffset);
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, -yOffset);
           Pose2d robotPose = drivebase.getPose();
   
           new DriveToPoseCommand(
@@ -372,7 +373,7 @@ public class RobotContainer
   driveController.b().onTrue(new InstantCommand(() -> {
     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
     if (tagPose != null) {
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, yOffset);
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
         Pose2d robotPose = drivebase.getPose();
 
         new DriveToPoseCommand(
@@ -381,10 +382,41 @@ public class RobotContainer
             driveController::getLeftX,  // x input (strafe)
             driveController::getLeftY   // y input (forward/back)
         ).schedule();
-    }
-}));
+    }}));
 
-  }
+
+  driveController.povRight().onTrue(new InstantCommand(() -> {
+    Pose2d robotPose = drivebase.getPose();
+    Pose2d nearestTag = aprilTagSystem.getNearestTagPose(robotPose);
+
+    if (nearestTag != null) {
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(nearestTag, xOffset, yOffset);
+
+        new DriveToPoseCommand(
+            robotPose,
+            offsetPose,
+            driveController::getLeftY,
+            driveController::getLeftX
+        ).schedule();
+    }}));
+    
+
+  driveController.povLeft().onTrue(new InstantCommand(() -> {
+    Pose2d robotPose = drivebase.getPose();
+    Pose2d nearestTag = aprilTagSystem.getNearestTagPose(robotPose);
+
+    if (nearestTag != null) {
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(nearestTag, xOffset, -yOffset);
+
+        new DriveToPoseCommand(
+            robotPose,
+            offsetPose,
+            driveController::getLeftY,
+            driveController::getLeftX
+        ).schedule();
+    }}));
+
+}
 
   /**
    * Use this to pass the autonomous command to the main {@link Robot} class.
