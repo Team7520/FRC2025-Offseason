@@ -84,56 +84,68 @@ public class AprilTagSystem {
     public AprilTagSystem() {
         // Initialize the cameras
         cameraList.add(new CameraInfo(
-                "center",
-                new PhotonCamera("center"),
-                false,
-                new Transform3d(0.33, // CAMERA_POS_FOR_ROBOT_X
-                                -0.17, // CAMERA_POS_FOR_ROBOT_Y
-                                0.0, // CAMERA_POS_FOR_ROBOT_Z
-                                new Rotation3d(
-                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
+            "FrontRightCam",
+            new PhotonCamera("FrontRightCam"),
+            false,
+            new Transform3d(
+                0.28321, // X forward
+                -0.19304, // Y right
+                0.2032,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(10), // pitched up
+                    0.0 // facing forward
+                )
+            )
         ));
 
         cameraList.add(new CameraInfo(
-                "right",
-                new PhotonCamera("right"),
-                false,
-                new Transform3d(0.32, // CAMERA_POS_FOR_ROBOT_X
-                                0.16, // CAMERA_POS_FOR_ROBOT_Y
-                                0.0, // CAMERA_POS_FOR_ROBOT_Z
-                                new Rotation3d(
-                                    0, // CAMERA_POS_FOR_ROBOT_ROLL,
-                                    Math.toRadians(20), // CAMERA_POS_FOR_ROBOT_PITCH
-                                    0)) // CAMERA_POS_FOR_ROBOT_YAW
+            "FrontLeftCam",
+            new PhotonCamera("FrontLeftCam"),
+            false,
+            new Transform3d(
+                0.28721, // X forward
+                0.20404, // Y left
+                0.2032,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(10),
+                    0.0
+                )
+            )
         ));
 
-        // cameraList.add(new CameraInfo(
-        //         "BackRightCam",
-        //         new PhotonCamera("BackRightCam"),
-        //         false,
-        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
-        //                         new Rotation3d(
-        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
-        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-        //                             Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
-        // ));
+        cameraList.add(new CameraInfo(
+            "BackRightCam",
+            new PhotonCamera("BackRightCam"),
+            false,
+            new Transform3d(
+                -0.29321, // X backward
+                -0.16, // Y right
+                0.2032,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(20),
+                    Math.PI // facing backward
+                )
+            )
+        ));
 
-        // cameraList.add(new CameraInfo(
-        //         "BackLeftCam",
-        //         new PhotonCamera("BackLeftCam"),
-        //         false,
-        //         new Transform3d(0.0, // CAMERA_POS_FOR_ROBOT_X
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Y
-        //                         0.0, // CAMERA_POS_FOR_ROBOT_Z
-        //                         new Rotation3d(
-        //                             0, // CAMERA_POS_FOR_ROBOT_ROLL,
-        //                             -Math.toRadians(0), // CAMERA_POS_FOR_ROBOT_PITCH
-        //                             Math.PI)) // CAMERA_POS_FOR_ROBOT_YAW
-        // ));
+        cameraList.add(new CameraInfo(
+            "BackLeftCam",
+            new PhotonCamera("BackLeftCam"),
+            false,
+            new Transform3d(
+                -0.28321, // X backward
+                0.19304,  // Y left
+                0.2032,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(10),
+                    Math.PI
+                )
+            )
+        ));
         periodic(robotPose);
     }
 
