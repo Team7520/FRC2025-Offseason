@@ -152,7 +152,7 @@ public class RobotContainer
         // autoChooser.addOption("Start 1 to E One Coral", drivebase.getAutonomousCommand("Start 1 to E One Coral", true));
         
         //All of section 3 autos
-        // autoChooser.addOption("3-c", drivebase.getAutonomousCommand("3-c", true));
+        autoChooser.addOption("test", drivebase.getAutonomousCommand("test"));
         autoChooser.addOption("ProcessorSide 3 Coral -- 3-c-y-b-y-b", drivebase.getAutonomousCommand("ProcessorSide 3 Coral -- 3-c-y-b-y-b"));
         autoChooser.addOption("BargeSide 3 Coral -- 3-e-x-f-x-f", drivebase.getAutonomousCommand("BargeSide 3 Coral -- 3-e-x-f-x-f"));
         autoChooser.addOption("ProcessorSide 2 coral -- 3-c-y-b", drivebase.getAutonomousCommand("ProcessorSide 2 coral -- 3-c-y-b"));
@@ -354,7 +354,7 @@ public class RobotContainer
     }
 
     double yOffset = 0.155;
-    double xOffset = 0.495;
+    double xOffset = 0.4;
     driveController.a().onTrue(new InstantCommand(() -> {
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
@@ -390,7 +390,7 @@ public class RobotContainer
     Pose2d nearestTag = aprilTagSystem.getNearestTagPose(robotPose);
 
     if (nearestTag != null) {
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(nearestTag, xOffset, yOffset);
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(nearestTag, xOffset, yOffset+0.04);
 
         new DriveToPoseCommand(
             robotPose,

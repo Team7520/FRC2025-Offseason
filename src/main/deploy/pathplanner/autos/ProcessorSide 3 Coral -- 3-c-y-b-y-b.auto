@@ -5,45 +5,19 @@
     "data": {
       "commands": [
         {
-          "type": "named",
-          "data": {
-            "name": "StartLimelight"
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "sequential",
           "data": {
             "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "elevatorHighNoShoot"
+                }
+              },
               {
                 "type": "path",
                 "data": {
                   "pathName": "3-c"
-                }
-              },
-              {
-                "type": "parallel",
-                "data": {
-                  "commands": [
-                    {
-                      "type": "sequential",
-                      "data": {
-                        "commands": [
-                          {
-                            "type": "wait",
-                            "data": {
-                              "waitTime": 1.1
-                            }
-                          },
-                          {
-                            "type": "named",
-                            "data": {
-                              "name": "elevatorHighNoShoot"
-                            }
-                          }
-                        ]
-                      }
-                    }
-                  ]
                 }
               }
             ]
@@ -66,9 +40,22 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "elevatorGround"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "elevatorGround"
+                      }
+                    }
+                  ]
                 }
               },
               {
@@ -123,7 +110,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.2
+                        "waitTime": 0.7
                       }
                     },
                     {
@@ -155,9 +142,22 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "elevatorGround"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "elevatorGround"
+                      }
+                    }
+                  ]
                 }
               },
               {
@@ -212,7 +212,7 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.2
+                        "waitTime": 0.7
                       }
                     },
                     {
@@ -244,9 +244,22 @@
           "data": {
             "commands": [
               {
-                "type": "named",
+                "type": "sequential",
                 "data": {
-                  "name": "elevatorGround"
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "elevatorGround"
+                      }
+                    }
+                  ]
                 }
               },
               {

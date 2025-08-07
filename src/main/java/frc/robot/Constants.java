@@ -119,8 +119,8 @@ public final class Constants
         public static final int CURRENT_LIMIT = 120;
         public static enum ElevatorPosition {
             GROUND(0, -0.45),
-            LOW(13.3, -0.12), // 11.41455078125, 7.984863
-            MID(27.4, -0.12), // 27.5 
+            LOW(10.439453, -0.12), // 11.41455078125, 7.984863
+            MID(26.278809, -0.12), // 27.5 
             HIGH(55, -0.45), // 52
             LOWALG(27.1, -0.45), // 23.7724609375
             HIGHALG(42.4, -0.45); // 39.609130859375

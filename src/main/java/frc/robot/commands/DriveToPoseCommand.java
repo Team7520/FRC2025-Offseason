@@ -33,7 +33,7 @@ public class DriveToPoseCommand extends Command {
             targetPose
         );
 
-        PathConstraints constraints = new PathConstraints(1, 1, 2 * Math.PI, 4 * Math.PI);
+        PathConstraints constraints = new PathConstraints(2, 2, 2 * Math.PI, 4 * Math.PI);
 
         GoalEndState goalEndState = new GoalEndState(
             0.0,
