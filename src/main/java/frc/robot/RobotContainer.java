@@ -14,11 +14,15 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
+import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
+import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -33,6 +37,8 @@ public class RobotContainer
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final         CommandXboxController driverXbox = new CommandXboxController(0);
+  final         XboxController  controllerXbox = new XboxController(1);
+
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/kraken-jetstream"));
@@ -93,6 +99,8 @@ public class RobotContainer
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+  private final ArmSubsystem arm = new ArmSubsystem(30, 20);
+
   public RobotContainer()
   {
     // Configure the trigger bindings
@@ -110,6 +118,18 @@ public class RobotContainer
    */
   private void configureBindings()
   {
+    // for testing, change later
+    new JoystickButton(controllerXbox, XboxController.Button.kB.value)
+    .whileTrue(Commands.run(arm::intake, arm))
+    .onFalse(Commands.runOnce(() -> {
+        arm.captureHoldFromEncoder();
+    }, arm));
+
+    new JoystickButton(controllerXbox, XboxController.Button.kA.value)
+        .whileTrue(Commands.run(arm::eject, arm))
+        .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+    // /\ for testing, change later
+    
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveRobotOrientedAngularVelocity  = drivebase.driveFieldOriented(driveRobotOriented);
