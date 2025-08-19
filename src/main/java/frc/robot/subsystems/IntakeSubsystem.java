@@ -20,7 +20,7 @@ public class IntakeSubsystem extends SubsystemBase {
 
     // --- Speed multipliers (constants for tuning) ---
     private static final double LEFT_INDEXER_MULTIPLIER = 0.5;
-    private static final double RIGHT_INDEXER_MULTIPLIER = 0.5;
+    private static final double RIGHT_INDEXER_MULTIPLIER = -0.5;
     private static final double ROLLER_MULTIPLIER = 0.5;
     private static final double PIVOT_MULTIPLIER = 0.5;
 
@@ -36,15 +36,12 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotLeader = new TalonFX(pivotLeaderId);
         pivotFollower = new TalonFX(pivotFollowerId);
 
-        // Brake mode helps resist back-driving
         pivotLeader.setNeutralMode(NeutralModeValue.Brake);
         pivotFollower.setNeutralMode(NeutralModeValue.Brake);
 
-        // Make follower mirror the leader (false = not inverted)
         pivotFollower.setControl(new Follower(pivotLeader.getDeviceID(), true));
     }
 
-    /** Run the intake (indexers + roller) */
     public void runIntake(double speed) {
         leftIndexer.setControl(duty.withOutput(speed * LEFT_INDEXER_MULTIPLIER));
         rightIndexer.setControl(duty.withOutput(speed * RIGHT_INDEXER_MULTIPLIER));
@@ -54,9 +51,7 @@ public class IntakeSubsystem extends SubsystemBase {
     /** Run only the pivot (manual + PID hold) */
     public void runPivot(double speed) {
         if (Math.abs(speed) > JOYSTICK_DEADBAND) {
-            // Manual control
             pivotLeader.setControl(duty.withOutput(speed * PIVOT_MULTIPLIER));
-            // Update hold position so when stick is released, PID locks here
             pivotHoldPosition = pivotLeader.getPosition().getValueAsDouble();
         } else {
             // Hold with PID
@@ -66,12 +61,10 @@ public class IntakeSubsystem extends SubsystemBase {
         }
     }
 
-    /** Stop everything */
     public void stopAll() {
         leftIndexer.setControl(duty.withOutput(0));
         rightIndexer.setControl(duty.withOutput(0));
         intakeRoller.setControl(duty.withOutput(0));
         pivotLeader.setControl(duty.withOutput(0));
-        // follower automatically stops with leader
     }
 }

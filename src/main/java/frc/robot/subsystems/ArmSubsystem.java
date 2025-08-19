@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import au.grapplerobotics.LaserCan;
 
@@ -18,7 +19,7 @@ public class ArmSubsystem extends SubsystemBase {
     private final PositionDutyCycle positionReq = new PositionDutyCycle(0);
 
     private double holdPositionRot = 0.0;
-    private double pieceThresholdMM = 5;
+    private double pieceThresholdMM = 4;
 
     public ArmSubsystem(int rollerCanId, int laserCanId) {
         roller = new TalonFX(rollerCanId);
@@ -36,7 +37,7 @@ public class ArmSubsystem extends SubsystemBase {
 
         cfg.Feedback.SensorToMechanismRatio = 1.0;
 
-        cfg.Slot0.kP = 0.35;   // increase to make hold stiffer
+        cfg.Slot0.kP = 0.35;   // tune
         cfg.Slot0.kI = 0.0;
         cfg.Slot0.kD = 0.0;
         cfg.Slot0.kS = 0.0;
@@ -58,7 +59,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     public boolean hasPiece() {
         double mm = laser.getMeasurement().distance_mm;
-        return mm > 0 && mm < pieceThresholdMM;
+        return mm < pieceThresholdMM;
     }
 
     public void setPieceThresholdMM(double mm) {
@@ -96,5 +97,7 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmartDashboard.putBoolean("hasPiece", hasPiece());
+        SmartDashboard.putNumber("LaserMM",laser.getMeasurement().distance_mm);
     }
 }

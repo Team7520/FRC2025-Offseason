@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
@@ -38,7 +39,7 @@ public class RobotContainer
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final         CommandXboxController driverXbox = new CommandXboxController(0);
-  final         XboxController  controllerXbox = new XboxController(1);
+  final CommandXboxController operatorController = new CommandXboxController(1);
 
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
@@ -108,6 +109,7 @@ public class RobotContainer
         14,  // right pivot
         15   // left pivot
     );
+  private final ElevatorSubsystem elevator = new ElevatorSubsystem(50, 51);
 
   public RobotContainer()
   {
@@ -127,29 +129,49 @@ public class RobotContainer
   private void configureBindings()
   {
     // for testing, change later
-    new JoystickButton(controllerXbox, XboxController.Button.kB.value)
-    .whileTrue(Commands.run(arm::intake, arm))
-    .onFalse(Commands.runOnce(() -> {
-        arm.captureHoldFromEncoder();
-    }, arm));
-
-    new JoystickButton(controllerXbox, XboxController.Button.kA.value)
+    // arm
+    // B button → intake until sensor detects a piece, then hold
+    operatorController.b().whileTrue(
+    Commands.run(() -> arm.intake(), arm)   // run intake
+        .until(arm::hasPiece)         // stop if sensor detects piece
+        .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // always hold when finished
+    );
+    // A button → arm eject
+    operatorController.a()
         .whileTrue(Commands.run(arm::eject, arm))
         .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
 
-    intake.setDefaultCommand(
-      Commands.run(
-        () -> {
-            // WPILib joystick Y: forward = -1, back = +1
-            double intakeSpeed = -controllerXbox.getLeftY();   // left stick Y → indexers + roller
-            double pivotSpeed  = -controllerXbox.getRightY();  // right stick Y → pivot
 
-            intake.runIntake(intakeSpeed);
-            intake.runPivot(pivotSpeed);
-        },
-        intake
-      )
+    // Default command for intake (left stick Y → intake, right stick Y → pivot)
+    intake.setDefaultCommand(
+        Commands.run(
+            () -> {
+                double intakeSpeed = -operatorController.getLeftY();
+                double pivotSpeed  = -operatorController.getRightY();
+
+                intake.runIntake(intakeSpeed);
+                intake.runPivot(pivotSpeed);
+            },
+            intake
+        )
     );
+    
+    // elevator
+    elevator.setDefaultCommand(
+    new RunCommand(
+        () -> {
+            double power = -operatorController.getLeftY() * 0.5; // scale down for safety
+            if (Math.abs(power) > 0.05) { // deadband
+                // Joystick is being moved → manual power
+                elevator.setPower(power);
+            } else {
+                // Joystick released → hold current position
+                elevator.setPosition(elevator.getPosition());
+            }
+        },
+        elevator
+    )
+);
     // /\ for testing, change later
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
