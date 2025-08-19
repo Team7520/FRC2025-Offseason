@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
@@ -100,6 +101,13 @@ public class RobotContainer
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   private final ArmSubsystem arm = new ArmSubsystem(30, 20);
+  private final IntakeSubsystem intake = new IntakeSubsystem(
+        21, // left indexer X44
+        22, // right indexer X44
+        25, // intake roller X60
+        14,  // right pivot
+        15   // left pivot
+    );
 
   public RobotContainer()
   {
@@ -128,8 +136,22 @@ public class RobotContainer
     new JoystickButton(controllerXbox, XboxController.Button.kA.value)
         .whileTrue(Commands.run(arm::eject, arm))
         .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+
+    intake.setDefaultCommand(
+      Commands.run(
+        () -> {
+            // WPILib joystick Y: forward = -1, back = +1
+            double intakeSpeed = -controllerXbox.getLeftY();   // left stick Y → indexers + roller
+            double pivotSpeed  = -controllerXbox.getRightY();  // right stick Y → pivot
+
+            intake.runIntake(intakeSpeed);
+            intake.runPivot(pivotSpeed);
+        },
+        intake
+      )
+    );
     // /\ for testing, change later
-    
+
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
     Command driveRobotOrientedAngularVelocity  = drivebase.driveFieldOriented(driveRobotOriented);
