@@ -4,9 +4,12 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import swervelib.math.Matter;
+import edu.wpi.first.math.geometry.Rotation2d;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean constants. This
@@ -43,9 +46,17 @@ public final class Constants
   {
 
     // Joystick Deadband
-    public static final double DEADBAND        = 0.1;
+    public static final double DEADBAND        = 0.05;
     public static final double LEFT_Y_DEADBAND = 0.1;
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT    = 6;
   }
+
+  //kinematics for Navarch, will need to be changed for other bots
+  public static final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+    new Translation2d(0.2667, 0.2667),
+    new Translation2d(0.2667, -0.2667),
+    new Translation2d(-0.2667, 0.2667),
+    new Translation2d(-0.2667, -0.2667)
+  );
 }

@@ -15,9 +15,13 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -101,6 +105,7 @@ public class RobotContainer
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+  private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
   private final ArmSubsystem arm = new ArmSubsystem(30, 20);
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
@@ -110,14 +115,33 @@ public class RobotContainer
         15   // left pivot
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem(50, 51);
+  
+  private SendableChooser<Command> autoChooser;
 
   public RobotContainer()
   {
+    registerAutos();
     // Configure the trigger bindings
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
   }
+  private void registerAutos() {
+        registerNamedCommands();
+
+        autoChooser = new SendableChooser<>();
+
+        autoChooser.setDefaultOption("Middle Barge to Reef G", drivebase.getAutonomousCommand("Middle Barge to Reef G"));
+        
+        SmartDashboard.putData("AutoPaths", autoChooser);
+    }
+
+    private void registerNamedCommands() {
+
+        // Example
+        //NamedCommands.registerCommand();
+
+    }
 
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -246,10 +270,8 @@ public class RobotContainer
    *
    * @return the command to run in autonomous
    */
-  public Command getAutonomousCommand()
-  {
-    // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("New Auto");
+  public Command getAutonomousCommand() {
+    return autoChooser.getSelected();
   }
 
   public void setMotorBrake(boolean brake)
