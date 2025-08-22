@@ -21,7 +21,7 @@ public class IntakeSubsystem extends SubsystemBase {
     // --- Speed multipliers (constants for tuning) ---
     private static final double LEFT_INDEXER_MULTIPLIER = 0.5;
     private static final double RIGHT_INDEXER_MULTIPLIER = -0.5;
-    private static final double ROLLER_MULTIPLIER = 0.5;
+    private static final double ROLLER_MULTIPLIER = -0.5;
     private static final double PIVOT_MULTIPLIER = 0.5;
 
     // PID for pivot hold

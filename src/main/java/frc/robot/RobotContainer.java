@@ -27,6 +27,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -106,17 +107,16 @@ public class RobotContainer
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
-  private final ArmSubsystem arm = new ArmSubsystem(30, 20);
+  private final ClimberSubsystem climber = new ClimberSubsystem(35);
+  private final ArmSubsystem arm = new ArmSubsystem(23, 20);
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
         22, // right indexer X44
-        25, // intake roller X60
+        23, // intake roller X60
         14,  // right pivot
         15   // left pivot
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem(50, 51);
-  
-  private SendableChooser<Command> autoChooser;
 
   public RobotContainer()
   {
@@ -155,22 +155,26 @@ public class RobotContainer
     // for testing, change later
     // arm
     // B button → intake until sensor detects a piece, then hold
-    operatorController.b().whileTrue(
-    Commands.run(() -> arm.intake(), arm)   // run intake
-        .until(arm::hasPiece)         // stop if sensor detects piece
-        .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // always hold when finished
-    );
-    // A button → arm eject
-    operatorController.a()
-        .whileTrue(Commands.run(arm::eject, arm))
-        .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+    // operatorController.b().whileTrue(
+    // Commands.run(() -> arm.intake(), arm)   // run intake
+    //     .until(arm::hasPiece)         // stop if sensor detects piece
+    //     .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // always hold when finished
+    // );
+    // // A button → arm eject
+    // operatorController.a()
+    //     .whileTrue(Commands.run(arm::eject, arm))
+    //     .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
 
 
-    // Default command for intake (left stick Y → intake, right stick Y → pivot)
     intake.setDefaultCommand(
         Commands.run(
             () -> {
-                double intakeSpeed = -operatorController.getLeftY();
+                double intakeSpeed;
+                if (operatorController.getLeftTriggerAxis()>operatorController.getRightTriggerAxis()){
+                    intakeSpeed = operatorController.getLeftTriggerAxis();
+                } else {
+                    intakeSpeed = -operatorController.getRightTriggerAxis();
+                }
                 double pivotSpeed  = -operatorController.getRightY();
 
                 intake.runIntake(intakeSpeed);
@@ -182,20 +186,20 @@ public class RobotContainer
     
     // elevator
     elevator.setDefaultCommand(
-    new RunCommand(
-        () -> {
-            double power = -operatorController.getLeftY() * 0.5; // scale down for safety
-            if (Math.abs(power) > 0.05) { // deadband
-                // Joystick is being moved → manual power
-                elevator.setPower(power);
-            } else {
-                // Joystick released → hold current position
-                elevator.setPosition(elevator.getPosition());
-            }
-        },
-        elevator
-    )
-);
+            new RunCommand(
+                () -> elevator.setPower(-operatorController.getLeftY() * 0.80), // scale down for safety
+                elevator
+            )
+        );
+    
+    operatorController.x()
+        .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))
+        .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+    
+    operatorController.y()
+        .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
+        .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+    
     // /\ for testing, change later
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
