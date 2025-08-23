@@ -4,6 +4,13 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase.PersistMode;
+import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkFlex;
+import com.revrobotics.spark.SparkLowLevel.MotorType;
+import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
+import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -13,8 +20,8 @@ public class IntakeSubsystem extends SubsystemBase {
     private final TalonFX leftIndexer;
     private final TalonFX rightIndexer;
     private final TalonFX intakeRoller;
-    private final TalonFX pivotLeader;
-    private final TalonFX pivotFollower;
+    private final SparkFlex leftPivot;
+    private final SparkFlex rightPivot;
 
     private final DutyCycleOut duty = new DutyCycleOut(0);
 
@@ -22,7 +29,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double LEFT_INDEXER_MULTIPLIER = 0.5;
     private static final double RIGHT_INDEXER_MULTIPLIER = -0.5;
     private static final double ROLLER_MULTIPLIER = -0.5;
-    private static final double PIVOT_MULTIPLIER = 0.5;
+    private static final double PIVOT_MULTIPLIER = 0.2;
 
     // PID for pivot hold
     private final PIDController pivotPID = new PIDController(0.05, 0.0, 0.0); // tune kP!
@@ -33,13 +40,21 @@ public class IntakeSubsystem extends SubsystemBase {
         leftIndexer = new TalonFX(leftIndexerId);
         rightIndexer = new TalonFX(rightIndexerId);
         intakeRoller = new TalonFX(rollerId);
-        pivotLeader = new TalonFX(pivotLeaderId);
-        pivotFollower = new TalonFX(pivotFollowerId);
+        leftPivot = new SparkFlex(pivotLeaderId, MotorType.kBrushless);
+        rightPivot= new SparkFlex(pivotFollowerId, MotorType.kBrushless);
+        SparkFlexConfig climberConfig = new SparkFlexConfig();
+        climberConfig.smartCurrentLimit(60);
+        climberConfig.idleMode(IdleMode.kBrake);
+        climberConfig.closedLoop
+            .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
+            .p(0.5)  // tune
+            .i(0)
+            .d(0)
+            .outputRange(-1, 1);
 
-        pivotLeader.setNeutralMode(NeutralModeValue.Brake);
-        pivotFollower.setNeutralMode(NeutralModeValue.Brake);
+        leftPivot.configure(climberConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        rightPivot.configure(climberConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        pivotFollower.setControl(new Follower(pivotLeader.getDeviceID(), true));
     }
 
     public void runIntake(double speed) {
@@ -51,13 +66,13 @@ public class IntakeSubsystem extends SubsystemBase {
     /** Run only the pivot (manual + PID hold) */
     public void runPivot(double speed) {
         if (Math.abs(speed) > JOYSTICK_DEADBAND) {
-            pivotLeader.setControl(duty.withOutput(speed * PIVOT_MULTIPLIER));
-            pivotHoldPosition = pivotLeader.getPosition().getValueAsDouble();
+            leftPivot.set(speed*PIVOT_MULTIPLIER);
+            rightPivot.set(speed*PIVOT_MULTIPLIER);
         } else {
-            // Hold with PID
-            double currentPosition = pivotLeader.getPosition().getValueAsDouble();
-            double output = pivotPID.calculate(currentPosition, pivotHoldPosition);
-            pivotLeader.setControl(duty.withOutput(output));
+            // // Hold with PID
+            // double currentPosition = pivotLeader.getPosition().getValueAsDouble();
+            // double output = pivotPID.calculate(currentPosition, pivotHoldPosition);
+            // pivotLeader.setControl(duty.withOutput(output));
         }
     }
 
@@ -65,6 +80,6 @@ public class IntakeSubsystem extends SubsystemBase {
         leftIndexer.setControl(duty.withOutput(0));
         rightIndexer.setControl(duty.withOutput(0));
         intakeRoller.setControl(duty.withOutput(0));
-        pivotLeader.setControl(duty.withOutput(0));
+        // pivotLeader.setControl(duty.withOutput(0));
     }
 }

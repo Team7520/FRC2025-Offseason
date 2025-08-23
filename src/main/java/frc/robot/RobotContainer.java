@@ -108,10 +108,10 @@ public class RobotContainer
         21, // left indexer X44
         22, // right indexer X44
         23, // intake roller X60
-        14,  // right pivot
-        15   // left pivot
+        28,  // right pivot
+        29   // left pivot
     );
-  private final ElevatorSubsystem elevator = new ElevatorSubsystem(50, 51);
+  private final ElevatorSubsystem elevator = new ElevatorSubsystem(31, 32);
 
   public RobotContainer()
   {
