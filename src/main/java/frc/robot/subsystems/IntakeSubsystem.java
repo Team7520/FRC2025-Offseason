@@ -36,12 +36,12 @@ public class IntakeSubsystem extends SubsystemBase {
     private double pivotHoldPosition = 0;
     private static final double JOYSTICK_DEADBAND = 0.05;
 
-    public IntakeSubsystem(int leftIndexerId, int rightIndexerId, int rollerId, int pivotLeaderId, int pivotFollowerId) {
+    public IntakeSubsystem(int leftIndexerId, int rightIndexerId, int rollerId, int leftPivotId, int rightPivotId) {
         leftIndexer = new TalonFX(leftIndexerId);
         rightIndexer = new TalonFX(rightIndexerId);
         intakeRoller = new TalonFX(rollerId);
-        leftPivot = new SparkFlex(pivotLeaderId, MotorType.kBrushless);
-        rightPivot= new SparkFlex(pivotFollowerId, MotorType.kBrushless);
+        leftPivot = new SparkFlex(leftPivotId, MotorType.kBrushless);
+        rightPivot= new SparkFlex(rightPivotId, MotorType.kBrushless);
         SparkFlexConfig climberConfig = new SparkFlexConfig();
         climberConfig.smartCurrentLimit(60);
         climberConfig.idleMode(IdleMode.kBrake);
@@ -63,16 +63,10 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRoller.setControl(duty.withOutput(speed * ROLLER_MULTIPLIER));
     }
 
-    /** Run only the pivot (manual + PID hold) */
     public void runPivot(double speed) {
         if (Math.abs(speed) > JOYSTICK_DEADBAND) {
             leftPivot.set(speed*PIVOT_MULTIPLIER);
             rightPivot.set(speed*PIVOT_MULTIPLIER);
-        } else {
-            // // Hold with PID
-            // double currentPosition = pivotLeader.getPosition().getValueAsDouble();
-            // double output = pivotPID.calculate(currentPosition, pivotHoldPosition);
-            // pivotLeader.setControl(duty.withOutput(output));
         }
     }
 
@@ -80,6 +74,5 @@ public class IntakeSubsystem extends SubsystemBase {
         leftIndexer.setControl(duty.withOutput(0));
         rightIndexer.setControl(duty.withOutput(0));
         intakeRoller.setControl(duty.withOutput(0));
-        // pivotLeader.setControl(duty.withOutput(0));
     }
 }

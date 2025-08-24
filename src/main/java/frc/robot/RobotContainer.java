@@ -103,7 +103,7 @@ public class RobotContainer
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
-  private final ArmSubsystem arm = new ArmSubsystem(23, 20);
+  private final ArmSubsystem arm = new ArmSubsystem(24, 20,33);
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
         22, // right indexer X44
@@ -131,17 +131,26 @@ public class RobotContainer
   private void configureBindings()
   {
     // for testing, change later
-    // arm
-    // B button → intake until sensor detects a piece, then hold
-    // operatorController.b().whileTrue(
-    // Commands.run(() -> arm.intake(), arm)   // run intake
-    //     .until(arm::hasPiece)         // stop if sensor detects piece
-    //     .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // always hold when finished
-    // );
-    // // A button → arm eject
-    // operatorController.a()
-    //     .whileTrue(Commands.run(arm::eject, arm))
-    //     .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+    // B button → intake until piece detected, then hold
+  operatorController.b().whileTrue(
+    Commands.run(() -> arm.intake(), arm)   // run intake
+        .until(arm::hasPiece)              // stop if sensor detects piece
+        .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
+  );
+
+  // A button → eject while held, stop when released
+  operatorController.a()
+    .whileTrue(Commands.run(arm::eject, arm))
+    .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+
+  // Default command → pivot follows right joystick Y (scaled down)
+  arm.setDefaultCommand(
+    new RunCommand(
+        () -> arm.updatePivotWithJoystick(operatorController.getRightY() * 0.2),
+        arm
+    )
+  );
+
 
 
     intake.setDefaultCommand(
@@ -153,10 +162,10 @@ public class RobotContainer
                 } else {
                     intakeSpeed = -operatorController.getRightTriggerAxis();
                 }
-                double pivotSpeed  = -operatorController.getRightY();
+                // double pivotSpeed  = -operatorController.getRightY();
 
                 intake.runIntake(intakeSpeed);
-                intake.runPivot(pivotSpeed);
+                // intake.runPivot(pivotSpeed);
             },
             intake
         )
@@ -164,11 +173,11 @@ public class RobotContainer
     
     // elevator
     elevator.setDefaultCommand(
-            new RunCommand(
-                () -> elevator.setPower(-operatorController.getLeftY() * 0.80), // scale down for safety
-                elevator
-            )
-        );
+    new RunCommand(
+        () -> elevator.updateWithJoystick(-operatorController.getLeftY()*0.5), 
+        elevator
+    )
+    );
     
     operatorController.x()
         .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))

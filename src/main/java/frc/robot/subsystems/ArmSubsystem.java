@@ -11,50 +11,67 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import au.grapplerobotics.LaserCan;
 
 public class ArmSubsystem extends SubsystemBase {
+    // Roller
     private final TalonFX roller;
+    private final DutyCycleOut rollerDuty = new DutyCycleOut(0);
+    private final PositionDutyCycle rollerPosReq = new PositionDutyCycle(0);
+
+    // Piece detection
     private final LaserCan laser;
+    private double pieceThresholdMM = 0;
 
-    private final DutyCycleOut duty = new DutyCycleOut(0);
+    // Pivot
+    private final TalonFX pivot;
+    private final DutyCycleOut pivotDuty = new DutyCycleOut(0);
+    private final PositionDutyCycle pivotPosReq = new PositionDutyCycle(0);
 
-    private final PositionDutyCycle positionReq = new PositionDutyCycle(0);
+    private double holdPivotRot = 0.0;
+    private boolean pivotHolding = false;
 
-    private double holdPositionRot = 0.0;
-    private double pieceThresholdMM = 4;
+    private double holdRollerRot = 0.0;
+    private boolean rollerHolding = false;
 
-    public ArmSubsystem(int rollerCanId, int laserCanId) {
+    public ArmSubsystem(int rollerCanId, int laserCanId, int pivotCanId) {
         roller = new TalonFX(rollerCanId);
         laser = new LaserCan(laserCanId);
 
+        // Roller config
         TalonFXConfiguration cfg = new TalonFXConfiguration();
-
         cfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-
         cfg.Voltage.PeakForwardVoltage = 12.0;
         cfg.Voltage.PeakReverseVoltage = -12.0;
-
         cfg.CurrentLimits.SupplyCurrentLimitEnable = true;
         cfg.CurrentLimits.SupplyCurrentLimit = 35.0;
-
         cfg.Feedback.SensorToMechanismRatio = 1.0;
-
         cfg.Slot0.kP = 0.35;   // tune
-        cfg.Slot0.kI = 0.0;
-        cfg.Slot0.kD = 0.0;
-        cfg.Slot0.kS = 0.0;
-
         roller.getConfigurator().apply(cfg);
+
+        // Pivot config
+        pivot = new TalonFX(pivotCanId);
+        TalonFXConfiguration pivotCfg = new TalonFXConfiguration();
+        pivotCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
+        pivotCfg.Voltage.PeakForwardVoltage = 12.0;
+        pivotCfg.Voltage.PeakReverseVoltage = -12.0;
+        pivotCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
+        pivotCfg.CurrentLimits.SupplyCurrentLimit = 40.0;
+        pivotCfg.Feedback.SensorToMechanismRatio = 1.0; // adjust
+        pivotCfg.Slot0.kP = 0.4; // tune
+        pivot.getConfigurator().apply(pivotCfg);
     }
 
+    // Roller control
     public void intake() {
-        roller.setControl(duty.withOutput(-0.2));
+        roller.setControl(rollerDuty.withOutput(-0.4));
+        rollerHolding = false;
     }
 
     public void eject() {
-        roller.setControl(duty.withOutput(0.8));
+        roller.setControl(rollerDuty.withOutput(0.8));
+        rollerHolding = false;
     }
 
     public void stopOpenLoop() {
-        roller.setControl(duty.withOutput(0.0));
+        roller.setControl(rollerDuty.withOutput(0.0));
     }
 
     public boolean hasPiece() {
@@ -67,37 +84,63 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void captureHoldFromEncoder() {
-        holdPositionRot = roller.getPosition().getValueAsDouble();
-        roller.setControl(positionReq.withPosition(holdPositionRot));
+        holdRollerRot = roller.getPosition().getValueAsDouble();
+        roller.setControl(rollerPosReq.withPosition(holdRollerRot));
+        rollerHolding = true;
     }
 
-    public void applyHold() {
-        roller.setControl(positionReq.withPosition(holdPositionRot));
+    public void applyHoldRoller() {
+        if (rollerHolding) {
+            roller.setControl(rollerPosReq.withPosition(holdRollerRot));
+        }
     }
 
-    public void releaseHold() {
+    public void releaseHoldRoller() {
         stopOpenLoop();
+        rollerHolding = false;
     }
 
-    public void setPosition_kP(double kP) {
-        TalonFXConfiguration cfg = new TalonFXConfiguration();
-        cfg.Slot0.kP = kP;
-        roller.getConfigurator().apply(cfg);
+    // Pivot control
+    public void setPivotManual(double percent) {
+        pivot.setControl(pivotDuty.withOutput(percent));
+        holdPivotRot = pivot.getPosition().getValueAsDouble();
+        pivotHolding = false;
     }
-    public void setPosition_kI(double kI) {
-        TalonFXConfiguration cfg = new TalonFXConfiguration();
-        cfg.Slot0.kI = kI;
-        roller.getConfigurator().apply(cfg);
+
+    public void startHoldPivot() {
+        holdPivotRot = pivot.getPosition().getValueAsDouble();
+        pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
+        pivotHolding = true;
     }
-    public void setPosition_kD(double kD) {
-        TalonFXConfiguration cfg = new TalonFXConfiguration();
-        cfg.Slot0.kD = kD;
-        roller.getConfigurator().apply(cfg);
+
+    public void applyHoldPivot() {
+        if (pivotHolding) {
+            pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
+        }
+    }
+
+    public void releaseHoldPivot() {
+        pivot.setControl(pivotDuty.withOutput(0.0));
+        pivotHolding = false;
+    }
+
+    public void updatePivotWithJoystick(double input) {
+        if (Math.abs(input) > 0.05) {
+            setPivotManual(input);
+        } else {
+            if (!pivotHolding) {
+                startHoldPivot();
+            } else {
+                applyHoldPivot();
+            }
+        }
     }
 
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("hasPiece", hasPiece());
-        SmartDashboard.putNumber("LaserMM",laser.getMeasurement().distance_mm);
+        SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+        SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
     }
 }
