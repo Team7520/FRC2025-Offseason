@@ -4,8 +4,11 @@ import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.RelativeEncoder;
+import com.revrobotics.spark.SparkBase.ControlType;
 import com.revrobotics.spark.SparkBase.PersistMode;
 import com.revrobotics.spark.SparkBase.ResetMode;
+import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
@@ -22,6 +25,9 @@ public class IntakeSubsystem extends SubsystemBase {
     private final TalonFX intakeRoller;
     private final SparkFlex leftPivot;
     private final SparkFlex rightPivot;
+    private final SparkClosedLoopController pivotController;
+    private final RelativeEncoder pivotEncoder;
+
 
     private final DutyCycleOut duty = new DutyCycleOut(0);
 
@@ -40,21 +46,32 @@ public class IntakeSubsystem extends SubsystemBase {
         leftIndexer = new TalonFX(leftIndexerId);
         rightIndexer = new TalonFX(rightIndexerId);
         intakeRoller = new TalonFX(rollerId);
+    
         leftPivot = new SparkFlex(leftPivotId, MotorType.kBrushless);
-        rightPivot= new SparkFlex(rightPivotId, MotorType.kBrushless);
-        SparkFlexConfig climberConfig = new SparkFlexConfig();
-        climberConfig.smartCurrentLimit(60);
-        climberConfig.idleMode(IdleMode.kBrake);
-        climberConfig.closedLoop
+        rightPivot = new SparkFlex(rightPivotId, MotorType.kBrushless);
+        pivotEncoder = leftPivot.getEncoder();
+        pivotController = leftPivot.getClosedLoopController();
+    
+        // Configure left pivot normally
+        SparkFlexConfig pivotConfig = new SparkFlexConfig();
+        pivotConfig.smartCurrentLimit(60);
+        pivotConfig.idleMode(IdleMode.kBrake);
+        pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.5)  // tune
+            .p(0.5) // tune
             .i(0)
             .d(0)
             .outputRange(-1, 1);
+        
+        pivotConfig.smartCurrentLimit(60);
+        pivotConfig.idleMode(IdleMode.kBrake);
+        leftPivot.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
-        leftPivot.configure(climberConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
-        rightPivot.configure(climberConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+        SparkFlexConfig followerConfig = new SparkFlexConfig();
+        followerConfig
+            .follow(leftPivot.getDeviceId(), true); // false = not inverted, set true if needed
 
+        rightPivot.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
     }
 
     public void runIntake(double speed) {
@@ -66,7 +83,6 @@ public class IntakeSubsystem extends SubsystemBase {
     public void runPivot(double speed) {
         if (Math.abs(speed) > JOYSTICK_DEADBAND) {
             leftPivot.set(speed*PIVOT_MULTIPLIER);
-            rightPivot.set(speed*PIVOT_MULTIPLIER);
         }
     }
 
@@ -74,5 +90,9 @@ public class IntakeSubsystem extends SubsystemBase {
         leftIndexer.setControl(duty.withOutput(0));
         rightIndexer.setControl(duty.withOutput(0));
         intakeRoller.setControl(duty.withOutput(0));
+    }
+
+    public void manual(double addRotations) {
+        pivotController.setReference(pivotEncoder.getPosition() + addRotations, ControlType.kPosition);
     }
 }

@@ -48,4 +48,49 @@ public final class Constants
     public static final double RIGHT_X_DEADBAND = 0.1;
     public static final double TURN_CONSTANT    = 6;
   }
+
+  public static class ElevatorConstants {
+    public static final int LIMIT_SWITCH_ID = 9;
+    public static final int FRONT_MOTOR_ID = 31;
+    public static final int BACK_MOTOR_ID = 32;
+    public static final double SENSOR_TO_MECHANISM_RATIO = 3d/11d; // Units will be in inches
+    public static final double MAX_HEIGHT = 60; // 60 inches
+
+    // PID Constants
+    public static final double kP = 0.7; // 0.675
+    public static final double kI = 0.0;
+    public static final double kD = 0.0;
+    public static final double kIz = 0.0;
+    public static final double kFF = 0.09;
+    public static final double kG = 0;
+    public static final double kA = 0.002;
+
+    // Motion Magic Constants
+    public static final double MAX_VELOCITY = 800; // 10 inches per second
+    public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
+    public static final double MAX_JERK = 4000; // 60 inches per second cubed
+    public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
+
+    public static final int CURRENT_LIMIT = 120;
+    public static enum ElevatorPosition {
+        GROUND(0),
+        LOW(102), // 11.41455078125, 7.984863
+        MID(29), // 27.5 
+        HIGH(55), // 52
+        LOWALG(27.1), 
+        HIGHALG(42.4);
+
+        private final double height;
+
+        ElevatorPosition(double height) {
+            this.height = height;
+        }
+
+        public double getHeight() {
+            return height;
+        }
+
+    }
+  }
+
 }
