@@ -6,6 +6,7 @@ import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
 import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
@@ -41,6 +42,7 @@ public class ArmSubsystem extends SubsystemBase {
     private double holdRollerRot = 0.0;     
     private boolean rollerHolding = false;
     private ArmPositions armPosition = ArmPositions.TEST;
+    public static double kG = 0.5;
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -60,9 +62,9 @@ public class ArmSubsystem extends SubsystemBase {
         cfg.CurrentLimits.SupplyCurrentLimit = 35.0;
         cfg.Feedback.SensorToMechanismRatio = 1.0;
         cfg.Slot0.kP = 0.35;   // tune
-        cfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
-        cfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
-        cfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
+        // cfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
+        // cfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
+        // cfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
         roller.getConfigurator().apply(cfg);
 
         // Pivot config
@@ -74,7 +76,12 @@ public class ArmSubsystem extends SubsystemBase {
         pivotCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
         pivotCfg.CurrentLimits.SupplyCurrentLimit = 40.0;
         pivotCfg.Feedback.SensorToMechanismRatio = 1.0; // adjust
-        pivotCfg.Slot0.kP = 0.4; // tune
+        pivotCfg.Slot0.kP = 0.4;
+        pivotCfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
+        pivotCfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
+        pivotCfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
+        pivotCfg.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
+        pivotCfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;  
         pivot.getConfigurator().apply(pivotCfg);
 
         motionMagic = new MotionMagicVoltage(0);
@@ -96,7 +103,10 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public boolean hasPiece() {
-        double mm = laser.getMeasurement().distance_mm;
+        double mm = 100;
+        if (laser.getMeasurement()!=null){
+            mm = laser.getMeasurement().distance_mm;}
+            
         return mm < pieceThresholdMM;
     }
 
@@ -137,6 +147,9 @@ public class ArmSubsystem extends SubsystemBase {
     public void applyHoldPivot() {
         if (pivotHolding) {
             pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
+            // double theta = pivotAngleRad(); 
+            // double ff = kG * Math.cos(theta);
+            // pivot.setControl(pivotDuty.withOutput(ff));
         }
     }
 
@@ -158,18 +171,37 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command moveToPosition(ArmPositions position) {
-        return Commands.runOnce(() -> setPosition(position), this);
+        return Commands.run(() -> {
+            pivot.setControl(motionMagic.withPosition(position.getPosition()));
+        }, this)
+        .until(() -> atTarget(position));
     }
+    
+    private boolean atTarget(ArmPositions position) {
+        double current = pivot.getPosition().getValueAsDouble();
+        double error = Math.abs(position.getPosition() - current);
+        return error < 0.01;
+    }
+
+    private double pivotAngleRad() {
+        double absRot = encoder.getAbsolutePosition().getValueAsDouble(); // 0..1 rotations
+        double rotFromHoriz = absRot - ArmConstants.PIVOT_HORIZONTAL_OFFSET_ROT;
+        return rotFromHoriz * 2.0 * Math.PI; // radians
+    }
+    
 
     public void setPosition(ArmPositions position) {
         armPosition = position;
-        pivot.setControl(motionMagic.withPosition(position.getPosition()));
+        double theta = pivotAngleRad();
+        double ff = kG * Math.cos(theta);
+        pivot.setControl(motionMagic.withPosition(position.getPosition()).withFeedForward(ff));
     }
+    
 
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("hasPiece", hasPiece());
-        SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+        //SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
         SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Encoder Value", encoder.getAbsolutePosition().getValueAsDouble());

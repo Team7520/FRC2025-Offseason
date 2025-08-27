@@ -94,6 +94,8 @@ public final class Constants
   }
 
     public static class ArmConstants {
+      public static final double PIVOT_HORIZONTAL_OFFSET_ROT = 0.153;
+
       public static final int ROLLER_CAN_ID = 24;
       public static final int LASER_CAN_ID = 20;
       public static final int PIVOT_CAN_ID = 33;
