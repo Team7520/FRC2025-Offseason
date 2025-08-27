@@ -93,4 +93,34 @@ public final class Constants
     }
   }
 
-}
+    public static class ArmConstants {
+      public static final int ROLLER_CAN_ID = 24;
+      public static final int LASER_CAN_ID = 20;
+      public static final int PIVOT_CAN_ID = 33;
+
+  
+      // Motion Magic Constants
+      public static final double MAX_VELOCITY = 800; // 10 inches per second
+      public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
+      public static final double MAX_JERK = 4000; // 60 inches per second cubed
+      public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
+  
+      public static final int CURRENT_LIMIT = 120;
+      public static enum ArmPositions {
+          TEST(0.2);
+  
+          private final double position;
+  
+          ArmPositions(double position) {
+              this.position = position;
+          }
+  
+          public double getPosition() {
+              return position;
+          }
+  
+      }
+    }
+  }
+
+

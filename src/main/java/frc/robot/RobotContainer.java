@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.ManualElevator;
@@ -106,7 +107,7 @@ public class RobotContainer
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
-  private final ArmSubsystem arm = new ArmSubsystem(24, 20,33);
+  private final ArmSubsystem arm = new ArmSubsystem();
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
         22, // right indexer X44
@@ -178,6 +179,7 @@ public class RobotContainer
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
     
     operatorController.a().onTrue(elevator.moveToPosition(ElevatorPosition.LOW));
+    operatorController.leftBumper().onTrue(arm.moveToPosition(ArmPositions.TEST));
 
     
     // /\ for testing, change later

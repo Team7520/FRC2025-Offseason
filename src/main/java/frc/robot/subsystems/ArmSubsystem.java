@@ -2,12 +2,21 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionDutyCycle;
+import com.ctre.phoenix6.hardware.CANcoder;
 import com.ctre.phoenix6.hardware.TalonFX;
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.revrobotics.spark.SparkBase.ControlType;
 
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
+import frc.robot.Constants.ArmConstants.ArmPositions;
+import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import au.grapplerobotics.LaserCan;
 
 public class ArmSubsystem extends SubsystemBase {
@@ -15,7 +24,8 @@ public class ArmSubsystem extends SubsystemBase {
     private final TalonFX roller;
     private final DutyCycleOut rollerDuty = new DutyCycleOut(0);
     private final PositionDutyCycle rollerPosReq = new PositionDutyCycle(0);
-
+    private final CANcoder encoder;
+    private final MotionMagicVoltage motionMagic;
     // Piece detection
     private final LaserCan laser;
     private double pieceThresholdMM = 0;
@@ -28,12 +38,18 @@ public class ArmSubsystem extends SubsystemBase {
     private double holdPivotRot = 0.0;
     private boolean pivotHolding = false;
 
-    private double holdRollerRot = 0.0;
+    private double holdRollerRot = 0.0;     
     private boolean rollerHolding = false;
+    private ArmPositions armPosition = ArmPositions.TEST;
 
-    public ArmSubsystem(int rollerCanId, int laserCanId, int pivotCanId) {
-        roller = new TalonFX(rollerCanId);
-        laser = new LaserCan(laserCanId);
+    public ArmSubsystem() {
+        roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
+        laser = new LaserCan(ArmConstants.LASER_CAN_ID);
+        encoder = new CANcoder(61);
+        
+        
+        
+
 
         // Roller config
         TalonFXConfiguration cfg = new TalonFXConfiguration();
@@ -44,10 +60,13 @@ public class ArmSubsystem extends SubsystemBase {
         cfg.CurrentLimits.SupplyCurrentLimit = 35.0;
         cfg.Feedback.SensorToMechanismRatio = 1.0;
         cfg.Slot0.kP = 0.35;   // tune
+        cfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
+        cfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
+        cfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
         roller.getConfigurator().apply(cfg);
 
         // Pivot config
-        pivot = new TalonFX(pivotCanId);
+        pivot = new TalonFX(ArmConstants.PIVOT_CAN_ID);
         TalonFXConfiguration pivotCfg = new TalonFXConfiguration();
         pivotCfg.MotorOutput.NeutralMode = NeutralModeValue.Brake;
         pivotCfg.Voltage.PeakForwardVoltage = 12.0;
@@ -57,6 +76,8 @@ public class ArmSubsystem extends SubsystemBase {
         pivotCfg.Feedback.SensorToMechanismRatio = 1.0; // adjust
         pivotCfg.Slot0.kP = 0.4; // tune
         pivot.getConfigurator().apply(pivotCfg);
+
+        motionMagic = new MotionMagicVoltage(0);
     }
 
     // Roller control
@@ -136,11 +157,22 @@ public class ArmSubsystem extends SubsystemBase {
         }
     }
 
+    public Command moveToPosition(ArmPositions position) {
+        return Commands.runOnce(() -> setPosition(position), this);
+    }
+
+    public void setPosition(ArmPositions position) {
+        armPosition = position;
+        pivot.setControl(motionMagic.withPosition(position.getPosition()));
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("hasPiece", hasPiece());
         SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
         SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Encoder Value", encoder.getAbsolutePosition().getValueAsDouble());
+        SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
     }
 }

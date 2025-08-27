@@ -48,6 +48,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         config.Slot0.kP = 0.3; // tune PID
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
+        config.Slot0.kG = ElevatorConstants.kFF;
         config.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MAX_VELOCITY;
         config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCELERATION;
         config.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
