@@ -131,10 +131,6 @@ public class ArmSubsystem extends SubsystemBase {
         rollerHolding = false;
     }
 
-    public void setHoldPosition(double rotations) {
-        holdPivotRot = rotations;
-    }
-
     // Pivot control
     public void setPivotManual(double percent) {
         pivot.setControl(pivotDuty.withOutput(percent));
