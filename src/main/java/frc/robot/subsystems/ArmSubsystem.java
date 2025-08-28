@@ -16,6 +16,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.ArmConstants.ArmPositions;
@@ -181,10 +182,10 @@ public class ArmSubsystem extends SubsystemBase {
         return error < 0.02;
     }
 
-    private double pivotAngleRad() {
-        double absRot = encoder.getAbsolutePosition().getValueAsDouble(); // 0..1 rotations
-        double rotFromHoriz = absRot - ArmConstants.PIVOT_HORIZONTAL_OFFSET_ROT;
-        return rotFromHoriz * 2.0 * Math.PI; // radians
+    public double pivotAngleRad() {
+        double cancoderRotations = encoder.getPosition().getValueAsDouble();
+        double armRotations = (cancoderRotations - ArmConstants.PIVOT_HORIZONTAL_OFFSET_ROT) / 4.0;
+        return armRotations * 2.0 * Math.PI;
     }
     
 

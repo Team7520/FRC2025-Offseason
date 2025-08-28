@@ -94,7 +94,7 @@ public final class Constants
   }
 
     public static class ArmConstants {
-      public static final double PIVOT_HORIZONTAL_OFFSET_ROT = 0.153;
+      public static final double PIVOT_HORIZONTAL_OFFSET_ROT = 0.155029;
 
       public static final int ROLLER_CAN_ID = 24;
       public static final int LASER_CAN_ID = 20;
@@ -110,7 +110,8 @@ public final class Constants
       public static final int CURRENT_LIMIT = 120;
       public static enum ArmPositions {
           TEST(1.05),
-          PICKUP(2.2);
+          PICKUP(2.2),
+          SCORE(0.927);
   
           private final double position;
   

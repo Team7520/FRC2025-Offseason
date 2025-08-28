@@ -17,6 +17,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -24,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
 import frc.robot.subsystems.ArmSubsystem;
@@ -133,9 +135,24 @@ public class RobotContainer
    * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
    * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
+  private String mode = "Coral";
   private void configureBindings()
   {
-    // for testing, change later
+    operatorController.povUp().onTrue(new InstantCommand(() -> {
+        if (mode.equals("Coral")) {
+            mode = "Algae";
+        } else {
+            mode = "Coral";
+        }
+        System.out.println("Mode switched to: " + mode);
+    }));
+    
+    operatorController.leftTrigger()
+    .whileTrue(new IntakeCommand(intake, arm, () -> mode)
+    );
+    
+
+
     // B button → intake until piece detected, then hold
   operatorController.b().whileTrue(
     Commands.run(() -> arm.intake(), arm)   // run intake
@@ -158,12 +175,12 @@ public class RobotContainer
 
 
 
-  // intake.setDefaultCommand(
-  //       new ManualIntake(
-  //         intake, 
-  //           () -> -operatorController.getRightY()
-  //       )
-  //   );
+  intake.setDefaultCommand(
+        new ManualIntake(
+          intake, 
+            () -> -operatorController.getRightY()
+        )
+    );
     
     // elevator
     elevator.setDefaultCommand(

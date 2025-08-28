@@ -38,7 +38,6 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double PIVOT_MULTIPLIER = 0.2;
 
     // PID for pivot hold
-    private final PIDController pivotPID = new PIDController(0.05, 0.0, 0.0); // tune kP!
     private double pivotHoldPosition = 0;
     private static final double JOYSTICK_DEADBAND = 0.05;
 
