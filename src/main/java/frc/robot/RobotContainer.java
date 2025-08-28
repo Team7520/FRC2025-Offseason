@@ -144,9 +144,9 @@ public class RobotContainer
   );
 
   // A button → eject while held, stop when released
-  // operatorController.a()
-  //   .whileTrue(Commands.run(arm::eject, arm))
-  //   .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+  operatorController.a()
+    .whileTrue(Commands.run(arm::eject, arm))
+    .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
 
   // Default command → pivot follows right joystick Y (scaled down)
   arm.setDefaultCommand(
@@ -158,12 +158,12 @@ public class RobotContainer
 
 
 
-  intake.setDefaultCommand(
-        new ManualIntake(
-          intake, 
-            () -> -operatorController.getRightY()
-        )
-    );
+  // intake.setDefaultCommand(
+  //       new ManualIntake(
+  //         intake, 
+  //           () -> -operatorController.getRightY()
+  //       )
+  //   );
     
     // elevator
     elevator.setDefaultCommand(
@@ -179,8 +179,8 @@ public class RobotContainer
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
     
-    operatorController.a().onTrue(elevator.moveToPosition(ElevatorPosition.LOW));
-    operatorController.leftBumper().onTrue(arm.moveToPosition(ArmPositions.TEST));
+    // operatorController.a().onTrue(elevator.moveToPosition(ElevatorPosition.LOW));
+    operatorController.leftBumper().onTrue(arm.moveToPosition(ArmPositions.PICKUP));
 
     
     // /\ for testing, change later

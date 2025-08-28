@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import javax.swing.text.Position;
+
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -41,15 +43,13 @@ public class ArmSubsystem extends SubsystemBase {
 
     private double holdRollerRot = 0.0;     
     private boolean rollerHolding = false;
-    private ArmPositions armPosition = ArmPositions.TEST;
-    public static double kG = 0.5;
+    private double armPosition;
+    public static double kG = 0;
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
         laser = new LaserCan(ArmConstants.LASER_CAN_ID);
         encoder = new CANcoder(61);
-        
-        
         
 
 
@@ -76,7 +76,7 @@ public class ArmSubsystem extends SubsystemBase {
         pivotCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
         pivotCfg.CurrentLimits.SupplyCurrentLimit = 40.0;
         pivotCfg.Feedback.SensorToMechanismRatio = 1.0; // adjust
-        pivotCfg.Slot0.kP = 0.4;
+        pivotCfg.Slot0.kP = 1.31;
         pivotCfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
         pivotCfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
         pivotCfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
@@ -131,6 +131,10 @@ public class ArmSubsystem extends SubsystemBase {
         rollerHolding = false;
     }
 
+    public void setHoldPosition(double rotations) {
+        holdPivotRot = rotations;
+    }
+
     // Pivot control
     public void setPivotManual(double percent) {
         pivot.setControl(pivotDuty.withOutput(percent));
@@ -139,17 +143,18 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public void startHoldPivot() {
-        holdPivotRot = pivot.getPosition().getValueAsDouble();
+        holdPivotRot = encoder.getPosition().getValueAsDouble();
         pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
         pivotHolding = true;
     }
 
     public void applyHoldPivot() {
-        if (pivotHolding) {
-            pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
-            // double theta = pivotAngleRad(); 
-            // double ff = kG * Math.cos(theta);
+        if (/*pivotHolding*/ true) {
+            //pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
+            double theta = pivotAngleRad(); 
+            double ff = kG * Math.cos(theta);
             // pivot.setControl(pivotDuty.withOutput(ff));
+            pivot.setControl(pivotPosReq.withPosition(holdPivotRot).withFeedForward(ff));
         }
     }
 
@@ -171,16 +176,13 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public Command moveToPosition(ArmPositions position) {
-        return Commands.run(() -> {
-            pivot.setControl(motionMagic.withPosition(position.getPosition()));
-        }, this)
-        .until(() -> atTarget(position));
+        return Commands.run(() -> setPosition(position), this).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
     }
     
     private boolean atTarget(ArmPositions position) {
-        double current = pivot.getPosition().getValueAsDouble();
+        double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
-        return error < 0.01;
+        return error < 0.02;
     }
 
     private double pivotAngleRad() {
@@ -190,11 +192,9 @@ public class ArmSubsystem extends SubsystemBase {
     }
     
 
-    public void setPosition(ArmPositions position) {
-        armPosition = position;
-        double theta = pivotAngleRad();
-        double ff = kG * Math.cos(theta);
-        pivot.setControl(motionMagic.withPosition(position.getPosition()).withFeedForward(ff));
+    public void setPosition(ArmConstants.ArmPositions position) {
+        armPosition = position.getPosition();
+        pivot.setControl(pivotPosReq.withPosition(armPosition));
     }
     
 
@@ -206,5 +206,6 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Encoder Value", encoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
+        SmartDashboard.putNumber("Hold Position", holdPivotRot);
     }
 }

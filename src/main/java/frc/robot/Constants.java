@@ -109,7 +109,8 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum ArmPositions {
-          TEST(0.2);
+          TEST(1.05),
+          PICKUP(2.2);
   
           private final double position;
   
