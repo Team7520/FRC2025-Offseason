@@ -100,6 +100,9 @@ public class ArmSubsystem extends SubsystemBase {
         roller.setControl(rollerDuty.withOutput(0.8));
         rollerHolding = false;
     }
+    // public Command placeCoralCommand(){
+    //     return Commands.run(roller.setControl(rollerDuty.withOutput(0.8)));
+    // }
 
     public void stopOpenLoop() {
         roller.setControl(rollerDuty.withOutput(0.0));
@@ -120,6 +123,14 @@ public class ArmSubsystem extends SubsystemBase {
         }
 
         return mm < coralThresholdMM;
+    }
+
+    public Command intakeCoral() {
+        return Commands.run(
+            () -> intake(), 
+            this
+        ).until(() -> hasCoral())
+         .finallyDo(interrupted -> stopOpenLoop());
     }
 
     // public void setPieceThresholdMM(double mm) {

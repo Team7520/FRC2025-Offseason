@@ -26,8 +26,11 @@ import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.IntakeCommand;
+import frc.robot.commands.L1Command;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
+import frc.robot.commands.PickupCoralCommand;
+import frc.robot.commands.ReadyToPickupCommand;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimberSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
@@ -205,17 +208,17 @@ public class RobotContainer
     //     COMMENTED OUT TO AVOID INTERFERING WITH TESTING
     
     // //EVERYTHING FOR A
-    // operatorController.a().onTrue(new InstantCommand(() -> {
-    //   if((mode.equals("Coral") && !arm.hasCoral()) || arm.checkIfLollipop()) {
-    //     arm.moveToPosition(ArmPositions.PICKUP).schedule();
-    //   } else if(mode.equals("Coral") && arm.hasCoral()){
-    //     arm.moveToPosition(ArmPositions.L1).schedule();
-    //   }/*else if(mode.equals("Algae") && arm.hasAlgae()) {
-    //     move to processor position
-    //   } else {
-    //     lollypop position
-    //   }*/
-    // }));
+    operatorController.a().onTrue(new InstantCommand(() -> {
+      if((mode.equals("Coral") && !arm.hasCoral()) || arm.checkIfLollipop()) {
+        new ReadyToPickupCommand(arm,elevator).schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral()){
+        new L1Command(arm,elevator).schedule();
+      }/*else if(mode.equals("Algae") && arm.hasAlgae()) {
+        move to processor position
+      } else {
+        lollypop position
+      }*/
+    }));
 
     // //EVERYTHING FOR B
     // operatorController.b().onTrue(new InstantCommand(() -> {
@@ -248,15 +251,15 @@ public class RobotContainer
     //   }*/
     // }));
 
-    
-
-    operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      if(!arm.checkScoreSide()) {
-          arm.moveToPosition(ArmPositions.SCORE).schedule();;
-      } else {
-        arm.moveToPosition(ArmPositions.OPP_SCORE).schedule();;
-      }
-    }));
+    operatorController.leftBumper()
+    .whileTrue(new PickupCoralCommand(arm, elevator));
+    // operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
+    //   if(!arm.checkScoreSide()) {
+    //       arm.moveToPosition(ArmPositions.SCORE).schedule();;
+    //   } else {
+    //     arm.moveToPosition(ArmPositions.OPP_SCORE).schedule();;
+    //   }
+    // }));
     
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
     

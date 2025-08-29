@@ -74,6 +74,9 @@ public final class Constants
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
         GROUND(0),
+        READY(100.308350),
+        PICKUP(85.468018),
+        L1(125.188965),
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
@@ -112,7 +115,7 @@ public final class Constants
           TEST(1.05),
           PICKUP(2.2),
           SCORE(0.927),
-          L1(1.01), //Placeholder, change when tuning
+          L1(1.5), //Placeholder, change when tuning
           L2_3(1.01), //Placeholder, change when tuning
           L4(1.01), //Placeholder, change when tuning
           OPP_SCORE(-0.45),
