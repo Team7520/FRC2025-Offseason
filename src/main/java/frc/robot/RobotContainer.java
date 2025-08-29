@@ -148,7 +148,7 @@ public class RobotContainer
     }));
     
     operatorController.leftTrigger()
-    .whileTrue(new IntakeCommand(intake, arm, () -> mode)
+      .whileTrue(new IntakeCommand(intake, arm, () -> mode)
     );
     
 
@@ -156,14 +156,14 @@ public class RobotContainer
     // B button → intake until piece detected, then hold
   operatorController.b().whileTrue(
     Commands.run(() -> arm.intake(), arm)   // run intake
-        .until(arm::hasPiece)              // stop if sensor detects piece
+        .until(arm::hasCoral)              // stop if sensor detects piece
         .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
   );
 
   // A button → eject while held, stop when released
-  operatorController.a()
-    .whileTrue(Commands.run(arm::eject, arm))
-    .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+  // operatorController.a()
+  //   .whileTrue(Commands.run(arm::eject, arm))
+  //   .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
 
   // Default command → pivot follows right joystick Y (scaled down)
   arm.setDefaultCommand(
@@ -175,12 +175,12 @@ public class RobotContainer
 
 
 
-  intake.setDefaultCommand(
-        new ManualIntake(
-          intake, 
-            () -> -operatorController.getRightY()
-        )
-    );
+  // intake.setDefaultCommand(
+  //       new ManualIntake(
+  //         intake, 
+  //           () -> -operatorController.getRightY()
+  //       )
+  //   );
     
     // elevator
     elevator.setDefaultCommand(
@@ -195,10 +195,70 @@ public class RobotContainer
     operatorController.y()
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+
+    //operatorController.leftBumper().onTrue()
     
     // operatorController.a().onTrue(elevator.moveToPosition(ElevatorPosition.LOW));
-    operatorController.leftBumper().onTrue(arm.moveToPosition(ArmPositions.PICKUP));
 
+    /* HAND COMMANDS */
+
+    //     COMMENTED OUT TO AVOID INTERFERING WITH TESTING
+    
+    // //EVERYTHING FOR A
+    // operatorController.a().onTrue(new InstantCommand(() -> {
+    //   if((mode.equals("Coral") && !arm.hasCoral()) || arm.checkIfLollipop()) {
+    //     arm.moveToPosition(ArmPositions.PICKUP).schedule();
+    //   } else if(mode.equals("Coral") && arm.hasCoral()){
+    //     arm.moveToPosition(ArmPositions.L1).schedule();
+    //   }/*else if(mode.equals("Algae") && arm.hasAlgae()) {
+    //     move to processor position
+    //   } else {
+    //     lollypop position
+    //   }*/
+    // }));
+
+    // //EVERYTHING FOR B
+    // operatorController.b().onTrue(new InstantCommand(() -> {
+    //   if((mode.equals("Coral") && !arm.hasCoral())) {
+    //     arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule(); //low algae
+    //   } else if(mode.equals("Coral") && arm.hasCoral()){
+    //     arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L2
+    //   } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
+    //     arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule();;
+    //   }*/
+    // }));
+
+    // //EVERYTHING FOR X
+    // operatorController.x().onTrue(new InstantCommand(() -> {
+    //   if((mode.equals("Coral") && !arm.hasCoral())) {
+    //     arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule(); 
+    //   } else if(mode.equals("Coral") && arm.hasCoral()){
+    //     arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L3
+    //   } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
+    //     arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule();;
+    //   }*/
+    // }));
+
+    // //EVERYTHING FOR Y
+    // operatorController.y().onTrue(new InstantCommand(() -> {
+    //   if(mode.equals("Coral") && arm.hasCoral()){
+    //     arm.moveToPosition(ArmPositions.L4).schedule(); //replace with a command that includes elevator later L4
+    //   } /*else if(mode.equals("Algae") && arm.hasAlgae()) {
+    //     arm.moveToPosition(ArmPositions.BARGE).schedule();; //replace with a comman that includes elevator BARGE
+    //   }*/
+    // }));
+
+    
+
+    operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
+      if(!arm.checkScoreSide()) {
+          arm.moveToPosition(ArmPositions.SCORE).schedule();;
+      } else {
+        arm.moveToPosition(ArmPositions.OPP_SCORE).schedule();;
+      }
+    }));
+    
+    operatorController.rightBumper().onTrue(arm.changeScoreSide());
     
     // /\ for testing, change later
 

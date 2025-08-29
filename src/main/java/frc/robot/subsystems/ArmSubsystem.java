@@ -33,6 +33,7 @@ public class ArmSubsystem extends SubsystemBase {
     // Piece detection
     private final LaserCan laser;
     private double pieceThresholdMM = 0;
+    private double coralThresholdMM = 4;
 
     // Pivot
     private final TalonFX pivot;
@@ -46,6 +47,7 @@ public class ArmSubsystem extends SubsystemBase {
     private boolean rollerHolding = false;
     private double armPosition;
     public static double kG = 0;
+    private boolean sideChange = false;
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -103,17 +105,26 @@ public class ArmSubsystem extends SubsystemBase {
         roller.setControl(rollerDuty.withOutput(0.0));
     }
 
-    public boolean hasPiece() {
-        double mm = 100;
-        if (laser.getMeasurement()!=null){
-            mm = laser.getMeasurement().distance_mm;}
+    // public boolean hasPiece() {
+    //     double mm = 100;
+    //     if (laser.getMeasurement()!=null){
+    //         mm = laser.getMeasurement().distance_mm;}
             
-        return mm < pieceThresholdMM;
+    //     return mm < pieceThresholdMM;
+    // }
+
+    public boolean hasCoral() {
+        double mm = 100;
+        if(laser.getMeasurement() != null) {
+            mm = laser.getMeasurement().distance_mm;
+        }
+
+        return mm < coralThresholdMM;
     }
 
-    public void setPieceThresholdMM(double mm) {
-        pieceThresholdMM = mm;
-    }
+    // public void setPieceThresholdMM(double mm) {
+    //     pieceThresholdMM = mm;
+    // }
 
     public void captureHoldFromEncoder() {
         holdRollerRot = roller.getPosition().getValueAsDouble();
@@ -194,15 +205,36 @@ public class ArmSubsystem extends SubsystemBase {
         pivot.setControl(pivotPosReq.withPosition(armPosition));
     }
     
+    public Command changeScoreSide() {
+        return Commands.runOnce(() -> setScoreSide());
+    }
+
+    public void setScoreSide() {
+        if(sideChange) {
+            sideChange = false;
+        } else {
+            sideChange = true;
+        }
+    }
+
+    public boolean checkScoreSide() {
+        return sideChange;
+    }
+
+    public boolean checkIfLollipop() {
+        return atTarget(ArmPositions.LOLLIPOP);
+    }
+    
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("hasPiece", hasPiece());
-        //SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+        SmartDashboard.putBoolean("Has Coral?", hasCoral());
+        SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
         SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Encoder Value", encoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
+        SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
     }
 }

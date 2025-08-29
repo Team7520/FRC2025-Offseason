@@ -108,10 +108,21 @@ public final class Constants
       public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
   
       public static final int CURRENT_LIMIT = 120;
-      public static enum ArmPositions {
+      public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           TEST(1.05),
           PICKUP(2.2),
-          SCORE(0.927);
+          SCORE(0.927),
+          L1(1.01), //Placeholder, change when tuning
+          L2_3(1.01), //Placeholder, change when tuning
+          L4(1.01), //Placeholder, change when tuning
+          OPP_SCORE(-0.45),
+          OPPL1(1.01), //Placeholder, change when tuning
+          OPPL2_3(1.01), //Placeholder, change when tuning
+          OPPL4(1.01), //Placeholder, change when tuning
+          LOLLIPOP(1.01), //Placeholder, change when tuning
+          LOW_ALGAE(1.01), //Placeholder
+          HIGH_ALGAE(1.01), //Placeholder
+          BARGE(1.01); //Placeholder
   
           private final double position;
   

@@ -30,7 +30,7 @@ public class IntakeCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return !modeSupplier.get().equals("Coral") && arm.hasPiece();
+        return !modeSupplier.get().equals("Coral") && arm.hasCoral();
     }
 
     @Override
