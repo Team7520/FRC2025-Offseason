@@ -4,7 +4,9 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.util.Units;
 import swervelib.math.Matter;
 
@@ -31,6 +33,13 @@ public final class Constants
 //    public static final PIDConstants TRANSLATION_PID = new PIDConstants(0.7, 0, 0);
 //    public static final PIDConstants ANGLE_PID       = new PIDConstants(0.4, 0, 0.01);
 //  }
+
+  public static final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(
+    new Translation2d(0.2667, 0.2667),
+    new Translation2d(0.2667, -0.2667),
+    new Translation2d(-0.2667, 0.2667),
+    new Translation2d(-0.2667, -0.2667)
+  );
 
   public static final class DrivebaseConstants
   {
@@ -74,9 +83,12 @@ public final class Constants
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
         GROUND(0),
-        READY(100.308350),
+        READY(102.308350),
         PICKUP(85.468018),
         L1(125.188965),
+        L2(49),
+        L3(130),
+        L4(230.3),
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
@@ -116,8 +128,9 @@ public final class Constants
           PICKUP(2.2),
           SCORE(0.927),
           L1(1.5), //Placeholder, change when tuning
-          L2_3(1.01), //Placeholder, change when tuning
-          L4(1.01), //Placeholder, change when tuning
+          L2(0.75),
+          L3(0.81),
+          L4(0.83),
           OPP_SCORE(-0.45),
           OPPL1(1.01), //Placeholder, change when tuning
           OPPL2_3(1.01), //Placeholder, change when tuning
