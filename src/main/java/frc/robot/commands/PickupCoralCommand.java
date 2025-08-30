@@ -12,7 +12,7 @@ public class PickupCoralCommand extends SequentialCommandGroup {
         addCommands(
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
-            arm.intakeCoral().until(arm::hasCoral) 
+            arm.intakeCoral().until(arm::hasPiece) 
             
 
         );

@@ -59,8 +59,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -1,
-                                                                () -> driverXbox.getLeftX() * -1)
+                                                                () -> driverXbox.getLeftY() * -0.3,
+                                                                () -> driverXbox.getLeftX() * -0.3)
                                                             .withControllerRotationAxis(driverXbox::getRightX)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
@@ -159,7 +159,7 @@ public class RobotContainer
     // B button → intake until piece detected, then hold
   operatorController.b().whileTrue(
     Commands.run(() -> arm.intake(), arm)   // run intake
-        .until(arm::hasCoral)              // stop if sensor detects piece
+        .until(arm::hasPiece)              // stop if sensor detects piece
         .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
   );
 
@@ -209,9 +209,9 @@ public class RobotContainer
     
     // //EVERYTHING FOR A
     operatorController.a().onTrue(new InstantCommand(() -> {
-      if((mode.equals("Coral") && !arm.hasCoral()) || arm.checkIfLollipop()) {
+      if((mode.equals("Coral") && !arm.hasPiece()) || arm.checkIfLollipop()) {
         new ReadyToPickupCommand(arm,elevator).schedule();
-      } else if(mode.equals("Coral") && arm.hasCoral()){
+      } else if(mode.equals("Coral") && arm.hasPiece()){
         new L1Command(arm,elevator).schedule();
       }/*else if(mode.equals("Algae") && arm.hasAlgae()) {
         move to processor position
