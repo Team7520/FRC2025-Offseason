@@ -7,89 +7,67 @@
         {
           "type": "path",
           "data": {
-            "pathName": "New New Path"
+            "pathName": "Collect Algae Part 1 Path"
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "jn"
+            "waitTime": 0.5
           }
         },
         {
-          "type": "sequential",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": "New Path"
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": null
-                }
-              }
-            ]
+            "pathName": "Score Algae 1 Path"
           }
         },
         {
-          "type": "parallel",
+          "type": "wait",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": null
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": null
-                }
-              }
-            ]
+            "waitTime": 0.5
           }
         },
         {
-          "type": "deadline",
+          "type": "path",
           "data": {
-            "commands": [
-              {
-                "type": "named",
-                "data": {
-                  "name": null
-                }
-              },
-              {
-                "type": "named",
-                "data": {
-                  "name": null
-                }
-              }
-            ]
+            "pathName": "Collect Algae 2 Path"
           }
         },
         {
-          "type": "race",
+          "type": "wait",
           "data": {
-            "commands": [
-              {
-                "type": "path",
-                "data": {
-                  "pathName": null
-                }
-              },
-              {
-                "type": "path",
-                "data": {
-                  "pathName": null
-                }
-              }
-            ]
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score Algae 2 Path"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Collect Algae 3 Path"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Score Algae 3 Path"
           }
         }
       ]
