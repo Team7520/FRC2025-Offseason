@@ -45,7 +45,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         TalonFXSConfiguration config = new TalonFXSConfiguration();
         config.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.Slot0.kP = 0.3; // tune PID
+        config.Slot0.kP = 0.8; // tune PID
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
         config.Slot0.kG = ElevatorConstants.kFF;
@@ -106,6 +106,21 @@ public class ElevatorSubsystem extends SubsystemBase {
         return Commands.runOnce(() -> setPosition(position), this);
     }
 
+    public Command moveAndWaitToPosition(ElevatorPosition position) {
+        System.out.println("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA");
+        System.out.println(position.getHeight());
+
+        return Commands.runOnce(() -> setPosition(position), this)
+            .andThen(Commands.waitUntil(() -> 
+                Math.abs(leftMotor.getPosition().getValue().magnitude() - position.getHeight()) < 2
+                
+            ));
+    }
+    
+    public double getPositionDouble() {
+        return leftMotor.getPosition().getValueAsDouble();
+    }
+
     public Angle getCurrentPosition() {
         return leftMotor.getPosition().getValue();
     }
@@ -122,6 +137,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("ElevatorPos", currentPos);
         double setPointPos = leftMotor.getClosedLoopReference().getValue();
         SmartDashboard.putNumber("ElevatorSetPoint", setPointPos);
+        SmartDashboard.putNumber("Elevator",leftMotor.getPosition().getValueAsDouble());
     }
 
 

@@ -1,0 +1,27 @@
+package frc.robot.commands;
+
+import frc.robot.subsystems.ArmSubsystem;
+import frc.robot.subsystems.ElevatorSubsystem;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
+import frc.robot.Constants;
+
+public class L3Command extends SequentialCommandGroup {
+    public L3Command(ArmSubsystem arm, ElevatorSubsystem elevator) {
+        if (elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) {
+            addCommands(
+            elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L3),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3)
+            // arm.eject()
+        );
+        }else{
+            addCommands(
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L3),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3)
+            // arm.eject()
+        );}
+    }
+}
+

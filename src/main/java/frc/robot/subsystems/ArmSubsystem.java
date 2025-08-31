@@ -48,6 +48,7 @@ public class ArmSubsystem extends SubsystemBase {
     private double armPosition;
     public static double kG = 0;
     private boolean sideChange = false;
+    
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -88,6 +89,9 @@ public class ArmSubsystem extends SubsystemBase {
         pivot.getConfigurator().apply(pivotCfg);
 
         motionMagic = new MotionMagicVoltage(0);
+        double absolutePosition = encoder.getAbsolutePosition().getValueAsDouble(); // rotations [0,1)
+        double adjustedPosition = absolutePosition - ArmConstants.PIVOT_HORIZONTAL_OFFSET_ROT;
+        pivot.setPosition(adjustedPosition);
     }
 
     // Roller control
@@ -96,13 +100,16 @@ public class ArmSubsystem extends SubsystemBase {
         rollerHolding = false;
     }
 
-    public void eject() {
-        roller.setControl(rollerDuty.withOutput(0.8));
+    public void eject(double speed) {
+        roller.setControl(rollerDuty.withOutput(speed));
         rollerHolding = false;
     }
-    // public Command placeCoralCommand(){
-    //     return Commands.run(roller.setControl(rollerDuty.withOutput(0.8)));
-    // }
+    public Command placeCoralCommand(double speed) {
+        return Commands.run(
+            () -> eject(speed), 
+            this       
+        ).finallyDo(interrupted -> stopOpenLoop());
+    }
 
     public void stopOpenLoop() {
         roller.setControl(rollerDuty.withOutput(0.0));
@@ -130,7 +137,8 @@ public class ArmSubsystem extends SubsystemBase {
             () -> intake(), 
             this
         ).until(() -> hasPiece())
-         .finallyDo(interrupted -> stopOpenLoop());
+         .finallyDo(interrupted -> {stopOpenLoop();
+            captureHoldFromEncoder();});
     }
 
     // public void setPieceThresholdMM(double mm) {
@@ -201,7 +209,7 @@ public class ArmSubsystem extends SubsystemBase {
     private boolean atTarget(ArmPositions position) {
         double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
-        return error < 0.02;
+        return error < 0.05;
     }
 
     public double pivotAngleRad() {

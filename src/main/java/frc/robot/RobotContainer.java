@@ -28,6 +28,9 @@ import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
+import frc.robot.commands.L2Command;
+import frc.robot.commands.L3Command;
+import frc.robot.commands.L4Command;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.PickupCoralCommand;
@@ -39,6 +42,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import java.io.File;
 import swervelib.SwerveInputStream;
+//import frc.robot.AprilTagSystem;
 
 /**
  * This class is where the bulk of the robot should be declared. Since Command-based is a "declarative" paradigm, very
@@ -65,7 +69,7 @@ public class RobotContainer
                                                             .withControllerRotationAxis(() -> driverXbox.getRightX() * 0.3)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
-                                                            .allianceRelativeControl(true);
+                                                            .allianceRelativeControl(false);
 
   /**
    * Clone's the angular velocity input stream and converts it to a fieldRelative input stream.
@@ -122,6 +126,7 @@ public class RobotContainer
         29   // left pivot
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
+  //private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
   
 
   public RobotContainer()
@@ -162,12 +167,12 @@ public class RobotContainer
     
 
 
-    // B button → intake until piece detected, then holdx
-  operatorController.b().whileTrue(
-    Commands.run(() -> arm.intake(), arm)   // run intake
-        .until(arm::hasPiece)              // stop if sensor detects piece
-        .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
-  );
+    // B button → intake until piece detected, then hold
+  // operatorController.b().whileTrue(
+  //   Commands.run(() -> arm.intake(), arm)   // run intake
+  //       .until(arm::hasPiece)              // stop if sensor detects piece
+  //       .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
+  // );
 
   // A button → eject while held, stop when released
   // operatorController.a()
@@ -197,11 +202,11 @@ public class RobotContainer
         );
     
     
-    operatorController.x()
+    driverXbox.x()
         .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
     
-    operatorController.y()
+    driverXbox.y()
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
 
@@ -227,35 +232,38 @@ public class RobotContainer
     }));
 
     // //EVERYTHING FOR B
-    // operatorController.b().onTrue(new InstantCommand(() -> {
-    //   if((mode.equals("Coral") && !arm.hasCoral())) {
-    //     arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule(); //low algae
-    //   } else if(mode.equals("Coral") && arm.hasCoral()){
-    //     arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L2
-    //   } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
-    //     arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule();;
-    //   }*/
-    // }));
+    operatorController.b().onTrue(new InstantCommand(() -> {
+      new L2Command(arm,elevator).schedule();
+      // if((mode.equals("Coral") && !arm.hasCoral())) {
+      //   arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule(); //low algae
+      // } else if(mode.equals("Coral") && arm.hasCoral()){
+      //   arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L2
+      // } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
+        //arm.moveToPosition(ArmPositions.LOW_ALGAE).schedule();;
+      //}*/
+    }));
 
     // //EVERYTHING FOR X
-    // operatorController.x().onTrue(new InstantCommand(() -> {
-    //   if((mode.equals("Coral") && !arm.hasCoral())) {
-    //     arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule(); 
-    //   } else if(mode.equals("Coral") && arm.hasCoral()){
-    //     arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L3
-    //   } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
-    //     arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule();;
-    //   }*/
-    // }));
+    operatorController.x().onTrue(new InstantCommand(() -> {
+      new L3Command(arm,elevator).schedule();
+      // if((mode.equals("Coral") && !arm.hasCoral())) {
+      //   arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule(); 
+      // } else if(mode.equals("Coral") && arm.hasCoral()){
+      //   arm.moveToPosition(ArmPositions.L2_3).schedule(); //replace with a command that includes elevator later L3
+      // } /*else if(mode.equals("Algae") && !arm.hasAlgae()) {
+      //   arm.moveToPosition(ArmPositions.HIGH_ALGAE).schedule();;
+      // }*/
+    }));
 
     // //EVERYTHING FOR Y
-    // operatorController.y().onTrue(new InstantCommand(() -> {
-    //   if(mode.equals("Coral") && arm.hasCoral()){
-    //     arm.moveToPosition(ArmPositions.L4).schedule(); //replace with a command that includes elevator later L4
-    //   } /*else if(mode.equals("Algae") && arm.hasAlgae()) {
-    //     arm.moveToPosition(ArmPositions.BARGE).schedule();; //replace with a comman that includes elevator BARGE
-    //   }*/
-    // }));
+    operatorController.y().onTrue(new InstantCommand(() -> {
+      new L4Command(arm,elevator).schedule();
+      // if(mode.equals("Coral") && arm.hasCoral()){
+      //   arm.moveToPosition(ArmPositions.L4).schedule(); //replace with a command that includes elevator later L4
+      // } /*else if(mode.equals("Algae") && arm.hasAlgae()) {
+      //   arm.moveToPosition(ArmPositions.BARGE).schedule();; //replace with a comman that includes elevator BARGE
+      // }*/
+    }));
 
     operatorController.leftBumper()
     .whileTrue(new PickupCoralCommand(arm, elevator));
@@ -268,8 +276,44 @@ public class RobotContainer
     // }));
     
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
-    
-    // /\ for testing, change later
+
+    operatorController.rightTrigger().whileTrue(arm.placeCoralCommand(0.5));
+
+
+  //   double yOffset = 0.155;
+  //   double xOffset = 0.4;
+  //   driverXbox.leftBumper().onTrue(new InstantCommand(() -> {
+  //     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+  //     System.out.println("LEFT BUMPER PRESSED");
+  //     if (tagPose != null) {
+  //         Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, -yOffset);
+  //         System.out.println("TARGET POSE:");
+  //         System.out.println(offsetPose);
+  //         Pose2d robotPose = drivebase.getPose();
+  
+  //         new DriveToPoseCommand(
+  //             robotPose,
+  //             offsetPose,
+  //             driverXbox::getLeftX,  // x input (strafe)
+  //             driverXbox::getLeftY   // y input (forward/back)
+  //         ).schedule();
+  //     }
+  // }));
+
+  // driverXbox.rightBumper().onTrue(new InstantCommand(() -> {
+  //   Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+  //   if (tagPose != null) {
+  //       Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+  //       Pose2d robotPose = drivebase.getPose();
+
+  //       new DriveToPoseCommand(
+  //           robotPose,
+  //           offsetPose,
+  //           driverXbox::getLeftX,  // x input (strafe)
+  //           driverXbox::getLeftY   // y input (forward/back)
+  //       ).schedule();
+  //   }}));
+
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
     Command driveFieldOrientedAngularVelocity = drivebase.driveFieldOriented(driveAngularVelocity);
@@ -329,11 +373,12 @@ public class RobotContainer
     } else
     {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
-      driverXbox.start().whileTrue(Commands.none());
-      driverXbox.back().whileTrue(Commands.none());
-      driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
-      driverXbox.rightBumper().onTrue(Commands.none());
+      //driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      // driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
+      // driverXbox.start().whileTrue(Commands.none());
+      // driverXbox.back().whileTrue(Commands.none());
+      // driverXbox.leftBumper().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      // driverXbox.rightBumper().onTrue(Commands.none());
     }
 
   }
