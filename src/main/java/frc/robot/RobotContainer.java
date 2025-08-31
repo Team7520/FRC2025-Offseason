@@ -25,7 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
-import frc.robot.commands.DriveToPoseCommand;
+//import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
 import frc.robot.commands.L2Command;
@@ -163,11 +163,11 @@ public class RobotContainer
 
 
     // B button → intake until piece detected, then hold
-  operatorController.b().whileTrue(
-    Commands.run(() -> arm.intake(), arm)   // run intake
-        .until(arm::hasPiece)              // stop if sensor detects piece
-        .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
-  );
+  // operatorController.b().whileTrue(
+  //   Commands.run(() -> arm.intake(), arm)   // run intake
+  //       .until(arm::hasPiece)              // stop if sensor detects piece
+  //       .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
+  // );
 
   // A button → eject while held, stop when released
   // operatorController.a()
@@ -197,11 +197,11 @@ public class RobotContainer
         );
     
     
-    operatorController.x()
+    driverXbox.x()
         .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
     
-    operatorController.y()
+    driverXbox.y()
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
 
@@ -368,7 +368,7 @@ public class RobotContainer
     } else
     {
       driverXbox.a().onTrue((Commands.runOnce(drivebase::zeroGyro)));
-      driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
+      //driverXbox.x().whileTrue(Commands.runOnce(drivebase::lock, drivebase).repeatedly());
       // driverXbox.x().onTrue(Commands.runOnce(drivebase::addFakeVisionReading));
       // driverXbox.start().whileTrue(Commands.none());
       // driverXbox.back().whileTrue(Commands.none());
