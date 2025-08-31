@@ -74,14 +74,15 @@ public final class Constants
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
         GROUND(0),
+        GROUNDALG(79.355712890625),
         READY(100.308350),
         PICKUP(85.468018),
         L1(125.188965),
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
-        LOWALG(27.1), 
-        HIGHALG(42.4);
+        LOWALG(96.46435546875), 
+        HIGHALG(162.46435546875);
 
         private final double height;
 
@@ -112,7 +113,7 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
-          TEST(1.05),
+          DEFAULT(0.1708984375),
           PICKUP(2.2),
           SCORE(0.927),
           L1(1.5), //Placeholder, change when tuning
@@ -123,10 +124,12 @@ public final class Constants
           OPPL2_3(1.01), //Placeholder, change when tuning
           OPPL4(1.01), //Placeholder, change when tuning
           LOLLIPOP(1.01), //Placeholder, change when tuning
+          GROUND_ALGAE(1.651611328125),
           LOW_ALGAE(1.01), //Placeholder
           HIGH_ALGAE(1.01), //Placeholder
           BARGE(1.01); //Placeholder
   
+          
           private final double position;
   
           ArmPositions(double position) {

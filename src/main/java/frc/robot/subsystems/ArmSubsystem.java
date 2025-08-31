@@ -2,6 +2,7 @@ package frc.robot.subsystems;
 
 import javax.swing.text.Position;
 
+import com.ctre.phoenix.motorcontrol.NeutralMode;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -124,7 +125,7 @@ public class ArmSubsystem extends SubsystemBase {
         return mm < pieceThresholdMM;
     }
 
-    public Command intakeCoral() {
+    public Command intakePiece() {
         return Commands.run(
             () -> intake(), 
             this

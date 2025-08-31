@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
 import frc.robot.commands.ManualElevator;
@@ -61,7 +62,7 @@ public class RobotContainer
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY() * -0.3,
                                                                 () -> driverXbox.getLeftX() * -0.3)
-                                                            .withControllerRotationAxis(driverXbox::getRightX)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * 0.3)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(true);
@@ -150,13 +151,18 @@ public class RobotContainer
         System.out.println("Mode switched to: " + mode);
     }));
     
-    operatorController.leftTrigger()
-      .whileTrue(new IntakeCommand(intake, arm, () -> mode)
-    );
+    operatorController.povRight().onTrue(elevator.resetEncoderCommand());
+    operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
+      if(mode.equals("Algae")) {
+        new AlgaePickupCommand(arm, elevator).schedule();
+      } else {
+        new IntakeCommand(intake, arm, () -> mode).schedule();
+      }
+    }));
     
 
 
-    // B button → intake until piece detected, then hold
+    // B button → intake until piece detected, then holdx
   operatorController.b().whileTrue(
     Commands.run(() -> arm.intake(), arm)   // run intake
         .until(arm::hasPiece)              // stop if sensor detects piece
