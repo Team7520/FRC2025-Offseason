@@ -11,7 +11,7 @@ public class ReadyToPickupCommand extends SequentialCommandGroup {
     public ReadyToPickupCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
-            new WaitCommand(2),
+            new WaitCommand(0.6),
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
 
         );

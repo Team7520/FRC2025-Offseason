@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -254,8 +255,7 @@ public class RobotContainer
 
     operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       if(true/*coral basket sensor is true */) {
-        new ReadyToPickupCommand(arm, elevator).schedule();
-        new PickupCoralCommand(arm, elevator).schedule();
+        new ReadyToPickupCommand(arm, elevator).andThen(new PickupCoralCommand(arm, elevator)).schedule();;
       } else {
         new ReadyToPickupCommand(arm, elevator).schedule();;
       }

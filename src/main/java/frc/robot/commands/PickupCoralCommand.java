@@ -12,7 +12,8 @@ public class PickupCoralCommand extends SequentialCommandGroup {
         addCommands(
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
-            arm.intakePiece().until(arm::hasPiece) 
+            arm.intakePiece(),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY)
             
 
         );
