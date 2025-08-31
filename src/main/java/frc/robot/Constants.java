@@ -93,8 +93,9 @@ public final class Constants
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
-        LOWALG(96.46435546875), 
-        HIGHALG(162.46435546875);
+        LOWALG(83.283935546875), 
+        HIGHALG(154.9609375),
+        LOLLYPOP(129.29248046875);
 
         private final double height;
 
@@ -136,11 +137,10 @@ public final class Constants
           OPPL1(1.01), //Placeholder, change when tuning
           OPPL2_3(1.01), //Placeholder, change when tuning
           OPPL4(1.01), //Placeholder, change when tuning
-          LOLLIPOP(1.01), //Placeholder, change when tuning
           GROUND_ALGAE(1.651611328125),
-          LOW_ALGAE(1.01), //Placeholder
-          HIGH_ALGAE(1.01), //Placeholder
-          BARGE(1.01); //Placeholder
+          ALGAE(1.142578125), //Placeholder
+          BARGE(1.01), //Placeholder
+          LOLLYPOP(1.682373046875);
   
           
           private final double position;

@@ -137,6 +137,7 @@ public class ArmSubsystem extends SubsystemBase {
             () -> intake(), 
             this
         ).until(() -> hasPiece())
+        .andThen(Commands.run(() -> intake(), this).withTimeout(0.15))
          .finallyDo(interrupted -> {stopOpenLoop();
             captureHoldFromEncoder();});
     }
@@ -219,7 +220,11 @@ public class ArmSubsystem extends SubsystemBase {
     }
     
 
-    public void setPosition(ArmConstants.ArmPositions position) {
+    public void setPosition(ArmConstants.ArmPositions position/* , boolean algae*/) {
+        // if(algae) {
+        //     armPosition = position.getPosition();
+        //     pivot.setControl(pivotPosReq.withPosition(armPosition).withVelocity());
+        // }
         armPosition = position.getPosition();
         pivot.setControl(pivotPosReq.withPosition(armPosition));
     }
@@ -239,11 +244,6 @@ public class ArmSubsystem extends SubsystemBase {
     public boolean checkScoreSide() {
         return sideChange;
     }
-
-    public boolean checkIfLollipop() {
-        return atTarget(ArmPositions.LOLLIPOP);
-    }
-    
 
     @Override
     public void periodic() {

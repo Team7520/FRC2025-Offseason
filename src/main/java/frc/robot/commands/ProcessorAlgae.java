@@ -7,13 +7,12 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
-public class ReadyToPickupCommand extends SequentialCommandGroup {
-    public ReadyToPickupCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
+public class ProcessorAlgae extends SequentialCommandGroup {
+    public ProcessorAlgae(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
-            new WaitCommand(2),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
-
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUND),
+            new WaitCommand(0.3),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.GROUND_ALGAE)
         );
         
     }

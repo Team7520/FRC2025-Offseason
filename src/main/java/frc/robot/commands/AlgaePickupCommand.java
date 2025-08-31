@@ -13,9 +13,10 @@ public class AlgaePickupCommand extends SequentialCommandGroup {
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUNDALG),
             new WaitCommand(0.3),
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.GROUND_ALGAE),
-            arm.intakePiece().until(arm::hasPiece),
-            new WaitCommand(0.25),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT)
+            arm.intakePiece(),
+            new WaitCommand(0.7),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUND)
         );
         
     }
