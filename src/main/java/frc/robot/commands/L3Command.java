@@ -9,7 +9,7 @@ import frc.robot.Constants;
 
 public class L3Command extends SequentialCommandGroup {
     public L3Command(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        if (elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) {
+        if ((elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) && (arm.getPositionDouble() > Constants.ArmConstants.ArmPositions.MOVEPOSSIBLE.getPosition())) {
             addCommands(
             elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.L3),

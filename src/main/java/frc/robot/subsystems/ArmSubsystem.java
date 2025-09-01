@@ -245,6 +245,10 @@ public class ArmSubsystem extends SubsystemBase {
         return sideChange;
     }
 
+    public double getPositionDouble() {
+        return pivot.getPosition().getValueAsDouble();
+    }
+
     @Override
     public void periodic() {
         SmartDashboard.putBoolean("Has Coral?", hasPiece());

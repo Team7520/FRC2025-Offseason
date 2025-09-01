@@ -56,7 +56,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         config.ExternalFeedback.SensorToMechanismRatio = ElevatorConstants.SENSOR_TO_MECHANISM_RATIO;
         
         CurrentLimitsConfigs limitConfigs = new CurrentLimitsConfigs();
-        limitConfigs.StatorCurrentLimit = 120;
+        limitConfigs.StatorCurrentLimit = 80;
         limitConfigs.StatorCurrentLimitEnable = true;
         limitConfigs.SupplyCurrentLimit = Constants.ElevatorConstants.CURRENT_LIMIT;
         limitConfigs.SupplyCurrentLimitEnable = true;

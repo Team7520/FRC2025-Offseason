@@ -140,7 +140,8 @@ public final class Constants
           GROUND_ALGAE(1.651611328125),
           ALGAE(1.142578125), //Placeholder
           BARGE(1.01), //Placeholder
-          LOLLYPOP(1.682373046875);
+          LOLLYPOP(1.682373046875),
+          MOVEPOSSIBLE(1.767);
   
           
           private final double position;
@@ -183,7 +184,7 @@ public final class Constants
       public static final int CURRENT_LIMIT = 120;
       public static enum PivotPosition {
           GROUND(0),
-          UP(-14.376116);
+          UP(-12);
 
           private final double angle;
   
