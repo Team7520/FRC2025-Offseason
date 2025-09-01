@@ -11,8 +11,9 @@ import frc.robot.Constants;
 public class IntakeCommand extends SequentialCommandGroup {
     public IntakeCommand(IntakeSubsystem intake) {
         addCommands(
+            intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.GROUND),
             intake.intakePiece(),
-            intake.setIntakePos()
+            intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP)
         );  
     }
 }

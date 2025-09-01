@@ -163,7 +163,7 @@ public class RobotContainer
     }));
     
     operatorController.povRight().onTrue(elevator.resetEncoderCommand());
-    operatorController.leftTrigger().onTrue(intake.setIntakePos());
+    operatorController.leftTrigger().onTrue(new IntakeCommand(intake));
     
 
 

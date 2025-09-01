@@ -22,6 +22,9 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
+import frc.robot.Constants.IntakeConstants;
+import frc.robot.Constants.IntakeConstants.PivotPosition;
 
 public class IntakeSubsystem extends SubsystemBase {
     // Motors
@@ -73,6 +76,12 @@ public class IntakeSubsystem extends SubsystemBase {
         
         pivotConfig.smartCurrentLimit(60);
         pivotConfig.idleMode(IdleMode.kBrake);
+
+        pivotConfig.closedLoop.maxMotion
+        .maxVelocity(IntakeConstants.MAX_VELOCITY)
+        .maxAcceleration(IntakeConstants.MAX_ACCELERATION)
+        .allowedClosedLoopError(IntakeConstants.ALLOWABLE_ERROR);
+
         leftPivot.configure(pivotConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
 
         SparkFlexConfig followerConfig = new SparkFlexConfig();
@@ -80,6 +89,8 @@ public class IntakeSubsystem extends SubsystemBase {
             .follow(leftPivot.getDeviceId(), true); // false = not inverted, set true if needed
 
         rightPivot.configure(followerConfig, ResetMode.kResetSafeParameters, PersistMode.kPersistParameters);
+
+        
     }
 
     public void runIntake(double speed) {
@@ -111,8 +122,12 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotController.setReference(pivotEncoder.getPosition() + addRotations, ControlType.kPosition);
     }
 
-    public Command setIntakePos() {
-        return Commands.runOnce(() -> pivotController.setReference(13.376116,ControlType.kMAXMotionPositionControl), this);
+    public void setPivotPosition(Constants.IntakeConstants.PivotPosition position) {
+        pivotController.setReference(position.getAngle(), ControlType.kMAXMotionPositionControl);
+    }
+
+    public Command setPivotPositionCommand(PivotPosition down) {
+        return Commands.runOnce(() -> setPivotPosition(down), this);
     }
 
     public boolean inBasket() { 

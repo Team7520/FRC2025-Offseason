@@ -162,6 +162,41 @@ public final class Constants
       public static final double xOffsetLeft = 0.65; //0.6
 
     }
+
+    public static class IntakeConstants {
+  
+      // PID Constants
+      public static final double kP = 0.7; // 0.675
+      public static final double kI = 0.0;
+      public static final double kD = 0.0;
+      public static final double kIz = 0.0;
+      public static final double kFF = 0.09;
+      public static final double kG = 0;
+      public static final double kA = 0.002;
+  
+      // Motion Magic Constants
+      public static final double MAX_VELOCITY = 800; // 10 inches per second
+      public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
+      public static final double MAX_JERK = 4000; // 60 inches per second cubed
+      public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
+  
+      public static final int CURRENT_LIMIT = 120;
+      public static enum PivotPosition {
+          GROUND(0),
+          UP(-14.376116);
+
+          private final double angle;
+  
+          PivotPosition(double angle) {
+              this.angle = angle;
+          }
+  
+          public double getAngle() {
+              return angle;
+          }
+  
+      }
+    }
   }
 
 
