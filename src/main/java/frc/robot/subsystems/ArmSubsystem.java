@@ -13,6 +13,7 @@ import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.revrobotics.spark.SparkBase.ControlType;
 
+import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
@@ -48,7 +49,6 @@ public class ArmSubsystem extends SubsystemBase {
     private double armPosition;
     public static double kG = 0;
     private boolean sideChange = false;
-    
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -259,5 +259,6 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
+        
     }
 }

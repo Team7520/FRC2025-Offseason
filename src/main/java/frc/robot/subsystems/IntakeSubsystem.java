@@ -12,10 +12,15 @@ import com.revrobotics.spark.SparkClosedLoopController;
 import com.revrobotics.spark.SparkFlex;
 import com.revrobotics.spark.SparkLowLevel.MotorType;
 import com.revrobotics.spark.config.ClosedLoopConfig.FeedbackSensor;
+import com.revrobotics.spark.config.MAXMotionConfig.MAXMotionPositionMode;
 import com.revrobotics.spark.config.SparkBaseConfig.IdleMode;
 import com.revrobotics.spark.config.SparkFlexConfig;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.AnalogInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 
 public class IntakeSubsystem extends SubsystemBase {
@@ -40,6 +45,10 @@ public class IntakeSubsystem extends SubsystemBase {
     // PID for pivot hold
     private double pivotHoldPosition = 0;
     private static final double JOYSTICK_DEADBAND = 0.05;
+
+    private AnalogInput sensor = new AnalogInput(0);
+    private double basketThreshold = 2;
+
 
     public IntakeSubsystem(int leftIndexerId, int rightIndexerId, int rollerId, int leftPivotId, int rightPivotId) {
         leftIndexer = new TalonFX(leftIndexerId);
@@ -79,6 +88,13 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRoller.setControl(duty.withOutput(speed * ROLLER_MULTIPLIER));
     }
 
+    public Command intakePiece() {
+        return Commands.run(
+            () -> runIntake(1), 
+            this
+        ).until(() -> inBasket()).andThen(() -> stopAll());
+    }
+
     public void runPivot(double speed) {
         if (Math.abs(speed) > JOYSTICK_DEADBAND) {
             leftPivot.set(speed*PIVOT_MULTIPLIER);
@@ -93,5 +109,19 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void manual(double addRotations) {
         pivotController.setReference(pivotEncoder.getPosition() + addRotations, ControlType.kPosition);
+    }
+
+    public Command setIntakePos() {
+        return Commands.runOnce(() -> pivotController.setReference(13.376116,ControlType.kMAXMotionPositionControl), this);
+    }
+
+    public boolean inBasket() { 
+        return sensor.getVoltage() <= basketThreshold;
+    }
+
+    @Override
+    public void periodic() {
+        SmartDashboard.putNumber("Analog Sensor", sensor.getVoltage());
+        SmartDashboard.putNumber("Intake Pivot", leftPivot.getEncoder().getPosition());
     }
 }

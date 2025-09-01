@@ -56,6 +56,7 @@ import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
+import frc.robot.Constants.ApriltagConstants;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import swervelib.SwerveController;
@@ -98,11 +99,13 @@ public class SwerveSubsystem extends SubsystemBase
   private final Field2d field = new Field2d();
 
   
-  StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
+  StructPublisher<Pose2d> currentPosePublisher = NetworkTableInstance.getDefault()
   .getStructTopic("MyPose", Pose2d.struct).publish();
 
   StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault()
-  .getStructTopic("PathplannerTarget", Pose2d.struct).publish();
+  .getStructTopic("PathplannerTargetRight", Pose2d.struct).publish();
+  StructPublisher<Pose2d> publisher3 = NetworkTableInstance.getDefault()
+  .getStructTopic("PathplannerTargetLeft", Pose2d.struct).publish();
   // StructArrayPublisher<Pose2d> arrayPublisher = NetworkTableInstance.getDefault()
   //   .getStructArrayTopic("MyPoseArray", Pose2d.struct).publish();
 
@@ -257,19 +260,23 @@ public class SwerveSubsystem extends SubsystemBase
 
     field.setRobotPose(poseEstimator.getEstimatedPosition());
 
-
+    publisher2.set(new Pose2d());
     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       if (tagPose != null) {
           // Offset: 1m forward, 0.5m to the RIGHT
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, 0.13);
-          SmartDashboard.putString("offsetPose Pose", offsetPose.toString());
-          publisher2.set(offsetPose);
+          Pose2d offsetPoseRight = aprilTagSystem.getOffsetPose(tagPose, ApriltagConstants.xOffsetRight, ApriltagConstants.yOffsetRight);
+          SmartDashboard.putString(" right offsetPose Pose", offsetPoseRight.toString());
+          publisher2.set(offsetPoseRight);
+          Pose2d offsetPoseLeft = aprilTagSystem.getOffsetPose(tagPose, ApriltagConstants.xOffsetLeft, ApriltagConstants.xOffsetLeft);
+          SmartDashboard.putString("left offsetPose Pose", offsetPoseLeft.toString());
+          publisher3.set(offsetPoseLeft);
+
       } else {
         //System.out.println("TAG POSE = null");
       }
 
 
-      publisher.set(getPose());
+      currentPosePublisher.set(getPose());
       //arrayPublisher.set(new Pose2d[] {getPose(), getPose()});
       //Pose3d pose = new Pose3d(getPose());
       Pose3d pose3d = new Pose3d(getPose().getX(),

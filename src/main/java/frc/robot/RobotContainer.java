@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ApriltagConstants;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
@@ -162,7 +163,7 @@ public class RobotContainer
     }));
     
     operatorController.povRight().onTrue(elevator.resetEncoderCommand());
-    operatorController.leftTrigger().whileTrue(new IntakeCommand(intake, arm, () -> mode));
+    operatorController.leftTrigger().onTrue(intake.setIntakePos());
     
 
 
@@ -188,12 +189,12 @@ public class RobotContainer
 
 
 
-  // intake.setDefaultCommand(
-  //       new ManualIntake(
-  //         intake, 
-  //           () -> -operatorController.getRightY()
-  //       )
-  //   );
+  intake.setDefaultCommand(
+        new ManualIntake(
+          intake, 
+            () -> -operatorController.getRightY()
+        )
+    );
     
     // elevator
     elevator.setDefaultCommand(
@@ -255,7 +256,7 @@ public class RobotContainer
     }));
 
     operatorController.leftBumper().onTrue(new InstantCommand(() -> {
-      if(true/*coral basket sensor is true */) {
+      if(intake.inBasket()) {
         new ReadyToPickupCommand(arm, elevator).andThen(new PickupCoralCommand(arm, elevator)).schedule();;
       } else {
         new ReadyToPickupCommand(arm, elevator).schedule();;
@@ -275,13 +276,11 @@ public class RobotContainer
     operatorController.rightTrigger().whileTrue(arm.placeCoralCommand(0.5));
 
 
-    double yOffsetLeft = 0.17;
-    double xOffsetLeft = 0.65;
     driverXbox.leftBumper().onTrue(new InstantCommand(() -> {
       Pose2d tagPose = aprilTagSystem.getClosestTagPose();
       System.out.println("LEFT BUMPER PRESSED");
       if (tagPose != null) {
-          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, yOffsetLeft, -xOffsetLeft);
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, ApriltagConstants.xOffsetLeft, ApriltagConstants.yOffsetLeft);
           System.out.println("TARGET POSE:");
           System.out.println(offsetPose);
           Pose2d robotPose = drivebase.getPose();
@@ -299,7 +298,7 @@ public class RobotContainer
   driverXbox.rightBumper().onTrue(new InstantCommand(() -> {
     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
     if (tagPose != null) {
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffsetRight, yOffsetRight);
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, ApriltagConstants.xOffsetRight, ApriltagConstants.yOffsetRight);
         Pose2d robotPose = drivebase.getPose();
 
         new DriveToPoseCommand(

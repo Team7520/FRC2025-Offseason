@@ -155,6 +155,13 @@ public final class Constants
   
       }
     }
+    public static class ApriltagConstants{
+      public static final double yOffsetRight = 0.16;
+      public static final double xOffsetRight = 0.65;
+      public static final double yOffsetLeft = -0.17; //0.17
+      public static final double xOffsetLeft = 0.65; //0.6
+
+    }
   }
 
 
