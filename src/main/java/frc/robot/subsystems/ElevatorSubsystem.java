@@ -46,7 +46,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         TalonFXSConfiguration config = new TalonFXSConfiguration();
         config.Commutation.MotorArrangement = MotorArrangementValue.Minion_JST;
         config.MotorOutput.NeutralMode = NeutralModeValue.Brake;
-        config.Slot0.kP = 0.8; // tune PID
+        config.Slot0.kP = 1; //0.8 tune PID
         config.Slot0.kI = 0.0;
         config.Slot0.kD = 0.0;
         config.Slot0.kG = ElevatorConstants.kFF;

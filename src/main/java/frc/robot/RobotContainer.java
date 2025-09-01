@@ -27,6 +27,7 @@ import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlgaePickupCommand;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.HighAlgaeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
@@ -70,7 +71,7 @@ public class RobotContainer
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY() * -0.3,
                                                                 () -> driverXbox.getLeftX() * -0.3)
-                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * 0.3)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.3)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(false);
@@ -130,7 +131,7 @@ public class RobotContainer
         29   // left pivot
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
-  //private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
+  private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
   
 
   public RobotContainer()
@@ -274,39 +275,40 @@ public class RobotContainer
     operatorController.rightTrigger().whileTrue(arm.placeCoralCommand(0.5));
 
 
-  //   double yOffset = 0.155;
-  //   double xOffset = 0.4;
-  //   driverXbox.leftBumper().onTrue(new InstantCommand(() -> {
-  //     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
-  //     System.out.println("LEFT BUMPER PRESSED");
-  //     if (tagPose != null) {
-  //         Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, -yOffset);
-  //         System.out.println("TARGET POSE:");
-  //         System.out.println(offsetPose);
-  //         Pose2d robotPose = drivebase.getPose();
+    double yOffsetLeft = 0.17;
+    double xOffsetLeft = 0.65;
+    driverXbox.leftBumper().onTrue(new InstantCommand(() -> {
+      Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+      System.out.println("LEFT BUMPER PRESSED");
+      if (tagPose != null) {
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, yOffsetLeft, -xOffsetLeft);
+          System.out.println("TARGET POSE:");
+          System.out.println(offsetPose);
+          Pose2d robotPose = drivebase.getPose();
   
-  //         new DriveToPoseCommand(
-  //             robotPose,
-  //             offsetPose,
-  //             driverXbox::getLeftX,  // x input (strafe)
-  //             driverXbox::getLeftY   // y input (forward/back)
-  //         ).schedule();
-  //     }
-  // }));
+          new DriveToPoseCommand(
+              robotPose,
+              offsetPose,
+              driverXbox::getLeftX,  // x input
+              driverXbox::getLeftY   // y input (forward/back)
+          ).schedule();
+      }
+  }));
+  double yOffsetRight = 0.16;
+  double xOffsetRight = 0.65;
+  driverXbox.rightBumper().onTrue(new InstantCommand(() -> {
+    Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+    if (tagPose != null) {
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffsetRight, yOffsetRight);
+        Pose2d robotPose = drivebase.getPose();
 
-  // driverXbox.rightBumper().onTrue(new InstantCommand(() -> {
-  //   Pose2d tagPose = aprilTagSystem.getClosestTagPose();
-  //   if (tagPose != null) {
-  //       Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
-  //       Pose2d robotPose = drivebase.getPose();
-
-  //       new DriveToPoseCommand(
-  //           robotPose,
-  //           offsetPose,
-  //           driverXbox::getLeftX,  // x input (strafe)
-  //           driverXbox::getLeftY   // y input (forward/back)
-  //       ).schedule();
-  //   }}));
+        new DriveToPoseCommand(
+            robotPose,
+            offsetPose,
+            driverXbox::getLeftX,  // x input
+            driverXbox::getLeftY   // y input (forward/back)
+        ).schedule();
+    }}));
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);

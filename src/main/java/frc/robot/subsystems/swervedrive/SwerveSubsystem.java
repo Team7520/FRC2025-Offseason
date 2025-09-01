@@ -6,6 +6,17 @@ package frc.robot.subsystems.swervedrive;
 
 import static edu.wpi.first.units.Units.Meter;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.DoubleSupplier;
+import java.util.function.Supplier;
+
+import org.json.simple.parser.ParseException;
+import org.photonvision.targeting.PhotonPipelineResult;
+
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.commands.PathfindingCommand;
@@ -17,44 +28,57 @@ import com.pathplanner.lib.path.PathPlannerPath;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
+
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.controller.SimpleMotorFeedforward;
+import edu.wpi.first.math.estimator.SwerveDrivePoseEstimator;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.trajectory.Trajectory;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.shuffleboard.Shuffleboard;
+import edu.wpi.first.wpilibj.smartdashboard.Field2d;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
+import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
-import java.io.File;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.DoubleSupplier;
-import java.util.function.Supplier;
-import org.json.simple.parser.ParseException;
-import org.photonvision.targeting.PhotonPipelineResult;
 import swervelib.SwerveController;
 import swervelib.SwerveDrive;
 import swervelib.SwerveDriveTest;
+import swervelib.SwerveModule;
 import swervelib.math.SwerveMath;
-import swervelib.parser.SwerveControllerConfiguration;
 import swervelib.parser.SwerveDriveConfiguration;
 import swervelib.parser.SwerveParser;
 import swervelib.telemetry.SwerveDriveTelemetry;
 import swervelib.telemetry.SwerveDriveTelemetry.TelemetryVerbosity;
+import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.networktables.StructArrayPublisher;
+import edu.wpi.first.networktables.NetworkTableInstance;
 
 public class SwerveSubsystem extends SubsystemBase
 {
+  //Change these names based on actual camera names
+  public AprilTagSystem aprilTagSystem = new AprilTagSystem();
+
+  //Matrix for Pose Estimator, tune values here
+  private static final Vector<N3> stateStdDevs = VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(5));
+  private static final Vector<N3> visionMeasurementStdDevs = VecBuilder.fill(0., 0., Units.degreesToRadians(10));
 
   /**
    * Swerve drive object.
@@ -69,6 +93,27 @@ public class SwerveSubsystem extends SubsystemBase
    */
   private       Vision      vision;
 
+  private final SwerveDrivePoseEstimator poseEstimator;
+
+  private final Field2d field = new Field2d();
+
+  
+  StructPublisher<Pose2d> publisher = NetworkTableInstance.getDefault()
+  .getStructTopic("MyPose", Pose2d.struct).publish();
+
+  StructPublisher<Pose2d> publisher2 = NetworkTableInstance.getDefault()
+  .getStructTopic("PathplannerTarget", Pose2d.struct).publish();
+  // StructArrayPublisher<Pose2d> arrayPublisher = NetworkTableInstance.getDefault()
+  //   .getStructArrayTopic("MyPoseArray", Pose2d.struct).publish();
+
+  StructPublisher<Pose3d> pose3dPublisher = NetworkTableInstance.getDefault()
+    .getStructTopic("MyPose3d", Pose3d.struct).publish();
+  
+  StructArrayPublisher<SwerveModuleState> publisherStates = NetworkTableInstance.getDefault()
+    .getStructArrayTopic("MyStates", SwerveModuleState.struct).publish();
+
+  
+
   /**
    * Initialize {@link SwerveDrive} with the directory provided.
    *
@@ -76,6 +121,8 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public SwerveSubsystem(File directory)
   {
+    //Shuffleboard.getTab("Swerve").add("Field", field);
+    SmartDashboard.putData("Field", field);
     boolean blueAlliance = false;
     Pose2d startingPose = blueAlliance ? new Pose2d(new Translation2d(Meter.of(1),
                                                                       Meter.of(4)),
@@ -94,13 +141,13 @@ public class SwerveSubsystem extends SubsystemBase
     {
       throw new RuntimeException(e);
     }
-    swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
-    swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
-    swerveDrive.setAngularVelocityCompensation(true,
-                                               true,
-                                               0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
-    swerveDrive.setModuleEncoderAutoSynchronize(false,
-                                                1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
+    // swerveDrive.setHeadingCorrection(false); // Heading correction should only be used while controlling the robot via angle.
+    // swerveDrive.setCosineCompensator(false);//!SwerveDriveTelemetry.isSimulation); // Disables cosine compensation for simulations since it causes discrepancies not seen in real life.
+    // swerveDrive.setAngularVelocityCompensation(true,
+    //                                            true,
+    //                                            0.1); //Correct for skew that gets worse as angular velocity increases. Start with a coefficient of 0.1.
+    // swerveDrive.setModuleEncoderAutoSynchronize(false,
+    //                                             1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
     if (visionDriveTest)
     {
@@ -110,6 +157,15 @@ public class SwerveSubsystem extends SubsystemBase
     }
     setupPathPlanner();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
+
+    this.poseEstimator = new SwerveDrivePoseEstimator(
+        Constants.kinematics,
+        Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
+        swerveDrive.getModulePositions(),
+        new Pose2d(),
+        stateStdDevs,
+        visionMeasurementStdDevs
+    );
   }
 
   /**
@@ -118,14 +174,14 @@ public class SwerveSubsystem extends SubsystemBase
    * @param driveCfg      SwerveDriveConfiguration for the swerve.
    * @param controllerCfg Swerve Controller.
    */
-  public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
-  {
-    swerveDrive = new SwerveDrive(driveCfg,
-                                  controllerCfg,
-                                  Constants.MAX_SPEED,
-                                  new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
-                                             Rotation2d.fromDegrees(0)));
-  }
+  // public SwerveSubsystem(SwerveDriveConfiguration driveCfg, SwerveControllerConfiguration controllerCfg)
+  // {
+  //   swerveDrive = new SwerveDrive(driveCfg,
+  //                                 controllerCfg,
+  //                                 Constants.MAX_SPEED,
+  //                                 new Pose2d(new Translation2d(Meter.of(2), Meter.of(0)),
+  //                                            Rotation2d.fromDegrees(0)));
+  // }
 
   /**
    * Setup the photon vision class.
@@ -136,15 +192,97 @@ public class SwerveSubsystem extends SubsystemBase
   }
 
   @Override
-  public void periodic()
-  {
-    // When vision is enabled we must manually update odometry in SwerveDrive
-    if (visionDriveTest)
-    {
-      swerveDrive.updateOdometry();
-      vision.updatePoseEstimation(swerveDrive);
+  public void periodic() {
+    SmartDashboard.putString("SwervePose",swerveDrive.getPose().toString());
+    
+    // Ensure AprilTag layout is loaded
+    if (!aprilTagSystem.aprilTagLayoutLoaded) {
+      aprilTagSystem.initiateAprilTagLayout();
     }
-    //periodic
+  
+    // Update odometry with gyro and module positions
+    poseEstimator.update(
+        Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
+        swerveDrive.getModulePositions());
+  
+    // Find the camera with lowest ambiguity for best vision measurement
+    double minAmbiguity = Double.MAX_VALUE;
+    int bestCameraIndex = -1;
+  
+    for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
+      double ambiguity = aprilTagSystem.getAmbiguity(i);
+      SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
+  
+      if (ambiguity >= 0 && ambiguity < minAmbiguity) {
+        minAmbiguity = ambiguity;
+        bestCameraIndex = i;
+      }
+    }
+  
+    SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
+    SmartDashboard.putNumber("Min Ambiguity", minAmbiguity);
+  
+    // If we have a valid camera and ambiguity is low enough, fuse vision pose measurement
+    if (bestCameraIndex != -1 && minAmbiguity < 0.5) {
+      Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
+      if (visionPose != null) {
+        double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);
+        double timestampSeconds = captureTimeMillis / 1000.0;
+  
+        // Fuse vision measurement into pose estimator
+        poseEstimator.addVisionMeasurement(visionPose, timestampSeconds);
+  
+        SmartDashboard.putNumber("Vision Pose X", visionPose.getX());
+        SmartDashboard.putNumber("Vision Pose Y", visionPose.getY());
+        SmartDashboard.putNumber("Vision Pose Heading", visionPose.getRotation().getDegrees());
+      }
+    } else {
+      System.out.println("No valid AprilTag detected or ambiguity too high.");
+    }
+  
+    // Publish swerve module diagnostic info
+    SwerveModule[] modules = swerveDrive.getModules();
+    for (int i = 0; i < modules.length; i++) {
+      SmartDashboard.putNumber("Module " + i + " Angle", modules[i].getAbsolutePosition());
+      SmartDashboard.putNumber("Module " + i + " Abs Encoder", modules[i].getAbsoluteEncoder().getAbsolutePosition());
+      SmartDashboard.putNumber("Module " + i + " Drive Motor Pos", modules[i].getDriveMotor().getPosition());
+    }
+  
+    // Publish current estimated robot pose
+    Pose2d estimatedPose = poseEstimator.getEstimatedPosition();
+    SmartDashboard.putString("Estimated Pose", estimatedPose.toString());
+    SmartDashboard.putNumber("Pose X", estimatedPose.getX());
+    SmartDashboard.putNumber("Pose Y", estimatedPose.getY());
+    SmartDashboard.putNumber("Pose Heading", estimatedPose.getRotation().getDegrees());
+
+    field.setRobotPose(poseEstimator.getEstimatedPosition());
+
+
+    Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+      if (tagPose != null) {
+          // Offset: 1m forward, 0.5m to the RIGHT
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, 0.495, 0.13);
+          SmartDashboard.putString("offsetPose Pose", offsetPose.toString());
+          publisher2.set(offsetPose);
+      } else {
+        //System.out.println("TAG POSE = null");
+      }
+
+
+      publisher.set(getPose());
+      //arrayPublisher.set(new Pose2d[] {getPose(), getPose()});
+      //Pose3d pose = new Pose3d(getPose());
+      Pose3d pose3d = new Pose3d(getPose().getX(),
+                                  getPose().getY(),
+                                  0.0, // Assuming flat ground, Z is 0
+                                  new Rotation3d(0.0, 0.0, getPose().getRotation().getRadians()));
+      pose3dPublisher.set(pose3d);
+
+      publisherStates.set(swerveDrive.getStates());
+
+        
+        
+
   }
 
   @Override
@@ -188,11 +326,10 @@ public class SwerveSubsystem extends SubsystemBase
           },
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
-              // PPHolonomicController is the built in path following controller for holonomic drive trains
-              new PIDConstants(5.0, 0.0, 0.0),
-              // Translation PID constants
-              new PIDConstants(5.0, 0.0, 0.0)
-              // Rotation PID constants
+              // PID constants for translation
+              new PIDConstants(3, 0, 0),
+              // PID constants for rotation
+              new PIDConstants(3, 0, 0)
           ),
           config,
           // The robot configuration
@@ -534,7 +671,8 @@ public class SwerveSubsystem extends SubsystemBase
    */
   public Pose2d getPose()
   {
-    return swerveDrive.getPose();
+    return //swerveDrive.getPose();
+     poseEstimator.getEstimatedPosition();
   }
 
   /**
