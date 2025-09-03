@@ -10,13 +10,10 @@ import frc.robot.Constants;
 public class AlgaePickupCommand extends SequentialCommandGroup {
     public AlgaePickupCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUNDALG),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
             new WaitCommand(0.3),
             arm.moveToPosition(Constants.ArmConstants.ArmPositions.GROUND_ALGAE),
-            arm.intakePiece(),
-            new WaitCommand(0.7),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUND)
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUNDALG)
         );
         
     }

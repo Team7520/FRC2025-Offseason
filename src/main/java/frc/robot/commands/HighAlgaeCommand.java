@@ -12,8 +12,7 @@ public class HighAlgaeCommand extends SequentialCommandGroup {
         addCommands(
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.HIGHALG),
             new WaitCommand(0.3),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-            arm.intakePiece()
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE)
             // new WaitCommand(0.7),
             // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT)
         );

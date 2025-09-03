@@ -240,7 +240,7 @@ public class SwerveSubsystem extends SubsystemBase
         SmartDashboard.putNumber("Vision Pose Heading", visionPose.getRotation().getDegrees());
       }
     } else {
-      System.out.println("No valid AprilTag detected or ambiguity too high.");
+      //System.out.println("No valid AprilTag detected or ambiguity too high.");
     }
   
     // Publish swerve module diagnostic info

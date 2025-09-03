@@ -35,6 +35,8 @@ public class ArmSubsystem extends SubsystemBase {
     // Piece detection
     private final LaserCan laser;
     private double pieceThresholdMM = 4;
+    private boolean hasGamePiece = false;
+
 
     // Pivot
     private final TalonFX pivot;
@@ -49,6 +51,7 @@ public class ArmSubsystem extends SubsystemBase {
     private double armPosition;
     public static double kG = 0;
     private boolean sideChange = false;
+    private boolean algaePos = false;
 
     public ArmSubsystem() {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -104,11 +107,11 @@ public class ArmSubsystem extends SubsystemBase {
         roller.setControl(rollerDuty.withOutput(speed));
         rollerHolding = false;
     }
-    public Command placeCoralCommand(double speed) {
+    public Command ejectPiece(double speed) {
         return Commands.run(
             () -> eject(speed), 
             this       
-        ).finallyDo(interrupted -> stopOpenLoop());
+        ).withTimeout(3).finallyDo(interrupted -> stopOpenLoop());
     }
 
     public void stopOpenLoop() {
@@ -123,13 +126,27 @@ public class ArmSubsystem extends SubsystemBase {
     //     return mm < pieceThresholdMM;
     // }
 
-    public boolean hasPiece() {
+    public boolean checkIfHeld() {
+        return hasGamePiece;
+    }
+
+    public boolean hasPiece() {  
         double mm = 100;
+
         if(laser.getMeasurement() != null) {
             mm = laser.getMeasurement().distance_mm;
         }
 
-        return mm < pieceThresholdMM;
+        if(mm < pieceThresholdMM) {
+            hasGamePiece = true;
+        } else {
+            hasGamePiece = false;
+        }
+        return hasGamePiece;
+    }
+
+    public Command forceOverWriteLaser() {
+        return Commands.runOnce(() -> hasGamePiece = false);
     }
 
     public Command intakePiece() {
@@ -140,6 +157,14 @@ public class ArmSubsystem extends SubsystemBase {
         .andThen(Commands.run(() -> intake(), this).withTimeout(0.15))
          .finallyDo(interrupted -> {stopOpenLoop();
             captureHoldFromEncoder();});
+    }
+
+    public boolean algaePos() {
+        return algaePos;
+    }
+
+    public void setAlgaePos(boolean pos) {
+        algaePos = pos;
     }
 
     // public void setPieceThresholdMM(double mm) {
@@ -173,7 +198,7 @@ public class ArmSubsystem extends SubsystemBase {
     public void startHoldPivot() {
         holdPivotRot = encoder.getPosition().getValueAsDouble();
         pivot.setControl(pivotPosReq.withPosition(holdPivotRot));
-        pivotHolding = true;
+        pivotHolding = true; //breaks at -0.03 -> -0.48
     }
 
     public void applyHoldPivot() {
@@ -246,12 +271,12 @@ public class ArmSubsystem extends SubsystemBase {
     }
 
     public double getPositionDouble() {
-        return pivot.getPosition().getValueAsDouble();
+        return encoder.getPosition().getValueAsDouble();
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Has Coral?", hasPiece());
+        SmartDashboard.putBoolean("Has Coral?", hasGamePiece);
         if(laser.getMeasurement() != null) {
             SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
         } else {
@@ -259,10 +284,12 @@ public class ArmSubsystem extends SubsystemBase {
         }
         SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
+        SmartDashboard.putNumber("Encoder Relative", encoder.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("Encoder Value", encoder.getAbsolutePosition().getValueAsDouble());
         SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
+        SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.GROUND_ALGAE));
         
     }
 }

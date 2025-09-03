@@ -82,20 +82,20 @@ public final class Constants
 
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
-        GROUND(0),
-        GROUNDALG(79.355712890625),
-        READY(102.308350),
+        GROUND(10),
+        GROUNDALG(78),
+        READY(105.5),
         PICKUP(85.468018),
         L1(125.188965),
         L2(49),
         L3(130),
-        L4(230.3),
+        L4(233),
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
         LOWALG(83.283935546875), 
         HIGHALG(154.9609375),
-        LOLLYPOP(129.29248046875);
+        BARGE(233);
 
         private final double height;
 
@@ -126,23 +126,23 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
-          DEFAULT(0.1708984375),
-          PICKUP(2.2),
+          DEFAULT(-0.1806640625),
+          PICKUP(1.82),
           SCORE(0.927),
           L1(1.5), //Placeholder, change when tuning
           L2(0.75),
           L3(0.81),
-          L4(0.83),
+          L4(0.487),
           OPP_SCORE(-0.45),
           OPPL1(1.01), //Placeholder, change when tuning
           OPPL2_3(1.01), //Placeholder, change when tuning
           OPPL4(1.01), //Placeholder, change when tuning
-          GROUND_ALGAE(1.651611328125),
-          ALGAE(1.142578125), //Placeholder
+          GROUND_ALGAE(1.22),
+          ALGAE(0.77197265625), //Placeholder  
           BARGE(1.01), //Placeholder
           LOLLYPOP(1.682373046875),
           MOVEPOSSIBLE(1.767);
-  
+          
           
           private final double position;
   
@@ -183,8 +183,8 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum PivotPosition {
-          GROUND(0),
-          UP(-12);
+          GROUND(16.754045486450195),
+          UP(3.748604774475098);
 
           private final double angle;
   
