@@ -3,25 +3,25 @@
   "waypoints": [
     {
       "anchor": {
-        "x": 2.0,
-        "y": 7.0
+        "x": 2.563693181818181,
+        "y": 1.6282954545454538
       },
       "prevControl": null,
       "nextControl": {
-        "x": 3.0,
-        "y": 7.0
+        "x": 2.805917555271851,
+        "y": 1.5664298509762886
       },
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "end of pickup4"
     },
     {
       "anchor": {
-        "x": 4.0,
-        "y": 6.0
+        "x": 3.0851136363636362,
+        "y": 3.8511931818181813
       },
       "prevControl": {
-        "x": 3.0,
-        "y": 6.0
+        "x": 2.9310310103093187,
+        "y": 3.6543212834979655
       },
       "nextControl": null,
       "isLocked": false,
@@ -33,8 +33,8 @@
   "pointTowardsZones": [],
   "eventMarkers": [],
   "globalConstraints": {
-    "maxVelocity": 2.0,
-    "maxAcceleration": 2.0,
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
     "maxAngularVelocity": 540.0,
     "maxAngularAcceleration": 720.0,
     "nominalVoltage": 12.0,
@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": 178.9390883097358
   },
   "reversed": false,
-  "folder": null,
+  "folder": "blue bottom 4 coral",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": 0.0
+    "rotation": -126.29262972847961
   },
   "useDefaultConstraints": true
 }

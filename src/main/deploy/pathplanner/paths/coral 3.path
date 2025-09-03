@@ -1,0 +1,54 @@
+{
+  "version": "2025.0",
+  "waypoints": [
+    {
+      "anchor": {
+        "x": 2.389886363636363,
+        "y": 1.3996022727272714
+      },
+      "prevControl": null,
+      "nextControl": {
+        "x": 2.946152637542707,
+        "y": 2.065552405867944
+      },
+      "isLocked": false,
+      "linkedName": "end of pickup 3"
+    },
+    {
+      "anchor": {
+        "x": 3.643125,
+        "y": 2.8906818181818177
+      },
+      "prevControl": {
+        "x": 3.4768339035865297,
+        "y": 2.7040075798584593
+      },
+      "nextControl": null,
+      "isLocked": false,
+      "linkedName": "end of coral 3"
+    }
+  ],
+  "rotationTargets": [],
+  "constraintZones": [],
+  "pointTowardsZones": [],
+  "eventMarkers": [],
+  "globalConstraints": {
+    "maxVelocity": 3.0,
+    "maxAcceleration": 3.0,
+    "maxAngularVelocity": 540.0,
+    "maxAngularAcceleration": 720.0,
+    "nominalVoltage": 12.0,
+    "unlimited": false
+  },
+  "goalEndState": {
+    "velocity": 0,
+    "rotation": -122.82854179141246
+  },
+  "reversed": false,
+  "folder": "blue bottom 4 coral",
+  "idealStartingState": {
+    "velocity": 0,
+    "rotation": -126.29262972847961
+  },
+  "useDefaultConstraints": true
+}
