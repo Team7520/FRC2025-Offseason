@@ -31,6 +31,7 @@ import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.HandIntakeCommand;
 import frc.robot.commands.HighAlgaeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
@@ -173,13 +174,16 @@ public class RobotContainer
 
     operatorController.povDown().whileTrue(arm.forceOverWriteLaser());
 
-    operatorController.leftTrigger().onTrue(new InstantCommand(() -> {
+    operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
       if(!intake.inBasket() && mode.equals("Coral")) {
-        new IntakeCommand(intake).schedule();
+        new IntakeCommand(intake, operatorController::getLeftTriggerAxis).schedule();
       } else if(arm.algaePos()) {
-        arm.intakePiece().schedule();
+        new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis).schedule();
+      } else {
+        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
       }
     }));
+    
     
 
 

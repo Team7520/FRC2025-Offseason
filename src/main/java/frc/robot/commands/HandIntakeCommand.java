@@ -15,16 +15,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
+import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.IntakeSubsystem;
 
-public class IntakeCommand extends Command {
+public class HandIntakeCommand extends Command {
 
-    IntakeSubsystem intake;
+    ArmSubsystem arm;
     DoubleSupplier leftTrigger;
     Boolean cancelled = false;
     
-    public IntakeCommand(IntakeSubsystem intake, DoubleSupplier leftTrigger) {
-        this.intake = intake;
+    public HandIntakeCommand(ArmSubsystem arm, DoubleSupplier leftTrigger) {
+        this.arm = arm;
         this.leftTrigger = leftTrigger;
     }
 
@@ -35,22 +36,23 @@ public class IntakeCommand extends Command {
         } 
         
         if(!cancelled) {
-            intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.GROUND).schedule();
-            new WaitCommand(2);
-            intake.runIntake(0.5);
-            
+            arm.intake();         
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        intake.stopAll();
-        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
+        if(arm.hasPiece()) {
+            arm.intakePiece().schedule();
+        } else {
+            arm.stopOpenLoop();
+        }
+        // arm.captureHoldFromEncoder();
     }
 
     @Override
     public boolean isFinished() {
-        return cancelled || intake.inBasket();
+        return cancelled || arm.hasPiece();
     }
 }
 
