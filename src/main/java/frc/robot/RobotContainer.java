@@ -128,8 +128,10 @@ public class RobotContainer
   /**
    * The container for the robot. Contains subsystems, OI devices, and commands.
    */
+
+  private String mode = "Coral";
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
-  private final ArmSubsystem arm = new ArmSubsystem();
+  private final ArmSubsystem arm = new ArmSubsystem(() -> mode);
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
         22, // right indexer X44
@@ -158,7 +160,7 @@ public class RobotContainer
    * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
    * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
-  private String mode = "Coral";
+  
   private void configureBindings()
   {
     operatorController.povUp().onTrue(new InstantCommand(() -> {
@@ -254,9 +256,12 @@ public class RobotContainer
     operatorController.b().onTrue(new InstantCommand(() -> {
       if(((mode.equals("Coral") || mode.equals("Algae")) && !arm.checkIfHeld())) {
         new LowAlgaeCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld()){
+      } else if(mode.equals("Coral") && arm.checkIfHeld() && !arm.checkScoreSide()){
         new L2Command(arm,elevator).schedule();
-    }}));
+      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
+        
+      }
+    }));
 
     // //EVERYTHING FOR X
     operatorController.x().onTrue(new InstantCommand(() -> {

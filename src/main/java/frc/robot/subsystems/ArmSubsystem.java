@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import java.util.function.Supplier;
+
 import javax.swing.text.Position;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
@@ -52,11 +54,13 @@ public class ArmSubsystem extends SubsystemBase {
     public static double kG = 0;
     private boolean sideChange = false;
     private boolean algaePos = false;
+    private Supplier<String> modeSupplier;
 
-    public ArmSubsystem() {
+    public ArmSubsystem(Supplier<String> modeSupplier) {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
         laser = new LaserCan(ArmConstants.LASER_CAN_ID);
         encoder = new CANcoder(61);
+        this.modeSupplier = modeSupplier;
         
 
 
@@ -290,6 +294,7 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
         SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.GROUND_ALGAE));
+        SmartDashboard.putString("Current Mode", modeSupplier.toString());
         
     }
 }
