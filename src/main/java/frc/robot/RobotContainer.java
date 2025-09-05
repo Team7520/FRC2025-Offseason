@@ -247,35 +247,45 @@ public class RobotContainer
         new AlgaePickupCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld()){
         new L1Command(arm,elevator).schedule();
-      }else if(mode.equals("Algae") && arm.checkIfHeld()) {
+      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
+        //swapped l1
+      } else if(mode.equals("Algae") && arm.checkIfHeld()) {
         new ProcessorAlgae(arm, elevator).schedule();
       }
     }));
 
     // //EVERYTHING FOR B
     operatorController.b().onTrue(new InstantCommand(() -> {
-      if(((mode.equals("Coral") || mode.equals("Algae")) && !arm.checkIfHeld())) {
+      if(!arm.checkIfHeld()) {
         new LowAlgaeCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
+        //swapped low algae
       } else if(mode.equals("Coral") && arm.checkIfHeld() && !arm.checkScoreSide()){
         new L2Command(arm,elevator).schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
-        
+        //swapped l2
       }
     }));
 
     // //EVERYTHING FOR X
     operatorController.x().onTrue(new InstantCommand(() -> {
-      if(((mode.equals("Coral") || mode.equals("Algae")) && !arm.checkIfHeld())) {
+      if(!arm.checkIfHeld()) {
         new HighAlgaeCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
+        //switched high algae
       } else if(mode.equals("Coral") && arm.checkIfHeld()){
         new L3Command(arm,elevator).schedule();
-    }}));
+      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
+        //swtiched l3
+      }}));
 
     // //EVERYTHING FOR Y
     operatorController.y().onTrue(new InstantCommand(() -> {
       if(mode.equals("Coral") && arm.checkIfHeld()){
          new L4Command(arm,elevator).andThen(() -> L4Pos = false).schedule();
-      } else if(mode.equals("Algae") && arm.checkIfHeld()) {
+      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
+        //swapped l4
+      }else if(mode.equals("Algae") && arm.checkIfHeld()) {
          new BargeCommand(arm, elevator).schedule();
       }
     }));
