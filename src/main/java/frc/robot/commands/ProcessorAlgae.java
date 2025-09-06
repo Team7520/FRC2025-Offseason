@@ -10,9 +10,9 @@ import frc.robot.Constants;
 public class ProcessorAlgae extends SequentialCommandGroup {
     public ProcessorAlgae(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUND),
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PROCESSOR),
             new WaitCommand(0.3),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.GROUND_ALGAE)
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PROCESSOR)
         );
         
     }

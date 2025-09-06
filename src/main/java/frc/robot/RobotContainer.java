@@ -228,10 +228,10 @@ public class RobotContainer
         .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
     
-    // driverXbox.y()
-    //     .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
-    //     .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
-    driverXbox.x().onTrue(elevator.moveAndWaitToPosition(ElevatorPosition.L4));
+    driverXbox.y()
+        .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
+        .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+    //driverXbox.x().onTrue(elevator.moveAndWaitToPosition(ElevatorPosition.L4));
 
     //operatorController.leftBumper().onTrue()
     
@@ -282,7 +282,7 @@ public class RobotContainer
     // //EVERYTHING FOR Y
     operatorController.y().onTrue(new InstantCommand(() -> {
       if(mode.equals("Coral") && arm.checkIfHeld()){
-         new L4Command(arm,elevator).andThen(() -> L4Pos = false).schedule();
+         new L4Command(arm,elevator).andThen(() -> L4Pos = true).schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
         //swapped l4
       }else if(mode.equals("Algae") && arm.checkIfHeld()) {

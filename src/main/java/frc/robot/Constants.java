@@ -83,7 +83,8 @@ public final class Constants
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
         GROUND(10),
-        GROUNDALG(78),
+        PROCESSOR(15.889404296875),
+        GROUNDALG(71.675048828125),
         READY(105.5),
         PICKUP(85.468018),
         L1(125.188965),
@@ -93,7 +94,7 @@ public final class Constants
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
-        LOWALG(83.283935546875), 
+        LOWALG(95.2470703125), 
         HIGHALG(154.9609375),
         BARGE(233);
 
@@ -132,13 +133,14 @@ public final class Constants
           L1(1.5), //Placeholder, change when tuning
           L2(0.75),
           L3(0.81),
-          L4(0.487),
+          L4(0.55),
           OPP_SCORE(-0.45),
           OPPL1(1.01), //Placeholder, change when tuning
           OPPL2_3(1.01), //Placeholder, change when tuning
           OPPL4(1.01), //Placeholder, change when tuning
           GROUND_ALGAE(1.22),
-          ALGAE(0.77197265625), //Placeholder  
+          PROCESSOR(0.734375),
+          ALGAE(0.8), //Placeholder  
           BARGE(1.01), //Placeholder
           LOLLYPOP(1.682373046875),
           MOVEPOSSIBLE(1.767);
@@ -158,9 +160,9 @@ public final class Constants
     }
     public static class ApriltagConstants{
       public static final double yOffsetRight = 0.16;
-      public static final double xOffsetRight = 0.65;
+      public static final double xOffsetRight = 0.56;
       public static final double yOffsetLeft = -0.17; //0.17
-      public static final double xOffsetLeft = 0.65; //0.6
+      public static final double xOffsetLeft = 0.56; //0.6
 
     }
 
