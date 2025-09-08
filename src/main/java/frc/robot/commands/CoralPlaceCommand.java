@@ -12,8 +12,9 @@ import frc.robot.Constants;
 public class CoralPlaceCommand extends ParallelCommandGroup {
     public CoralPlaceCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),//elevator move down from that level
-            arm.ejectPiece(0.2)
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3SCORE),//elevator move down from that level
+            arm.ejectPiece(0.2),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE)
         );
         
     }

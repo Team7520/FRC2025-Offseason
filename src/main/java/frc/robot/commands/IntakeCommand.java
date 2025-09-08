@@ -37,7 +37,7 @@ public class IntakeCommand extends Command {
         if(!cancelled) {
             intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.GROUND).schedule();
             new WaitCommand(2);
-            intake.runIntake(0.5);
+            intake.runIntake(0.7520);
             
         }
     }

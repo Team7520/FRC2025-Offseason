@@ -193,7 +193,7 @@ public class AprilTagSystem {
      * Returns the ambiguity of the given camera, used to determine which has the most accurate data
      * @return a double representing the ambiguity of the camera
      */
-    public double getAmbiguity(int cameraIndex) {
+    public double getClosest(int cameraIndex) {
         if (cameraIndex < 0 || cameraIndex >= cameraList.size()) {
             return -1; // Handle invalid camera index
         }
@@ -206,7 +206,11 @@ public class AprilTagSystem {
         }
 
         PhotonTrackedTarget target = result.getBestTarget();
-        return target.getPoseAmbiguity();
+        Transform3d targets = target.getBestCameraToTarget();
+        double xValue = targets.getX();
+        double yValue = targets.getY();
+        double distance = Math.sqrt(Math.pow(xValue, 2) + Math.pow(yValue, 2));
+        return distance;
     }
 
     /**

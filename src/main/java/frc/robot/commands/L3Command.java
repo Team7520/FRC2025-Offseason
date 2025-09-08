@@ -12,13 +12,13 @@ public class L3Command extends SequentialCommandGroup {
         if ((elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) && (arm.getPositionDouble() > Constants.ArmConstants.ArmPositions.MOVEPOSSIBLE.getPosition())) {
             addCommands(
             elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L3),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L2_3),
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3)
             // arm.eject()
         );
         }else{
             addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L3),
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L2_3),
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3)
             // arm.eject()
         );}

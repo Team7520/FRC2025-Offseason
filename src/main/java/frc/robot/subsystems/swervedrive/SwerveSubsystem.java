@@ -209,24 +209,24 @@ public class SwerveSubsystem extends SubsystemBase
         swerveDrive.getModulePositions());
   
     // Find the camera with lowest ambiguity for best vision measurement
-    double minAmbiguity = Double.MAX_VALUE;
+    double shortestDistance = Double.MAX_VALUE;
     int bestCameraIndex = -1;
   
     for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
-      double ambiguity = aprilTagSystem.getAmbiguity(i);
-      SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
+      double distance = aprilTagSystem.getClosest(i);
+      // SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
   
-      if (ambiguity >= 0 && ambiguity < minAmbiguity) {
-        minAmbiguity = ambiguity;
-        bestCameraIndex = i;
+      if (distance <= 3 && distance < shortestDistance) {
+        shortestDistance = distance;
+        bestCameraIndex = i; 
       }
     }
   
     SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
-    SmartDashboard.putNumber("Min Ambiguity", minAmbiguity);
+    // SmartDashboard.putNumber("Min Ambiguity", minAmbiguity);
   
     // If we have a valid camera and ambiguity is low enough, fuse vision pose measurement
-    if (bestCameraIndex != -1 && minAmbiguity < 0.5) {
+    if (bestCameraIndex != -1 && shortestDistance <= 3) {
       Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
       if (visionPose != null) {
         double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);

@@ -36,7 +36,7 @@ public class ArmSubsystem extends SubsystemBase {
     private final MotionMagicVoltage motionMagic;
     // Piece detection
     private final LaserCan laser;
-    private double pieceThresholdMM = 4;
+    private double pieceThresholdMM = 3;
     private boolean hasGamePiece = false;
 
 

@@ -36,7 +36,9 @@ import frc.robot.commands.HighAlgaeCommand;
 import frc.robot.commands.IntakeCommand;
 import frc.robot.commands.L1Command;
 import frc.robot.commands.L2Command;
+import frc.robot.commands.L2PlaceCommand;
 import frc.robot.commands.L3Command;
+import frc.robot.commands.L3PlaceCommand;
 import frc.robot.commands.L4Command;
 import frc.robot.commands.L4PlaceCommand;
 import frc.robot.commands.LowAlgaeCommand;
@@ -76,9 +78,9 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -0.3,
-                                                                () -> driverXbox.getLeftX() * -0.3)
-                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.3)
+                                                                () -> driverXbox.getLeftY() * -1,
+                                                                () -> driverXbox.getLeftX() * -1)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(false);
@@ -142,7 +144,7 @@ public class RobotContainer
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
   private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
   private boolean algaePos = false;
-  private boolean L4Pos = false;
+  private String coralLevel = "none";
   
 
   public RobotContainer()
@@ -261,7 +263,7 @@ public class RobotContainer
       } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
         //swapped low algae
       } else if(mode.equals("Coral") && arm.checkIfHeld() && !arm.checkScoreSide()){
-        new L2Command(arm,elevator).schedule();
+        new L2Command(arm,elevator).andThen(() -> coralLevel = "L2").schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
         //swapped l2
       }
@@ -274,7 +276,7 @@ public class RobotContainer
       } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
         //switched high algae
       } else if(mode.equals("Coral") && arm.checkIfHeld()){
-        new L3Command(arm,elevator).schedule();
+        new L3Command(arm,elevator).andThen(() -> coralLevel = "L3").schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
         //swtiched l3
       }}));
@@ -282,7 +284,7 @@ public class RobotContainer
     // //EVERYTHING FOR Y
     operatorController.y().onTrue(new InstantCommand(() -> {
       if(mode.equals("Coral") && arm.checkIfHeld()){
-         new L4Command(arm,elevator).andThen(() -> L4Pos = true).schedule();
+         new L4Command(arm,elevator).andThen(() -> coralLevel = "L4").schedule();
       } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
         //swapped l4
       }else if(mode.equals("Algae") && arm.checkIfHeld()) {
@@ -311,16 +313,15 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      if(mode.equals("Coral")) {
-        if(L4Pos) {
-          new L4PlaceCommand(arm, elevator).andThen(() -> L4Pos = false).andThen(arm.forceOverWriteLaser()).schedule();
-        } else {
-          new CoralPlaceCommand(arm, elevator).andThen(() -> L4Pos = false).andThen(arm.forceOverWriteLaser()).schedule();
-        }
+      if(coralLevel.equals("L4")) {
+        new L4PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
+      } else if(coralLevel.equals("L3")) {
+        new L3PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
+      } else if(coralLevel.equals("L2")) {
+        new L2PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
       } else {
         arm.ejectPiece(0.5).andThen(arm.forceOverWriteLaser()).schedule();
-      }
-    
+      }    
     }));
 
 

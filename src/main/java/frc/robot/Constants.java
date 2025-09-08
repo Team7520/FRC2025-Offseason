@@ -83,19 +83,21 @@ public final class Constants
     public static final int CURRENT_LIMIT = 120;
     public static enum ElevatorPosition {
         GROUND(10),
-        PROCESSOR(15.889404296875),
-        GROUNDALG(71.675048828125),
-        READY(105.5),
-        PICKUP(85.468018),
-        L1(125.188965),
-        L2(49),
-        L3(130),
-        L4(233),
+        PROCESSOR(124.0556640625),
+        GROUNDALG(85.0224609375),
+        READY(107.015380859375),
+        PICKUP(76.301513671875),
+        L1(95),
+        L2SCORE(14.3173828125),
+        L2(62.855712890625),
+        L3SCORE(100.355712890625),
+        L3(124.666259765625),
+        L4(218.253662109375),
         LOW(102), // 11.41455078125, 7.984863
         MID(29), // 27.5 
         HIGH(55), // 52
         LOWALG(95.2470703125), 
-        HIGHALG(154.9609375),
+        HIGHALG(173.50126953125),
         BARGE(233);
 
         private final double height;
@@ -130,16 +132,15 @@ public final class Constants
           DEFAULT(-0.1806640625),
           PICKUP(1.82),
           SCORE(0.927),
-          L1(1.5), //Placeholder, change when tuning
-          L2(0.75),
-          L3(0.81),
-          L4(0.55),
+          L1(1), //Placeholder, change when tuning
+          L2_3(0.46630859375),
+          L4(0.402587890625),
           OPP_SCORE(-0.45),
           OPPL1(1.01), //Placeholder, change when tuning
           OPPL2_3(1.01), //Placeholder, change when tuning
           OPPL4(1.01), //Placeholder, change when tuning
-          GROUND_ALGAE(1.22),
-          PROCESSOR(0.734375),
+          GROUND_ALGAE(1.3),
+          PROCESSOR(1.1),
           ALGAE(0.8), //Placeholder  
           BARGE(1.01), //Placeholder
           LOLLYPOP(1.682373046875),
@@ -160,9 +161,9 @@ public final class Constants
     }
     public static class ApriltagConstants{
       public static final double yOffsetRight = 0.16;
-      public static final double xOffsetRight = 0.56;
+      public static final double xOffsetRight = 0.53;
       public static final double yOffsetLeft = -0.17; //0.17
-      public static final double xOffsetLeft = 0.56; //0.6
+      public static final double xOffsetLeft = 0.53; //0.6
 
     }
 
