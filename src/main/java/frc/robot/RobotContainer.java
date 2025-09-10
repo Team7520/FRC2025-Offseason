@@ -380,11 +380,10 @@ public class RobotContainer
         Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
 
         System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
+        System.out.println("Current POSE: " + robotPose);
         return new DriveToPoseCommand(
-            drivebase.getPose(),
-            optimalAlign,
-            driverXbox::getLeftX,
-            driverXbox::getLeftY
+            drivebase, 
+            optimalAlign
         );
     }, Set.of(drivebase))
 );
@@ -415,10 +414,8 @@ driverXbox.rightBumper().whileTrue(
         System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
 
         return new DriveToPoseCommand(
-            drivebase.getPose(),
-            optimalAlign,
-            driverXbox::getLeftX,
-            driverXbox::getLeftY
+            drivebase,
+            optimalAlign
         );
     }, Set.of(drivebase))
 );
