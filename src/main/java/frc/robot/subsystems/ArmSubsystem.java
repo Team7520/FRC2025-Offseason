@@ -36,8 +36,8 @@ public class ArmSubsystem extends SubsystemBase {
     private final MotionMagicVoltage motionMagic;
     // Piece detection
     private final LaserCan laser;
-    private double pieceThresholdMM = 3;
-    private boolean hasGamePiece = false;
+    private double coralThresholdMM = 3;
+    private double algaeThresholdMM = 20;
 
 
     // Pivot
@@ -55,6 +55,9 @@ public class ArmSubsystem extends SubsystemBase {
     private boolean sideChange = false;
     private boolean algaePos = false;
     private Supplier<String> modeSupplier;
+    private int trust = 0;
+    private Boolean canTrust = false;
+    private int trustStrictness = 12;
 
     public ArmSubsystem(Supplier<String> modeSupplier) {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
@@ -115,7 +118,7 @@ public class ArmSubsystem extends SubsystemBase {
         return Commands.run(
             () -> eject(speed), 
             this       
-        ).withTimeout(3).finallyDo(interrupted -> stopOpenLoop());
+        ).withTimeout(1).finallyDo(interrupted -> stopOpenLoop());
     }
 
     public void stopOpenLoop() {
@@ -129,28 +132,33 @@ public class ArmSubsystem extends SubsystemBase {
             
     //     return mm < pieceThresholdMM;
     // }
+    
+    public boolean hasCoral() {  
+        LaserCan.Measurement measurement = laser.getMeasurement();
 
-    public boolean checkIfHeld() {
-        return hasGamePiece;
+        if(measurement != null && canTrust) {
+            return measurement.distance_mm <= coralThresholdMM;
+        }
+
+        return false;
+    }
+
+    public boolean hasAlgae() {  
+        LaserCan.Measurement measurement = laser.getMeasurement();
+
+        if(measurement != null && canTrust) {
+            return measurement.distance_mm <= algaeThresholdMM;
+        }
+
+        return false;
     }
 
     public boolean hasPiece() {  
-        double mm = 100;
-
-        if(laser.getMeasurement() != null) {
-            mm = laser.getMeasurement().distance_mm;
+        if(!hasAlgae() && !hasCoral()) {
+            return false;
         }
 
-        if(mm < pieceThresholdMM) {
-            hasGamePiece = true;
-        } else {
-            hasGamePiece = false;
-        }
-        return hasGamePiece;
-    }
-
-    public Command forceOverWriteLaser() {
-        return Commands.runOnce(() -> hasGamePiece = false);
+        return true;
     }
 
     public Command intakePiece() {
@@ -280,11 +288,31 @@ public class ArmSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        SmartDashboard.putBoolean("Has Coral?", hasGamePiece);
-        if(laser.getMeasurement() != null) {
-            SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+        SmartDashboard.putBoolean("Has Gamepiece?", hasPiece());
+        SmartDashboard.putBoolean("Has Algae?", hasAlgae());
+
+        LaserCan.Measurement measurement = laser.getMeasurement();
+        if(measurement != null && measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT) {
+            trust++;
         } else {
-            SmartDashboard.putNumber("LaserMM", -1);
+            trust = 0;
+        }
+
+        canTrust = trust >= trustStrictness;
+        
+        SmartDashboard.putBoolean("Can Trust Laser?", canTrust);
+        SmartDashboard.putNumber("Valid Streak", trust);
+        if(measurement != null && canTrust) {
+            SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+            SmartDashboard.putNumber("LaserStatus", measurement.status);
+            SmartDashboard.putBoolean("Yippee?", true);
+        } else if(measurement != null){
+            SmartDashboard.putNumber("LaserMM", laser.getMeasurement().distance_mm);
+            SmartDashboard.putNumber("LaserStatus", measurement.status);
+            SmartDashboard.putBoolean("Yippee?", false);
+            if(measurement.status == LaserCan.LASERCAN_STATUS_VALID_MEASUREMENT && measurement.distance_mm == 0.0) {
+                System.out.println("Straight lie");
+            }
         }
         SmartDashboard.putNumber("PivotPos", pivot.getPosition().getValueAsDouble());
         SmartDashboard.putNumber("RollerPos", roller.getPosition().getValueAsDouble());
@@ -295,6 +323,7 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
         SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.GROUND_ALGAE));
         SmartDashboard.putString("Current Mode", modeSupplier.toString());
+        SmartDashboard.putBoolean("Scoring Side Flipped?", checkScoreSide());
         
     }
 }

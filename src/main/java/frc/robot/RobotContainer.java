@@ -78,9 +78,9 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -1,
-                                                                () -> driverXbox.getLeftX() * -1)
-                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1)
+                                                                () -> driverXbox.getLeftY() * -0.3,
+                                                                () -> driverXbox.getLeftX() * -0.3)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.3)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(false);
@@ -176,7 +176,7 @@ public class RobotContainer
     
     operatorController.povRight().onTrue(elevator.resetEncoderCommand());
 
-    operatorController.povDown().whileTrue(arm.forceOverWriteLaser());
+    operatorController.povDown().onTrue(new InstantCommand(() -> intake.manaulSetPos()));
 
     operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
       if(!intake.inBasket() && mode.equals("Coral")) {
@@ -245,50 +245,52 @@ public class RobotContainer
     
     // //EVERYTHING FOR A
     operatorController.a().onTrue(new InstantCommand(() -> {
-      if(!arm.checkIfHeld()) {
+      if(!arm.hasPiece()) {
         new AlgaePickupCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld()){
-        new L1Command(arm,elevator).schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
-        //swapped l1
-      } else if(mode.equals("Algae") && arm.checkIfHeld()) {
+      } else if(mode.equals("Coral") && arm.hasCoral() && !arm.checkScoreSide()){
+        new L1Command(arm,elevator, false).schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && arm.checkScoreSide()) {
+        new L1Command(arm,elevator, true).schedule();
+      } else if(mode.equals("Algae") && arm.hasAlgae()) {
         new ProcessorAlgae(arm, elevator).schedule();
       }
     }));
 
     // //EVERYTHING FOR B
     operatorController.b().onTrue(new InstantCommand(() -> {
-      if(!arm.checkIfHeld()) {
-        new LowAlgaeCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
-      } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
-        //swapped low algae
-      } else if(mode.equals("Coral") && arm.checkIfHeld() && !arm.checkScoreSide()){
-        new L2Command(arm,elevator).andThen(() -> coralLevel = "L2").schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
-        //swapped l2
+      if(!arm.hasPiece() && !arm.checkScoreSide()) {
+        new LowAlgaeCommand(arm, elevator, false).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(!arm.hasPiece() && arm.checkScoreSide()) {
+        new LowAlgaeCommand(arm, elevator, true).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && !arm.checkScoreSide()){
+        new L2Command(arm,elevator, false).andThen(() -> coralLevel = "L2").schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && arm.checkScoreSide()) {
+        new L2Command(arm,elevator, true).andThen(() -> coralLevel = "L2").schedule();
       }
     }));
 
     // //EVERYTHING FOR X
     operatorController.x().onTrue(new InstantCommand(() -> {
-      if(!arm.checkIfHeld()) {
-        new HighAlgaeCommand(arm, elevator).andThen(() -> arm.setAlgaePos(true)).schedule();
-      } else if(!arm.checkIfHeld() && arm.checkScoreSide()) {
-        //switched high algae
-      } else if(mode.equals("Coral") && arm.checkIfHeld()){
-        new L3Command(arm,elevator).andThen(() -> coralLevel = "L3").schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
-        //swtiched l3
+      if(!arm.hasPiece() && !arm.checkScoreSide()) {
+        new HighAlgaeCommand(arm, elevator, false).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(!arm.hasPiece() && arm.checkScoreSide()) {
+        new HighAlgaeCommand(arm, elevator, true).andThen(() -> arm.setAlgaePos(true)).schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && !arm.checkScoreSide()){
+        new L3Command(arm,elevator, false).andThen(() -> coralLevel = "L3").schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && arm.checkScoreSide()) {
+        new L3Command(arm,elevator, true).andThen(() -> coralLevel = "L3").schedule();
       }}));
 
     // //EVERYTHING FOR Y
     operatorController.y().onTrue(new InstantCommand(() -> {
-      if(mode.equals("Coral") && arm.checkIfHeld()){
-         new L4Command(arm,elevator).andThen(() -> coralLevel = "L4").schedule();
-      } else if(mode.equals("Coral") && arm.checkIfHeld() && arm.checkScoreSide()) {
-        //swapped l4
-      }else if(mode.equals("Algae") && arm.checkIfHeld()) {
-         new BargeCommand(arm, elevator).schedule();
+      if(mode.equals("Coral") && arm.hasCoral() && !arm.checkScoreSide()){
+         new L4Command(arm,elevator, false).andThen(() -> coralLevel = "L4").schedule();
+      } else if(mode.equals("Coral") && arm.hasCoral() && arm.checkScoreSide()) {
+         new L4Command(arm,elevator, true).andThen(() -> coralLevel = "L4").schedule();
+      }else if(mode.equals("Algae") && arm.hasAlgae() && !arm.checkScoreSide()) {
+         new BargeCommand(arm, elevator, false).schedule();
+      }else if(mode.equals("Algae") && arm.hasAlgae() && arm.checkScoreSide()) {
+        new BargeCommand(arm, elevator, true).schedule();
       }
     }));
 
@@ -313,15 +315,27 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      if(coralLevel.equals("L4")) {
-        new L4PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
-      } else if(coralLevel.equals("L3")) {
-        new L3PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
-      } else if(coralLevel.equals("L2")) {
-        new L2PlaceCommand(arm, elevator).andThen(() -> coralLevel = "none").andThen(arm.forceOverWriteLaser()).schedule();
-      } else {
-        arm.ejectPiece(0.5).andThen(arm.forceOverWriteLaser()).schedule();
-      }    
+      if(!arm.checkScoreSide()) {
+        if(coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
+        } else if(coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
+        } else if(coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
+        } else {
+          arm.ejectPiece(0.5).schedule();
+        }  
+      } else if(arm.checkScoreSide()) {
+        if(coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
+        } else if(coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
+        } else if(coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
+        } else {
+          arm.ejectPiece(0.5).schedule();
+        }  
+      }
     }));
 
 

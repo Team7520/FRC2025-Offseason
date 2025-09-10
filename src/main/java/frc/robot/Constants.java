@@ -134,17 +134,18 @@ public final class Constants
           SCORE(0.927),
           L1(1), //Placeholder, change when tuning
           L2_3(0.46630859375),
+          FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
           L4(0.402587890625),
-          OPP_SCORE(-0.45),
-          OPPL1(1.01), //Placeholder, change when tuning
-          OPPL2_3(1.01), //Placeholder, change when tuning
-          OPPL4(1.01), //Placeholder, change when tuning
+          FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
           GROUND_ALGAE(1.3),
           PROCESSOR(1.1),
-          ALGAE(0.8), //Placeholder  
-          BARGE(1.01), //Placeholder
+          ALGAE(0.8),
+          FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
+          BARGE(0.06), //Placeholder
+          FLIPBARGE(2*DEFAULT.getPosition()-BARGE.getPosition()),
           LOLLYPOP(1.682373046875),
-          MOVEPOSSIBLE(1.767);
+          MOVEPOSSIBLE(1.767),
+          FLIPL1(2*DEFAULT.getPosition()-L1.getPosition());
           
           
           private final double position;
@@ -179,8 +180,8 @@ public final class Constants
       public static final double kA = 0.002;
   
       // Motion Magic Constants
-      public static final double MAX_VELOCITY = 800; // 10 inches per second
-      public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
+      public static final double MAX_VELOCITY = 1600; // 10 inches per second
+      public static final double MAX_ACCELERATION = 3000; // 20 inches per second squared
       public static final double MAX_JERK = 4000; // 60 inches per second cubed
       public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
   

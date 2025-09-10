@@ -9,12 +9,22 @@ import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 
 public class L2PlaceCommand extends SequentialCommandGroup {
-    public L2PlaceCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-            arm.ejectPiece(1),
-            new WaitCommand(0.5),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
-        );
+    public L2PlaceCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
+        if(flip) {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE),
+                arm.ejectPiece(1),
+                new WaitCommand(0.5),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+            );
+        } else {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
+                arm.ejectPiece(1),
+                new WaitCommand(0.5),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+            );
+        }
+        
     }
 }

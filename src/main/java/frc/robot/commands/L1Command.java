@@ -8,13 +8,22 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
 public class L1Command extends SequentialCommandGroup {
-    public L1Command(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOW),   
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L1)
-            //arm.eject();
-
-        );
+    public L1Command(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
+        if(flip) {
+            addCommands(
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOW),   
+                new WaitCommand(1),
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL1)
+                //arm.eject();
+            );
+        } else {
+            addCommands(
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOW),   
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.L1)
+                //arm.eject();
+            );
+        }
+        
         
     }
 }

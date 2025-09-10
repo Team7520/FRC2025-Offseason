@@ -9,20 +9,35 @@ import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class LowAlgaeCommand extends SequentialCommandGroup {
-    public LowAlgaeCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
+    public LowAlgaeCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
         if(elevator.getPositionDouble() <= Constants.ElevatorConstants.ElevatorPosition.LOWALG.getHeight()) {
-            addCommands(
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG),
-                arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE)
-                
-            );
+            if(flip) {
+                addCommands(
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG),
+                    new WaitCommand(0.7),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE)
+                );
+            } else {
+                addCommands(
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG),
+                    new WaitCommand(0.7),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE)
+                );
+            }
+            
         } else {
-            addCommands(  
-                arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG)
-                // new WaitCommand(0.7),
-                // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT)
-        );
+            if(flip) {
+                addCommands(  
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG)
+                );
+            } else {
+                addCommands(
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOWALG)
+                );
+            }
+            
         }
         
     }

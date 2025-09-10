@@ -9,10 +9,22 @@ import frc.robot.Constants;
 import frc.robot.Constants.ElevatorConstants;
 
 public class BargeCommand extends SequentialCommandGroup {
-    public BargeCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.BARGE)          
-        );
+    public BargeCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
+        if(flip) {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.BARGE),
+                new WaitCommand(0.3),
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPBARGE)        
+            );
+        } else {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.BARGE),
+                new WaitCommand(0.3),
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.BARGE)        
+            );
+        }
+        
     }
 }

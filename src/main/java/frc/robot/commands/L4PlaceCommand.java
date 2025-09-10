@@ -9,10 +9,18 @@ import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 
 public class L4PlaceCommand extends SequentialCommandGroup {
-    public L4PlaceCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-            arm.ejectPiece(1)
-        );
+    public L4PlaceCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
+        if(flip) {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE),
+                arm.ejectPiece(1)
+            );
+        } else {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
+                arm.ejectPiece(1)
+            );
+        }
+        
     }
 }

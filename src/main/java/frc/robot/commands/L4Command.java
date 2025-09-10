@@ -8,20 +8,38 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
 public class L4Command extends SequentialCommandGroup {
-    public L4Command(ArmSubsystem arm, ElevatorSubsystem elevator) {
+    public L4Command(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
         if ((elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) && (arm.getPositionDouble() > Constants.ArmConstants.ArmPositions.MOVEPOSSIBLE.getPosition())) {
-            addCommands(
-            elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
-            // arm.eject()
-        );
+            if(flip) {
+                addCommands(
+                    elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    // arm.eject()
+                );
+            } else {
+                addCommands(
+                    elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    // arm.eject()
+                );
+            }    
         }else{
-            addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
-            // arm.eject()
-        );}
+            if(flip) {
+                addCommands(
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    // arm.eject()
+                );
+            } else {
+                addCommands(
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    // arm.eject()
+                );
+            }    
+        }
     }
 }
 

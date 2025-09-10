@@ -69,7 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.5) // tune
+            .p(0.7) // tune
             .i(0)
             .d(0)
             .outputRange(-1, 1);
@@ -120,6 +120,10 @@ public class IntakeSubsystem extends SubsystemBase {
 
     public void manual(double addRotations) {
         pivotController.setReference(pivotEncoder.getPosition() + addRotations, ControlType.kPosition);
+    }
+
+    public void manaulSetPos() {
+        pivotEncoder.setPosition(0);
     }
 
     public void setPivotPosition(Constants.IntakeConstants.PivotPosition position) {
