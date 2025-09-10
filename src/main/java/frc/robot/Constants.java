@@ -187,8 +187,8 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum PivotPosition {
-          GROUND(16.754045486450195),
-          UP(3.748604774475098);
+          GROUND(0), //16.754045486450195
+          UP(-13.0054);
 
           private final double angle;
   
