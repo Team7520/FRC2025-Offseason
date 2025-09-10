@@ -356,55 +356,72 @@ public class RobotContainer
   //         ).schedule();
   //     }
   // }));
+  // LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
   driverXbox.leftBumper().whileTrue(
     Commands.defer(() -> {
-        Pose2d tagPose = aprilTagSystem.getClosestTagPose();
+        Pose2d robotPose = drivebase.getPose();
+        Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
         if (tagPose == null) {
-            //System.out.println("No valid AprilTag found.");
-            return new InstantCommand(); // ends immediately
-        }
-
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(
-            tagPose,
-            ApriltagConstants.xOffsetLeft,
-            ApriltagConstants.yOffsetLeft
-        );
-
-        System.out.println("Driving to offset pose: " + offsetPose);
-
-        return new DriveToPoseCommand(
-            drivebase.getPose(),
-            offsetPose,
-            driverXbox::getLeftX,
-            driverXbox::getLeftY
-        );
-    }, Set.of(drivebase)) // requirements
-  );
-
-  driverXbox.rightBumper().whileTrue(
-    Commands.defer(() -> {
-        Pose2d tagPose = aprilTagSystem.getClosestTagPose();
-        if (tagPose == null) {
-            System.out.println("No tag detected (right bumper).");
+            System.out.println("No AprilTag found on field (left bumper)!");
             return new InstantCommand();
         }
 
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(
-            tagPose,
-            ApriltagConstants.xOffsetRight,
-            ApriltagConstants.yOffsetRight
-        );
+        double xOffset = ApriltagConstants.xOffsetLeft;
+        double yOffset = ApriltagConstants.yOffsetLeft;
 
+        // Find translation for left side
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+        Rotation2d facingTag = offsetPose.getRotation();
+        Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+
+        Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+        Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+
+        Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+
+        System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
         return new DriveToPoseCommand(
             drivebase.getPose(),
-            offsetPose,
+            optimalAlign,
             driverXbox::getLeftX,
             driverXbox::getLeftY
         );
     }, Set.of(drivebase))
+);
 
+// RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
+driverXbox.rightBumper().whileTrue(
+    Commands.defer(() -> {
+        Pose2d robotPose = drivebase.getPose();
+        Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+        if (tagPose == null) {
+            System.out.println("No AprilTag found on field (right bumper)!");
+            return new InstantCommand();
+        }
 
-  );
+        double xOffset = ApriltagConstants.xOffsetRight;
+        double yOffset = ApriltagConstants.yOffsetRight;
+
+        // Find translation for right side
+        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+        Rotation2d facingTag = offsetPose.getRotation();
+        Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+
+        Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+        Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+
+        Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+
+        System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
+
+        return new DriveToPoseCommand(
+            drivebase.getPose(),
+            optimalAlign,
+            driverXbox::getLeftX,
+            driverXbox::getLeftY
+        );
+    }, Set.of(drivebase))
+);
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);

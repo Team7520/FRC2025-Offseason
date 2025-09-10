@@ -9,10 +9,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 //import java.util.List;
 
 import org.photonvision.PhotonCamera;
+import org.photonvision.PhotonPoseEstimator;
+import org.photonvision.PhotonPoseEstimator.PoseStrategy;
 import org.photonvision.PhotonUtils;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
@@ -70,6 +73,7 @@ public class AprilTagSystem {
     
     private Pose2d robotPose;
     private AprilTag closestTag;
+    private List<PhotonPoseEstimator> estimators = null;
 
     public enum PipeLineType {
         APRIL_TAG,
@@ -114,38 +118,39 @@ public class AprilTagSystem {
             )
         ));
 
-        // cameraList.add(new CameraInfo(
-        //     "BackRightCam",
-        //     new PhotonCamera("BackRightCam"),
-        //     false,
-        //     new Transform3d(
-        //         -0.29321, // X backward
-        //         -0.16, // Y right
-        //         0.2032,
-        //         new Rotation3d(
-        //             0.0,
-        //             Math.toRadians(20),
-        //             Math.PI // facing backward
-        //         )
-        //     )
-        // ));
+        cameraList.add(new CameraInfo(
+            "BackRightCam",
+            new PhotonCamera("BackRightCam"),
+            false,
+            new Transform3d(
+                -0.282121, // X backward
+                -0.189152, // Y right
+                0.206491,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(10),
+                    Math.PI // facing backward
+                )
+            )
+        ));
 
-        // cameraList.add(new CameraInfo(
-        //     "BackLeftCam",
-        //     new PhotonCamera("BackLeftCam"),
-        //     false,
-        //     new Transform3d(
-        //         -0.28321, // X backward
-        //         0.19304,  // Y left
-        //         0.2032,
-        //         new Rotation3d(
-        //             0.0,
-        //             Math.toRadians(10),
-        //             Math.PI
-        //         )
-        //     )
-        // ));
+        cameraList.add(new CameraInfo(
+            "BackLeftCam",
+            new PhotonCamera("BackLeftCam"),
+            false,
+            new Transform3d(
+                -0.282121, // X backward
+                0.189152,  // Y left
+                0.206491,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(10),
+                    Math.PI
+                )
+            )
+        ));
         periodic(robotPose);
+        
     }
 
     public void periodic(Pose2d robotPose) {
@@ -161,6 +166,30 @@ public class AprilTagSystem {
             }
             SmartDashboard.putBoolean(cameraList.get(i).name + " OPEN?", cameraList.get(i).isOpen);
         }
+    }
+
+
+    public List<PhotonCamera> getCameras() {
+        return cameraList.stream()
+            .map(info -> info.camera)
+            .collect(Collectors.toList());
+    }
+    public List<PhotonPoseEstimator> getEstimators() {
+        // Ensure layout is loaded first
+        if (!aprilTagLayoutLoaded) {
+            initiateAprilTagLayout();
+        }
+        // Only build estimators once
+        if (estimators == null && aprilTagLayoutLoaded) {
+            estimators = cameraList.stream()
+                .map(info -> new PhotonPoseEstimator(
+                    aprilTagFieldLayout,
+                    PoseStrategy.MULTI_TAG_PNP_ON_COPROCESSOR,
+                    info.robotToCamera
+                ))
+                .collect(Collectors.toList());
+        }
+        return estimators == null ? List.of() : estimators;
     }
 
     public int getCameraCount() {
@@ -369,5 +398,25 @@ public class AprilTagSystem {
         }
 
         return closestPose;
+    }
+
+    public Pose2d getAlignPose(Pose2d robotPose, Pose2d tagPose, boolean faceFront) {
+        Translation2d toTag = tagPose.getTranslation().minus(robotPose.getTranslation());
+        double angleToTag = Math.atan2(toTag.getY(), toTag.getX());
+        Rotation2d desiredRotation = Rotation2d.fromRadians(angleToTag);
+    
+        if (!faceFront) {
+            desiredRotation = desiredRotation.rotateBy(Rotation2d.fromDegrees(180));
+        }
+    
+        return new Pose2d(tagPose.getTranslation(), desiredRotation);
+    }
+    public Pose2d getOptimalAlignPose(Pose2d robotPose, Pose2d poseA, Pose2d poseB) {
+        
+        double costA = robotPose.getTranslation().getDistance(poseA.getTranslation())
+                      + Math.abs(robotPose.getRotation().minus(poseA.getRotation()).getRadians());
+        double costB = robotPose.getTranslation().getDistance(poseB.getTranslation())
+                      + Math.abs(robotPose.getRotation().minus(poseB.getRotation()).getRadians());
+        return (costA <= costB) ? poseA : poseB;
     }
 }

@@ -54,6 +54,7 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
+import frc.robot.AprilTagMultiCameraVision;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
 import frc.robot.Constants.ApriltagConstants;
@@ -92,7 +93,9 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * PhotonVision class to keep an accurate odometry.
    */
-  private       Vision      vision;
+  // private       Vision      vision;
+
+  private AprilTagMultiCameraVision vision;
 
   private final SwerveDrivePoseEstimator poseEstimator;
 
@@ -152,12 +155,12 @@ public class SwerveSubsystem extends SubsystemBase
     // swerveDrive.setModuleEncoderAutoSynchronize(false,
     //                                             1); // Enable if you want to resynchronize your absolute encoders and motor encoders periodically when they are not moving.
     // swerveDrive.pushOffsetsToEncoders(); // Set the absolute encoder to be used over the internal encoder and push the offsets onto it. Throws warning if not possible
-    if (visionDriveTest)
-    {
-      setupPhotonVision();
-      // Stop the odometry thread if we are using vision that way we can synchronize updates better.
-      swerveDrive.stopOdometryThread();
-    }
+    // if (visionDriveTest)
+    // {
+    //   setupPhotonVision();
+    //   // Stop the odometry thread if we are using vision that way we can synchronize updates better.
+    //   swerveDrive.stopOdometryThread();
+    // }
     setupPathPlanner();
     RobotModeTriggers.autonomous().onTrue(Commands.runOnce(this::zeroGyroWithAlliance));
 
@@ -165,10 +168,20 @@ public class SwerveSubsystem extends SubsystemBase
         Constants.kinematics,
         Rotation2d.fromRadians(swerveDrive.getGyro().getRotation3d().getZ()),
         swerveDrive.getModulePositions(),
-        new Pose2d(),
+        new Pose2d(), 
         stateStdDevs,
         visionMeasurementStdDevs
     );
+    if (!aprilTagSystem.initiateAprilTagLayout()) {
+      throw new RuntimeException("AprilTag field layout failed to load.");
+    }
+    vision = new AprilTagMultiCameraVision(
+      aprilTagSystem.getCameras(),
+      aprilTagSystem.getEstimators(),
+    (pose, timestamp, stdDevs) -> {
+        poseEstimator.addVisionMeasurement(pose, timestamp, stdDevs);
+    }
+);
   }
 
   /**
@@ -189,13 +202,15 @@ public class SwerveSubsystem extends SubsystemBase
   /**
    * Setup the photon vision class.
    */
-  public void setupPhotonVision()
-  {
-    vision = new Vision(swerveDrive::getPose, swerveDrive.field);
-  }
+  // public void setupPhotonVision()
+  // {
+  //   vision = new Vision(swerveDrive::getPose, swerveDrive.field);
+  // }
 
   @Override
   public void periodic() {
+    vision.periodic(poseEstimator.getEstimatedPosition());
+    
     SmartDashboard.putString("SwervePose",swerveDrive.getPose().toString());
     
     // Ensure AprilTag layout is loaded
@@ -209,39 +224,39 @@ public class SwerveSubsystem extends SubsystemBase
         swerveDrive.getModulePositions());
   
     // Find the camera with lowest ambiguity for best vision measurement
-    double shortestDistance = Double.MAX_VALUE;
-    int bestCameraIndex = -1;
+    // double minAmbiguity = Double.MAX_VALUE;
+    // int bestCameraIndex = -1;
   
-    for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
-      double distance = aprilTagSystem.getClosest(i);
-      // SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
+    // for (int i = 0; i < aprilTagSystem.getCameraCount(); i++) {
+    //   double ambiguity = aprilTagSystem.getAmbiguity(i);
+    //   SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
   
-      if (distance <= 3 && distance < shortestDistance) {
-        shortestDistance = distance;
-        bestCameraIndex = i; 
-      }
-    }
+    //   if (ambiguity >= 0 && ambiguity < minAmbiguity) {
+    //     minAmbiguity = ambiguity;
+    //     bestCameraIndex = i;
+    //   }
+    // }
   
-    SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
+    // SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
     // SmartDashboard.putNumber("Min Ambiguity", minAmbiguity);
   
     // If we have a valid camera and ambiguity is low enough, fuse vision pose measurement
-    if (bestCameraIndex != -1 && shortestDistance <= 3) {
-      Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
-      if (visionPose != null) {
-        double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);
-        double timestampSeconds = captureTimeMillis / 1000.0;
+    // if (bestCameraIndex != -1 && minAmbiguity < 0.5) {
+    //   Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
+    //   if (visionPose != null) {
+    //     double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);
+    //     double timestampSeconds = captureTimeMillis / 1000.0;
   
-        // Fuse vision measurement into pose estimator
-        poseEstimator.addVisionMeasurement(visionPose, timestampSeconds);
+    //     // Fuse vision measurement into pose estimator
+    //     poseEstimator.addVisionMeasurement(visionPose, timestampSeconds);
   
-        SmartDashboard.putNumber("Vision Pose X", visionPose.getX());
-        SmartDashboard.putNumber("Vision Pose Y", visionPose.getY());
-        SmartDashboard.putNumber("Vision Pose Heading", visionPose.getRotation().getDegrees());
-      }
-    } else {
-      //System.out.println("No valid AprilTag detected or ambiguity too high.");
-    }
+    //     SmartDashboard.putNumber("Vision Pose X", visionPose.getX());
+    //     SmartDashboard.putNumber("Vision Pose Y", visionPose.getY());
+    //     SmartDashboard.putNumber("Vision Pose Heading", visionPose.getRotation().getDegrees());
+    //   }
+    // } else {
+    //   //System.out.println("No valid AprilTag detected or ambiguity too high.");
+    // }
   
     // Publish swerve module diagnostic info
     SwerveModule[] modules = swerveDrive.getModules();
@@ -336,7 +351,7 @@ public class SwerveSubsystem extends SubsystemBase
               // PID constants for translation
               new PIDConstants(3, 0, 0),
               // PID constants for rotation
-              new PIDConstants(3, 0, 0)
+              new PIDConstants(5, 0, 0)
           ),
           config,
           // The robot configuration
