@@ -9,6 +9,7 @@ import static edu.wpi.first.units.Units.Meter;
 import java.io.File;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.DoubleSupplier;
@@ -23,8 +24,10 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
 import com.pathplanner.lib.util.swerve.SwerveSetpointGenerator;
@@ -380,6 +383,30 @@ public class SwerveSubsystem extends SubsystemBase
     //Preload PathPlanner Path finding
     // IF USING CUSTOM PATHFINDER ADD BEFORE THIS LINE
     PathfindingCommand.warmupCommand().schedule();
+  }
+
+  public PathPlannerPath moveAlongPath(Pose2d targetPose) {
+    List<Waypoint> waypoints = PathPlannerPath.waypointsFromPoses(
+            swerveDrive.getPose(),
+            targetPose
+        );
+
+        PathConstraints constraints = new PathConstraints(2, 2, 4 * Math.PI, 4 * Math.PI);
+
+        GoalEndState goalEndState = new GoalEndState(
+            0.0,
+            targetPose.getRotation()
+        );
+
+        PathPlannerPath path = new PathPlannerPath(
+            waypoints,
+            constraints,
+            null,
+            goalEndState
+        );
+        path.preventFlipping = true;
+
+        return path;
   }
 
   /**

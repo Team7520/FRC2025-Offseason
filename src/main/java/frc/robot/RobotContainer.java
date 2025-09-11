@@ -31,6 +31,7 @@ import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.DriveToPoseCommand.TurnToAngleCommand;
 import frc.robot.commands.HandIntakeCommand;
 import frc.robot.commands.HighAlgaeCommand;
 import frc.robot.commands.IntakeCommand;
@@ -73,6 +74,7 @@ public class RobotContainer
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
                                                                                 "swerve/kraken-jetstream"));
+                                                                      
 
   /**
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
@@ -143,6 +145,7 @@ public class RobotContainer
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
   private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
+  private final CoralDetection coralDetection = new CoralDetection(drivebase);
   private boolean algaePos = false;
   private String coralLevel = "none";
   
@@ -233,6 +236,8 @@ public class RobotContainer
     driverXbox.y()
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+      
+    driverXbox.b().onTrue(/*new TurnToAngleCommand(drivebase, drivebase.getPose().getRotation().plus(coralDetection.getYawError())).andThen*/(new DriveToPoseCommand(drivebase, coralDetection.getCoralPos(drivebase.getPose()))));
     //driverXbox.x().onTrue(elevator.moveAndWaitToPosition(ElevatorPosition.L4));
 
     //operatorController.leftBumper().onTrue()

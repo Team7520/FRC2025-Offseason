@@ -83,7 +83,7 @@ public class DriveToPoseCommand extends Command {
         return sequentialCommand.isFinished();
     }
 
-    private static class TurnToAngleCommand extends Command {
+    public static class TurnToAngleCommand extends Command {
         private final SwerveSubsystem drivebase;
         private final Rotation2d targetAngle;
         private final PIDController rotationController;
