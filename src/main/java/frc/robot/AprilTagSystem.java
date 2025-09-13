@@ -102,21 +102,21 @@ public class AprilTagSystem {
             )
         ));
 
-        cameraList.add(new CameraInfo(
-            "FrontLeftCam",
-            new PhotonCamera("FrontLeftCam"),
-            false,
-            new Transform3d(
-                0.282121, // X forward
-                0.189152, // Y left
-                0.206491,
-                new Rotation3d(
-                    0.0,
-                    Math.toRadians(10),
-                    0.0
-                )
-            )
-        ));
+        // cameraList.add(new CameraInfo(
+        //     "FrontLeftCam",
+        //     new PhotonCamera("FrontLeftCam"),
+        //     false,
+        //     new Transform3d(
+        //         0.282121, // X forward
+        //         0.189152, // Y left
+        //         0.206491,
+        //         new Rotation3d(
+        //             0.0,
+        //             Math.toRadians(10),
+        //             0.0
+        //         )
+        //     )
+        // ));
 
         cameraList.add(new CameraInfo(
             "BackRightCam",
