@@ -161,14 +161,16 @@ public final class Constants
       }
     }
     public static class ApriltagConstants{
-      public static final double yOffsetRight = 0.16;
-      public static final double xOffsetRight = 0.53;
-      public static final double yOffsetLeft = -0.17; //0.17
-      public static final double xOffsetLeft = 0.53; //0.6
+      public static final double yOffsetRight = 0.13;
+      public static final double xOffsetRight = 0.58;
+      public static final double yOffsetLeft = -0.18; //0.17
+      public static final double xOffsetLeft = 0.59; //0.6
 
     }
 
-    public static class IntakeConstants {
+    public static class IntakeConstants { //5.37, 5.11, -119.07
+      //3.94, 5,32, -59.93
+      //3.67, 5.16, -59.8
   
       // PID Constants
       public static final double kP = 0.7; // 0.675

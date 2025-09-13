@@ -15,6 +15,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -31,6 +33,7 @@ import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.commands.ElevatorDownAuto;
 import frc.robot.commands.HandIntakeCommand;
 import frc.robot.commands.HighAlgaeCommand;
 import frc.robot.commands.IntakeCommand;
@@ -78,9 +81,9 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -0.3,
-                                                                () -> driverXbox.getLeftX() * -0.3)
-                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.3)
+                                                                () -> driverXbox.getLeftY() * -1,
+                                                                () -> driverXbox.getLeftX() * -1)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(false);
@@ -145,6 +148,7 @@ public class RobotContainer
   private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
   private boolean algaePos = false;
   private String coralLevel = "none";
+  private SendableChooser<Command> autoChooser;
   
 
   public RobotContainer()
@@ -153,8 +157,25 @@ public class RobotContainer
     configureBindings();
     DriverStation.silenceJoystickConnectionWarning(true);
     NamedCommands.registerCommand("test", Commands.print("I EXIST"));
+    registerAutos();
   }
 
+
+  private void registerAutos() {
+    registerNamedCommands();
+
+    autoChooser = new SendableChooser<>();
+
+    autoChooser.setDefaultOption("test", drivebase.getAutonomousCommand("test"));
+    autoChooser.addOption("wjajjg", drivebase.getAutonomousCommand("betterName"));
+    SmartDashboard.putData("AutoPaths", autoChooser);
+  }
+
+  private void registerNamedCommands() {
+    NamedCommands.registerCommand("L4Command", new L4Command(arm, elevator, false));
+    NamedCommands.registerCommand("ScoreL4", new L4PlaceCommand(arm, elevator, false));
+    NamedCommands.registerCommand("ElevatorDown", new ElevatorDownAuto(arm, elevator));
+  }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
    * {@link Trigger#Trigger(java.util.function.BooleanSupplier)} constructor with an arbitrary predicate, or via the
@@ -162,7 +183,7 @@ public class RobotContainer
    * {@link CommandXboxController Xbox}/{@link edu.wpi.first.wpilibj2.command.button.CommandPS4Controller PS4}
    * controllers or {@link edu.wpi.first.wpilibj2.command.button.CommandJoystick Flight joysticks}.
    */
-  
+
   private void configureBindings()
   {
     operatorController.povUp().onTrue(new InstantCommand(() -> {
@@ -483,7 +504,7 @@ public class RobotContainer
   public Command getAutonomousCommand()
   {
     // An example command will be run in autonomous
-    return drivebase.getAutonomousCommand("New Auto");
+    return autoChooser.getSelected();
   }
 
   public void setMotorBrake(boolean brake)

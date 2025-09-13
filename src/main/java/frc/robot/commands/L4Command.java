@@ -9,37 +9,20 @@ import frc.robot.Constants;
 
 public class L4Command extends SequentialCommandGroup {
     public L4Command(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
-        if ((elevator.getPositionDouble() < Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) && (arm.getPositionDouble() > Constants.ArmConstants.ArmPositions.MOVEPOSSIBLE.getPosition())) {
             if(flip) {
                 addCommands(
-                    elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4)
                     // arm.eject()
                 );
             } else {
                 addCommands(
-                    elevator.moveAndWaitToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4)
                     // arm.eject()
                 );
             }    
-        }else{
-            if(flip) {
-                addCommands(
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
-                    // arm.eject()
-                );
-            } else {
-                addCommands(
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
-                    // arm.eject()
-                );
-            }    
-        }
+        
     }
 }
 
