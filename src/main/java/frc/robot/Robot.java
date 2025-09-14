@@ -5,7 +5,9 @@
 package frc.robot;
 
 import au.grapplerobotics.CanBridge;
+import edu.wpi.first.net.WebServer;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.Filesystem;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -55,6 +57,9 @@ public class Robot extends TimedRobot
     {
       DriverStation.silenceJoystickConnectionWarning(true);
     }
+
+    // Enable webserver for Elastic Remote Layout Downloading
+    WebServer.start(5800, Filesystem.getDeployDirectory().getPath());
   }
 
   /**
