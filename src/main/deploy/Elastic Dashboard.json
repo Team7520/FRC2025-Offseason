@@ -48,7 +48,7 @@
           {
             "title": "Analog Sensor",
             "x": 384.0,
-            "y": 384.0,
+            "y": 512.0,
             "width": 384.0,
             "height": 256.0,
             "type": "Graph",
@@ -64,7 +64,7 @@
           {
             "title": "Has Gamepiece?",
             "x": 640.0,
-            "y": 128.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Boolean Box",
@@ -81,7 +81,7 @@
           {
             "title": "Has Algae?",
             "x": 384.0,
-            "y": 128.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Boolean Box",
@@ -97,8 +97,8 @@
           },
           {
             "title": "Pigeon 2 (v6) [0]",
-            "x": 896.0,
-            "y": 128.0,
+            "x": 1280.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Gyro",
@@ -127,8 +127,8 @@
           },
           {
             "title": "Yippee?",
-            "x": 1024.0,
-            "y": 0.0,
+            "x": 896.0,
+            "y": 128.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -145,9 +145,9 @@
           {
             "title": "PhotonAlerts",
             "x": 1280.0,
-            "y": 384.0,
+            "y": 512.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/PhotonAlerts",
@@ -156,8 +156,8 @@
           },
           {
             "title": "swerve",
-            "x": 768.0,
-            "y": 384.0,
+            "x": 1024.0,
+            "y": 256.0,
             "width": 256.0,
             "height": 256.0,
             "type": "YAGSL Swerve Drive",
@@ -171,9 +171,9 @@
           },
           {
             "title": "Field",
-            "x": 1152.0,
+            "x": 1024.0,
             "y": 0.0,
-            "width": 384.0,
+            "width": 512.0,
             "height": 256.0,
             "type": "Field",
             "properties": {
@@ -191,8 +191,8 @@
           },
           {
             "title": "FrontRightCam OPEN?",
-            "x": 1152.0,
-            "y": 256.0,
+            "x": 768.0,
+            "y": 512.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -209,7 +209,7 @@
           {
             "title": "Is encoder working",
             "x": 1024.0,
-            "y": 384.0,
+            "y": 512.0,
             "width": 256.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -221,6 +221,24 @@
               "false_color": 4294198070,
               "true_icon": "None",
               "false_icon": "None"
+            }
+          },
+          {
+            "title": "Battery Voltage",
+            "x": 384.0,
+            "y": 128.0,
+            "width": 512.0,
+            "height": 128.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Battery Voltage",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 4.0,
+              "max_value": 13.0,
+              "divisions": 5,
+              "inverted": false,
+              "orientation": "horizontal"
             }
           }
         ]
@@ -246,8 +264,8 @@
           },
           {
             "title": "Pigeon 2 (v6) [0]",
-            "x": 640.0,
-            "y": 256.0,
+            "x": 768.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 256.0,
             "type": "Gyro",
@@ -259,8 +277,8 @@
           },
           {
             "title": "swerve",
-            "x": 896.0,
-            "y": 256.0,
+            "x": 1024.0,
+            "y": 384.0,
             "width": 256.0,
             "height": 256.0,
             "type": "YAGSL Swerve Drive",
@@ -332,10 +350,10 @@
           },
           {
             "title": "PhotonAlerts",
-            "x": 1152.0,
+            "x": 1280.0,
             "y": 256.0,
             "width": 256.0,
-            "height": 384.0,
+            "height": 256.0,
             "type": "Alerts",
             "properties": {
               "topic": "/SmartDashboard/PhotonAlerts",
@@ -377,8 +395,8 @@
           },
           {
             "title": "Can Trust Laser?",
-            "x": 768.0,
-            "y": 512.0,
+            "x": 384.0,
+            "y": 0.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -428,8 +446,8 @@
           },
           {
             "title": "Is encoder working",
-            "x": 896.0,
-            "y": 512.0,
+            "x": 640.0,
+            "y": 384.0,
             "width": 128.0,
             "height": 128.0,
             "type": "Boolean Box",
@@ -441,6 +459,24 @@
               "false_color": 4294198070,
               "true_icon": "None",
               "false_icon": "None"
+            }
+          },
+          {
+            "title": "Battery Voltage",
+            "x": 640.0,
+            "y": 256.0,
+            "width": 640.0,
+            "height": 128.0,
+            "type": "Voltage View",
+            "properties": {
+              "topic": "/SmartDashboard/Battery Voltage",
+              "period": 0.06,
+              "data_type": "double",
+              "min_value": 4.0,
+              "max_value": 13.0,
+              "divisions": 5,
+              "inverted": false,
+              "orientation": "horizontal"
             }
           }
         ]
