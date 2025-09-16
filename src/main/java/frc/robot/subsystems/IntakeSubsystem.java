@@ -50,7 +50,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double JOYSTICK_DEADBAND = 0.05;
 
     private AnalogInput sensor = new AnalogInput(0);
-    private double basketThreshold = 3;
+    private double basketThreshold = 3.75;
 
 
     public IntakeSubsystem(int leftIndexerId, int rightIndexerId, int rollerId, int leftPivotId, int rightPivotId) {

@@ -91,44 +91,44 @@ public class AprilTagSystem {
             new PhotonCamera("FrontRightCam"),
             false,
             new Transform3d(
-                0.282121, // X forward
-                -0.189152, // Y right
-                0.206491,
+                0.283940504, // X forward
+                -0.188200919, // Y right
+                0.205,
                 new Rotation3d(
                     0.0,
-                    Math.toRadians(10), // pitched up
+                    Math.toRadians(15), // pitched up
                     0.0 // facing forward
                 )
             )
         ));
 
-        // cameraList.add(new CameraInfo(
-        //     "FrontLeftCam",
-        //     new PhotonCamera("FrontLeftCam"),
-        //     false,
-        //     new Transform3d(
-        //         0.282121, // X forward
-        //         0.189152, // Y left
-        //         0.206491,
-        //         new Rotation3d(
-        //             0.0,
-        //             Math.toRadians(10),
-        //             0.0
-        //         )
-        //     )
-        // ));
+        cameraList.add(new CameraInfo(
+            "FrontLeftCam",
+            new PhotonCamera("FrontLeftCam"),
+            false,
+            new Transform3d(
+                0.283940504, // X forward
+                0.188200919, // Y left
+                0.205,
+                new Rotation3d(
+                    0.0,
+                    Math.toRadians(15),
+                    0.0
+                )
+            )
+        ));
 
         cameraList.add(new CameraInfo(
             "BackRightCam",
             new PhotonCamera("BackRightCam"),
             false,
             new Transform3d(
-                -0.282121, // X backward
-                -0.189152, // Y right
-                0.206491,
+                -0.283940504, // X backward
+                -0.188200919, // Y right
+                0.205,
                 new Rotation3d(
                     0.0,
-                    Math.toRadians(10),
+                    Math.toRadians(15),
                     Math.PI // facing backward
                 )
             )
@@ -139,12 +139,12 @@ public class AprilTagSystem {
             new PhotonCamera("BackLeftCam"),
             false,
             new Transform3d(
-                -0.282121, // X backward
-                0.189152,  // Y left
-                0.206491,
+                -0.283940504, // X backward
+                0.188200919,  // Y left
+                0.205,
                 new Rotation3d(
                     0.0,
-                    Math.toRadians(10),
+                    Math.toRadians(15),
                     Math.PI
                 )
             )

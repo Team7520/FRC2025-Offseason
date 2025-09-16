@@ -12,12 +12,14 @@ public class L4Command extends SequentialCommandGroup {
             if(flip) {
                 addCommands(
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4),
+                    new WaitCommand(1),
                     arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL4)
                     // arm.eject()
                 );
             } else {
                 addCommands(
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4),
+                    new WaitCommand(1),
                     arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4)
                     // arm.eject()
                 );

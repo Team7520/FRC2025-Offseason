@@ -171,6 +171,7 @@ public class RobotContainer
 
     autoChooser.setDefaultOption("test", drivebase.getAutonomousCommand("test"));
     autoChooser.addOption("wjajjg", drivebase.getAutonomousCommand("betterName"));
+    autoChooser.addOption("wippee", drivebase.getAutonomousCommand("bestestName"));
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 
@@ -178,6 +179,9 @@ public class RobotContainer
     NamedCommands.registerCommand("L4Command", new L4Command(arm, elevator, false));
     NamedCommands.registerCommand("ScoreL4", new L4PlaceCommand(arm, elevator, false));
     NamedCommands.registerCommand("ElevatorDown", new ElevatorDownAuto(arm, elevator));
+    NamedCommands.registerCommand("ArmPickup", new PickupCoralCommand(arm, elevator));
+    NamedCommands.registerCommand("ReadyPos", new ReadyToPickupCommand(arm, elevator));
+    NamedCommands.registerCommand("Intake", new IntakeCommand(intake, operatorController::getLeftTriggerAxis, true));
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -204,7 +208,7 @@ public class RobotContainer
 
     operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
       if(!intake.inBasket() && mode.equals("Coral")) {
-        new IntakeCommand(intake, operatorController::getLeftTriggerAxis).schedule();
+        new IntakeCommand(intake, operatorController::getLeftTriggerAxis, false).schedule();
       } else if(arm.algaePos()) {
         new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis).schedule();
       } else {

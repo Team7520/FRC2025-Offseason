@@ -22,15 +22,17 @@ public class IntakeCommand extends Command {
     IntakeSubsystem intake;
     DoubleSupplier leftTrigger;
     Boolean cancelled = false;
+    Boolean inAuto = false;
     
-    public IntakeCommand(IntakeSubsystem intake, DoubleSupplier leftTrigger) {
+    public IntakeCommand(IntakeSubsystem intake, DoubleSupplier leftTrigger, Boolean inAuto) {
         this.intake = intake;
         this.leftTrigger = leftTrigger;
+        this.inAuto = inAuto;
     }
 
     @Override
     public void execute() {
-        if(leftTrigger.getAsDouble() < 0.5) {
+        if(leftTrigger.getAsDouble() < 0.5 && !inAuto) {
             cancelled = true;            
         } 
         

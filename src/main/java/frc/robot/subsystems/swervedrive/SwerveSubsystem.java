@@ -224,16 +224,17 @@ public class SwerveSubsystem extends SubsystemBase
       double distance = aprilTagSystem.getClosest(i);
       // SmartDashboard.putNumber("Ambiguity Cam " + i, ambiguity);
   
-      if (distance <= 3 && distance < shortestDistance) {
+      if (distance <= 3.5 && distance < shortestDistance && distance != -1) {
         shortestDistance = distance;
         bestCameraIndex = i; 
       }
     }
     
     SmartDashboard.putNumber("Best Camera Index", bestCameraIndex);
+    SmartDashboard.putNumber("Camera Distance", shortestDistance);
     // SmartDashboard.putNumber("Min Ambiguity", minshortestDistanceAmbiguity);
   
-    if (bestCameraIndex != -1 && shortestDistance <= 3) {
+    if (bestCameraIndex != -1 && shortestDistance <= 3.5) {
       Pose2d visionPose = aprilTagSystem.getCurrentRobotFieldPose(bestCameraIndex);
       if (visionPose != null) {
         double captureTimeMillis = aprilTagSystem.getCaptureTime(bestCameraIndex);
@@ -341,9 +342,9 @@ public class SwerveSubsystem extends SubsystemBase
           // Method that will drive the robot given ROBOT RELATIVE ChassisSpeeds. Also optionally outputs individual module feedforwards
           new PPHolonomicDriveController(
               // PID constants for translation
-              new PIDConstants(5, 0, 0),
+              new PIDConstants(2, 0, 0),
               // PID constants for rotation
-              new PIDConstants(3, 0, 0)
+              new PIDConstants(1, 0, 0)
           ),
           config,
           // The robot configuration
