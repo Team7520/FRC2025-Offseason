@@ -123,7 +123,7 @@ public class ArmSubsystem extends SubsystemBase {
         return Commands.run(
             () -> eject(speed), 
             this       
-        ).withTimeout(0.3).finallyDo(interrupted -> stopOpenLoop());
+        ).withTimeout(0.17).finallyDo(interrupted -> stopOpenLoop());
     }
 
     public void stopOpenLoop() {
@@ -251,6 +251,10 @@ public class ArmSubsystem extends SubsystemBase {
 
     public Command moveWhileRolling(ArmPositions position) {
         return Commands.run(() -> setPosition(position), this).alongWith(new InstantCommand(() -> eject(0.5))).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
+    }
+
+    public Command moveWhileIntake(ArmPositions position) {
+        return Commands.run(() -> setPosition(position), this).until(() -> atTarget(position)).andThen(() -> intakePiece()).andThen(() -> captureHoldFromEncoder());
     }
     
     public boolean atTarget(ArmPositions position) {

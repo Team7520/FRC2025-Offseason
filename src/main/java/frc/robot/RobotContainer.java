@@ -370,8 +370,10 @@ public class RobotContainer
       }
     }));
 
-
+    operatorController.start().onTrue(intake.reverseIntake(-0.3));
+    
   //   driverXbox.leftBumper().whileTrue(new InstantCommand(() -> {
+
   //     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
   //     System.out.println("LEFT BUMPER PRESSED");
   //     if (tagPose != null) {

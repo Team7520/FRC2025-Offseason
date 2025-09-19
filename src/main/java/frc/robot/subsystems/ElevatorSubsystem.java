@@ -54,7 +54,6 @@ public class ElevatorSubsystem extends SubsystemBase {
         config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCELERATION;
         config.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
         config.ExternalFeedback.SensorToMechanismRatio = ElevatorConstants.SENSOR_TO_MECHANISM_RATIO;
-        config.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(2);
         
         CurrentLimitsConfigs limitConfigs = new CurrentLimitsConfigs();
         limitConfigs.StatorCurrentLimit = 80;

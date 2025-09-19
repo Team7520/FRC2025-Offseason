@@ -75,12 +75,12 @@ public final class Constants
     public static final double kA = 0.002;
 
     // Motion Magic Constants
-    public static final double MAX_VELOCITY = 500; // 10 inches per second
+    public static final double MAX_VELOCITY = 700; // 10 inches per second
     public static final double MAX_ACCELERATION = 1500; // 20 inches per second squared
     public static final double MAX_JERK = 4000; // 60 inches per second cubed
     public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
 
-    public static final int CURRENT_LIMIT = 80;
+    public static final int CURRENT_LIMIT = 90;
     public static enum ElevatorPosition {
         GROUND(10),
         PROCESSOR(120),
@@ -92,7 +92,7 @@ public final class Constants
         L2(62.855712890625),
         L3SCORE(110),
         L3(124.666259765625),
-        L4(220),
+        L4(230),
         L4AUTO(225),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
@@ -129,7 +129,7 @@ public final class Constants
       public static final int CURRENT_LIMIT = 150;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(-0.1806640625),
-          PICKUP(1.805),
+          PICKUP(1.78),
           SCORE(0.927),
           L1(1), //Placeholder, change when tuning
           L2_3(0.46630859375),

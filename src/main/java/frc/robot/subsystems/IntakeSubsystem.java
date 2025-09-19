@@ -99,6 +99,10 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRoller.setControl(duty.withOutput(speed * ROLLER_MULTIPLIER));
     }
 
+    public Command reverseIntake(double speed) {
+        return Commands.run(() -> runIntake(speed), this).withTimeout(0.35).finallyDo(() -> stopAll());
+    }
+
     public Command intakePiece() {
         return Commands.run(
             () -> runIntake(1), 
