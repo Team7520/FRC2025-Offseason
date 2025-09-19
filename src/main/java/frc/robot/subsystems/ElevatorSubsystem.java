@@ -54,6 +54,7 @@ public class ElevatorSubsystem extends SubsystemBase {
         config.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MAX_ACCELERATION;
         config.MotionMagic.MotionMagicJerk = ElevatorConstants.MAX_JERK;
         config.ExternalFeedback.SensorToMechanismRatio = ElevatorConstants.SENSOR_TO_MECHANISM_RATIO;
+        config.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(2);
         
         CurrentLimitsConfigs limitConfigs = new CurrentLimitsConfigs();
         limitConfigs.StatorCurrentLimit = 80;
@@ -120,6 +121,12 @@ public class ElevatorSubsystem extends SubsystemBase {
     
     public double getPositionDouble() {
         return leftMotor.getPosition().getValueAsDouble();
+    }
+
+    public boolean atTarget(ElevatorPosition position) {
+        double current = leftMotor.getPosition().getValueAsDouble();
+        double error = Math.abs(position.getHeight() - current);
+        return error < 0.05;
     }
 
     public Angle getCurrentPosition() {

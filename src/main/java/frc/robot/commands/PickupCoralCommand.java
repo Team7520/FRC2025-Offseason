@@ -8,15 +8,36 @@ import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
 public class PickupCoralCommand extends SequentialCommandGroup {
-    public PickupCoralCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
-            arm.intakePiece(),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-            new WaitCommand(1),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT)
-        );
-        
+    public PickupCoralCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean inAuto) {
+        if(inAuto) {
+            addCommands(
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
+                arm.intakePiece(),
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+                new WaitCommand(0.4)
+            );    
+        } else {
+            if(arm.atTarget(Constants.ArmConstants.ArmPositions.PICKUP)) {
+                addCommands(
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
+                    arm.intakePiece(),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+                    new WaitCommand(0.7520),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+                );    
+            } else {
+                addCommands(
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
+                    arm.intakePiece(),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
+                    new WaitCommand(0.7520),
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+                );  
+            }
+        }
     }
 }

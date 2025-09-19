@@ -5,6 +5,8 @@ import java.util.function.Supplier;
 import javax.swing.text.Position;
 
 import com.ctre.phoenix.motorcontrol.NeutralMode;
+import com.ctre.phoenix6.configs.ClosedLoopRampsConfigs;
+import com.ctre.phoenix6.configs.OpenLoopRampsConfigs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
@@ -19,6 +21,7 @@ import edu.wpi.first.wpilibj.AnalogInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
@@ -88,14 +91,16 @@ public class ArmSubsystem extends SubsystemBase {
         pivotCfg.Voltage.PeakForwardVoltage = 12.0;
         pivotCfg.Voltage.PeakReverseVoltage = -12.0;
         pivotCfg.CurrentLimits.SupplyCurrentLimitEnable = true;
-        pivotCfg.CurrentLimits.SupplyCurrentLimit = 40.0;
+        pivotCfg.CurrentLimits.SupplyCurrentLimit = ArmConstants.CURRENT_LIMIT;
         pivotCfg.Feedback.SensorToMechanismRatio = 1.0; // adjust
-        pivotCfg.Slot0.kP = 1.31;
+        pivotCfg.Slot0.kP = 1.3; //1.31
         pivotCfg.MotionMagic.MotionMagicCruiseVelocity = ArmConstants.MAX_VELOCITY;
         pivotCfg.MotionMagic.MotionMagicAcceleration = ArmConstants.MAX_ACCELERATION;
         pivotCfg.MotionMagic.MotionMagicJerk = ArmConstants.MAX_JERK;
         pivotCfg.Feedback.FeedbackRemoteSensorID = encoder.getDeviceID();
         pivotCfg.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RemoteCANcoder;  
+        pivotCfg.ClosedLoopRamps.withDutyCycleClosedLoopRampPeriod(0.13);
+        pivotCfg.ClosedLoopRamps.withVoltageClosedLoopRampPeriod(0.1);
         pivot.getConfigurator().apply(pivotCfg);
 
         motionMagic = new MotionMagicVoltage(0);
@@ -118,7 +123,7 @@ public class ArmSubsystem extends SubsystemBase {
         return Commands.run(
             () -> eject(speed), 
             this       
-        ).withTimeout(1).finallyDo(interrupted -> stopOpenLoop());
+        ).withTimeout(0.3).finallyDo(interrupted -> stopOpenLoop());
     }
 
     public void stopOpenLoop() {
@@ -243,8 +248,12 @@ public class ArmSubsystem extends SubsystemBase {
     public Command moveToPosition(ArmPositions position) {
         return Commands.run(() -> setPosition(position), this).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
     }
+
+    public Command moveWhileRolling(ArmPositions position) {
+        return Commands.run(() -> setPosition(position), this).alongWith(new InstantCommand(() -> eject(0.5))).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
+    }
     
-    private boolean atTarget(ArmPositions position) {
+    public boolean atTarget(ArmPositions position) {
         double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
         return error < 0.05;

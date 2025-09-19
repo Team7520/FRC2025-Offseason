@@ -66,7 +66,7 @@ public final class Constants
     public static final double MAX_HEIGHT = 60; // 60 inches
 
     // PID Constants
-    public static final double kP = 0.7; // 0.675
+    public static final double kP = 0.2; // 0.675
     public static final double kI = 0.0;
     public static final double kD = 0.0;
     public static final double kIz = 0.0;
@@ -75,29 +75,28 @@ public final class Constants
     public static final double kA = 0.002;
 
     // Motion Magic Constants
-    public static final double MAX_VELOCITY = 800; // 10 inches per second
-    public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
+    public static final double MAX_VELOCITY = 500; // 10 inches per second
+    public static final double MAX_ACCELERATION = 1500; // 20 inches per second squared
     public static final double MAX_JERK = 4000; // 60 inches per second cubed
     public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
 
-    public static final int CURRENT_LIMIT = 90;
+    public static final int CURRENT_LIMIT = 80;
     public static enum ElevatorPosition {
         GROUND(10),
-        PROCESSOR(124.0556640625),
+        PROCESSOR(120),
         GROUNDALG(85.0224609375),
-        READY(107.015380859375),
-        PICKUP(76.301513671875),
-        L1(95),
-        L2SCORE(14.3173828125),
+        READY(109.015380859375),
+        PICKUP(85),
+        L1(97),
+        L2SCORE(50),
         L2(62.855712890625),
-        L3SCORE(100.355712890625),
+        L3SCORE(110),
         L3(124.666259765625),
-        L4(218.253662109375),
-        LOW(102), // 11.41455078125, 7.984863
-        MID(29), // 27.5 
-        HIGH(55), // 52
+        L4(220),
+        L4AUTO(225),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
+        
         BARGE(233);
 
         private final double height;
@@ -122,20 +121,20 @@ public final class Constants
 
   
       // Motion Magic Constants
-      public static final double MAX_VELOCITY = 800; // 10 inches per second
+      public static final double MAX_VELOCITY = 3000; // 10 inches per second
       public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
-      public static final double MAX_JERK = 4000; // 60 inches per second cubed
+      public static final double MAX_JERK = 500; // 60 inches per second cubed
       public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
   
-      public static final int CURRENT_LIMIT = 120;
+      public static final int CURRENT_LIMIT = 150;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(-0.1806640625),
-          PICKUP(1.82),
+          PICKUP(1.805),
           SCORE(0.927),
           L1(1), //Placeholder, change when tuning
           L2_3(0.46630859375),
           FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
-          L4(0.402587890625),
+          L4(0.385),
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
           GROUND_ALGAE(1.3),
           PROCESSOR(1.1),

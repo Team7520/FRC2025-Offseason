@@ -45,6 +45,7 @@ import frc.robot.commands.L3Command;
 import frc.robot.commands.L3PlaceCommand;
 import frc.robot.commands.L4Command;
 import frc.robot.commands.L4PlaceCommand;
+import frc.robot.commands.L4PlaceCommandAuto;
 import frc.robot.commands.LowAlgaeCommand;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
@@ -85,7 +86,7 @@ public class RobotContainer
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
                                                                 () -> driverXbox.getLeftY() * -1,
                                                                 () -> driverXbox.getLeftX() * -1)
-                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -1)
+                                                            .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.6)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
                                                             .allianceRelativeControl(false);
@@ -176,12 +177,13 @@ public class RobotContainer
   }
 
   private void registerNamedCommands() {
-    NamedCommands.registerCommand("L4Command", new L4Command(arm, elevator, false));
-    NamedCommands.registerCommand("ScoreL4", new L4PlaceCommand(arm, elevator, false));
+    NamedCommands.registerCommand("L4Command", new L4Command(arm, elevator, false, true));
+    NamedCommands.registerCommand("ScoreL4", new L4PlaceCommand(arm, elevator, false).withTimeout(1.3));
     NamedCommands.registerCommand("ElevatorDown", new ElevatorDownAuto(arm, elevator));
-    NamedCommands.registerCommand("ArmPickup", new PickupCoralCommand(arm, elevator));
+    NamedCommands.registerCommand("ArmPickup", new PickupCoralCommand(arm, elevator, true).withTimeout(3.7));
     NamedCommands.registerCommand("ReadyPos", new ReadyToPickupCommand(arm, elevator));
     NamedCommands.registerCommand("Intake", new IntakeCommand(intake, operatorController::getLeftTriggerAxis, true));
+    NamedCommands.registerCommand("L4ElevatorFirst", new L4Command(arm, elevator, false, false));
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -314,9 +316,9 @@ public class RobotContainer
     // //EVERYTHING FOR Y
     operatorController.y().onTrue(new InstantCommand(() -> {
       if(mode.equals("Coral") && arm.hasCoral() && !arm.checkScoreSide()){
-         new L4Command(arm,elevator, false).andThen(() -> coralLevel = "L4").schedule();
+         new L4Command(arm,elevator, false, false).andThen(() -> coralLevel = "L4").schedule();
       } else if(mode.equals("Coral") && arm.hasCoral() && arm.checkScoreSide()) {
-         new L4Command(arm,elevator, true).andThen(() -> coralLevel = "L4").schedule();
+         new L4Command(arm,elevator, true, false).andThen(() -> coralLevel = "L4").schedule();
       }else if(mode.equals("Algae") && arm.hasAlgae() && !arm.checkScoreSide()) {
          new BargeCommand(arm, elevator, false).schedule();
       }else if(mode.equals("Algae") && arm.hasAlgae() && arm.checkScoreSide()) {
@@ -326,9 +328,9 @@ public class RobotContainer
 
     operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       if(arm.algaePos()) {
-        arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT).andThen(() -> arm.setAlgaePos(false)).schedule();
+        arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT).andThen(() -> elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)).andThen(() -> arm.setAlgaePos(false)).schedule();
       } else if(intake.inBasket()) {
-        new ReadyToPickupCommand(arm, elevator).andThen(new PickupCoralCommand(arm, elevator)).schedule();
+        new ReadyToPickupCommand(arm, elevator).andThen(new PickupCoralCommand(arm, elevator, false).withTimeout(3.7)).schedule();
       } else {
         new ReadyToPickupCommand(arm, elevator).schedule();
       }
@@ -353,7 +355,7 @@ public class RobotContainer
         } else if(coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
         } else {
-          arm.ejectPiece(0.5).schedule();
+          arm.ejectPiece(0.2).schedule();
         }  
       } else if(arm.checkScoreSide()) {
         if(coralLevel.equals("L4")) {
