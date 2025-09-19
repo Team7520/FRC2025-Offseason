@@ -236,7 +236,7 @@ public class RobotContainer
   // Default command → pivot follows right joystick Y (scaled down)
   arm.setDefaultCommand(
     new RunCommand(
-        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * 0.2),
+        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * 0.5),
         arm
     )
   );
