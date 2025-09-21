@@ -129,7 +129,7 @@ public final class Constants
       public static final int CURRENT_LIMIT = 150;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(-0.1806640625),
-          PICKUP(1.78),
+          PICKUP(1.8),
           SCORE(0.927),
           L1(1), //Placeholder, change when tuning
           L2_3(0.46630859375),
@@ -138,7 +138,7 @@ public final class Constants
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
           GROUND_ALGAE(1.3),
           PROCESSOR(1.1),
-          ALGAE(0.8),
+          ALGAE(0.74),
           FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
           BARGE(0.06), //Placeholder
           FLIPBARGE(2*DEFAULT.getPosition()-BARGE.getPosition()),
@@ -160,10 +160,10 @@ public final class Constants
       }
     }
     public static class ApriltagConstants{
-      public static final double yOffsetRight = 0.13;
-      public static final double xOffsetRight = 0.58;
-      public static final double yOffsetLeft = -0.18; //0.17
-      public static final double xOffsetLeft = 0.59; //0.6
+      public static final double yOffsetRight = 0.15;
+      public static final double xOffsetRight = 0.51;
+      public static final double yOffsetLeft = -0.2; //0.17
+      public static final double xOffsetLeft = 0.52; //0.6
 
     }
 
@@ -188,8 +188,8 @@ public final class Constants
   
       public static final int CURRENT_LIMIT = 120;
       public static enum PivotPosition {
-          GROUND(0), //16.754045486450195
-          UP(-13.0054);
+          GROUND(16.754045486450195),
+          UP(3.748604774475098);
 
           private final double angle;
   

@@ -8,7 +8,7 @@ import frc.robot.subsystems.IntakeSubsystem;
 public class ManualIntake extends Command {
     private final IntakeSubsystem intakeSubsystem;
     private final DoubleSupplier input;
-    private static final double MANUAL_ADJUSTMENT_RATE = 0.7; // Rotations per execution
+    private static final double MANUAL_ADJUSTMENT_RATE = 0.9; // Rotations per execution
 
     public ManualIntake(IntakeSubsystem intakeSubsystem, DoubleSupplier input) {
         this.intakeSubsystem = intakeSubsystem;

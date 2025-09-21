@@ -52,7 +52,7 @@ public class IntakeCommand extends Command {
 
     @Override
     public boolean isFinished() {
-        return cancelled || (intake.inBasket() && !inAuto);
+        return cancelled || intake.inBasket();
     }
 }
 

@@ -74,6 +74,7 @@ public class RobotContainer
   // Replace with CommandPS4Controller or CommandJoystick if needed
   final         CommandXboxController driverXbox = new CommandXboxController(0);
   final CommandXboxController operatorController = new CommandXboxController(1);
+  private double SpeedCutOff = 1;
 
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
@@ -84,8 +85,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -1,
-                                                                () -> driverXbox.getLeftX() * -1)
+                                                                () -> driverXbox.getLeftY() * -SpeedCutOff,
+                                                                () -> driverXbox.getLeftX() * -SpeedCutOff)
                                                             .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.6)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
@@ -138,8 +139,9 @@ public class RobotContainer
    */
 
   private String mode = "Coral";
+  private Boolean robotMode = false; //false for coral, true for algae
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
-  private final ArmSubsystem arm = new ArmSubsystem(() -> mode);
+  private final ArmSubsystem arm = new ArmSubsystem(() -> robotMode);
   private final IntakeSubsystem intake = new IntakeSubsystem(
         21, // left indexer X44
         22, // right indexer X44
@@ -170,9 +172,8 @@ public class RobotContainer
 
     autoChooser = new SendableChooser<>();
 
-    autoChooser.setDefaultOption("test", drivebase.getAutonomousCommand("test"));
-    autoChooser.addOption("wjajjg", drivebase.getAutonomousCommand("betterName"));
-    autoChooser.addOption("wippee", drivebase.getAutonomousCommand("bestestName"));
+    autoChooser.setDefaultOption("one coral", drivebase.getAutonomousCommand("1-coral"));
+    autoChooser.addOption("wippee", drivebase.getAutonomousCommand("processor-3-coral"));
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 
@@ -184,6 +185,7 @@ public class RobotContainer
     NamedCommands.registerCommand("ReadyPos", new ReadyToPickupCommand(arm, elevator));
     NamedCommands.registerCommand("Intake", new IntakeCommand(intake, operatorController::getLeftTriggerAxis, true));
     NamedCommands.registerCommand("L4ElevatorFirst", new L4Command(arm, elevator, false, false));
+    NamedCommands.registerCommand("IntakeUp", new InstantCommand(() -> intake.setPivotPosition(Constants.IntakeConstants.PivotPosition.UP)));
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -198,8 +200,10 @@ public class RobotContainer
     operatorController.povUp().onTrue(new InstantCommand(() -> {
         if (mode.equals("Coral")) {
             mode = "Algae";
+            robotMode = true;
         } else {
             mode = "Coral";
+            robotMode = false;
         }
         System.out.println("Mode switched to: " + mode);
     }));
@@ -236,7 +240,7 @@ public class RobotContainer
   // Default command → pivot follows right joystick Y (scaled down)
   arm.setDefaultCommand(
     new RunCommand(
-        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * 0.5),
+        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * 0.2),
         arm
     )
   );
@@ -330,7 +334,7 @@ public class RobotContainer
       if(arm.algaePos()) {
         arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT).andThen(() -> elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)).andThen(() -> arm.setAlgaePos(false)).schedule();
       } else if(intake.inBasket()) {
-        new ReadyToPickupCommand(arm, elevator).andThen(new PickupCoralCommand(arm, elevator, false).withTimeout(3.7)).schedule();
+        new PickupCoralCommand(arm, elevator, false).withTimeout(3.2).schedule();
       } else {
         new ReadyToPickupCommand(arm, elevator).schedule();
       }
@@ -453,6 +457,14 @@ driverXbox.rightBumper().whileTrue(
         );
     }, Set.of(drivebase))
 );
+
+driverXbox.b().onTrue(new InstantCommand(() -> {
+  if(SpeedCutOff == 1) {
+     SpeedCutOff = 0.4;
+  } else {
+    SpeedCutOff = 1;
+  }
+  }));
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);

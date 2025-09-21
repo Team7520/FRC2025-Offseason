@@ -1,5 +1,6 @@
 package frc.robot.subsystems;
 
+import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
 import javax.swing.text.Position;
@@ -57,12 +58,12 @@ public class ArmSubsystem extends SubsystemBase {
     public static double kG = 0;
     private boolean sideChange = false;
     private boolean algaePos = false;
-    private Supplier<String> modeSupplier;
+    private BooleanSupplier modeSupplier;
     private int trust = 0;
     private Boolean canTrust = false;
     private int trustStrictness = 12;
 
-    public ArmSubsystem(Supplier<String> modeSupplier) {
+    public ArmSubsystem(BooleanSupplier modeSupplier) {
         roller = new TalonFX(ArmConstants.ROLLER_CAN_ID);
         laser = new LaserCan(ArmConstants.LASER_CAN_ID);
         encoder = new CANcoder(61);
@@ -335,7 +336,7 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
         SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.GROUND_ALGAE));
-        SmartDashboard.putString("Current Mode", modeSupplier.toString());
+        SmartDashboard.putBoolean("Current Mode", modeSupplier.getAsBoolean()); //green for algae
         SmartDashboard.putBoolean("Scoring Side Flipped?", checkScoreSide());
         
     }
