@@ -5,9 +5,28 @@
     "data": {
       "commands": [
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "1 coral"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "1 coral"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "L4Command"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ScoreL4"
           }
         }
       ]

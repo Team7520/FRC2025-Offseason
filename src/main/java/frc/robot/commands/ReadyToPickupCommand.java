@@ -9,12 +9,21 @@ import frc.robot.Constants;
 
 public class ReadyToPickupCommand extends SequentialCommandGroup {
     public ReadyToPickupCommand(ArmSubsystem arm, ElevatorSubsystem elevator) {
-        addCommands(
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
-            new WaitCommand(0.6),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
+        if(elevator.getPositionDouble() > Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) {
+            addCommands(
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
+                new WaitCommand(1.2),
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
 
-        );
+            );
+        } else {
+            addCommands(
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
+                new WaitCommand(0.3),
+                arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
+
+            );
+        }
         
     }
 }

@@ -100,7 +100,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command reverseIntake(double speed) {
-        return Commands.run(() -> runIntake(speed), this).withTimeout(0.35).finallyDo(() -> stopAll());
+        return Commands.run(() -> runIntake(speed), this).finallyDo(() -> stopAll());
     }
 
     public Command intakePiece() {
@@ -145,6 +145,7 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Analog Sensor", sensor.getVoltage());
+        SmartDashboard.putBoolean("In Basket?", inBasket());
         SmartDashboard.putNumber("Intake Pivot", leftPivot.getEncoder().getPosition());
     }
 }

@@ -75,6 +75,8 @@ public class RobotContainer
   final         CommandXboxController driverXbox = new CommandXboxController(0);
   final CommandXboxController operatorController = new CommandXboxController(1);
   private double SpeedCutOff = 1;
+  private boolean sped = false;
+  
 
   // The robot's subsystems and commands are defined here...
   private final SwerveSubsystem       drivebase  = new SwerveSubsystem(new File(Filesystem.getDeployDirectory(),
@@ -213,10 +215,12 @@ public class RobotContainer
     operatorController.povDown().onTrue(new InstantCommand(() -> intake.manaulSetPos()));
 
     operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
-      if(!intake.inBasket() && mode.equals("Coral")) {
-        new IntakeCommand(intake, operatorController::getLeftTriggerAxis, false).schedule();
-      } else if(arm.algaePos()) {
-        new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis).schedule();
+      new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis).schedule();
+    }));
+    
+    driverXbox.leftTrigger().whileTrue(new InstantCommand(() -> {
+      if(!intake.inBasket()) {
+        new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false).schedule();
       } else {
         intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
       }
@@ -268,7 +272,7 @@ public class RobotContainer
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
       
-    driverXbox.b().onTrue(/*new TurnToAngleCommand(drivebase, drivebase.getPose().getRotation().plus(coralDetection.getYawError())).andThen*/(new DriveToPoseCommand(drivebase, coralDetection.getCoralPos(drivebase.getPose()))));
+    // driverXbox.b().onTrue(/*new TurnToAngleCommand(drivebase, drivebase.getPose().getRotation().plus(coralDetection.getYawError())).andThen*/(new DriveToPoseCommand(drivebase, coralDetection.getCoralPos(drivebase.getPose()))));
     //driverXbox.x().onTrue(elevator.moveAndWaitToPosition(ElevatorPosition.L4));
 
     //operatorController.leftBumper().onTrue()
@@ -334,7 +338,7 @@ public class RobotContainer
       if(arm.algaePos()) {
         arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT).andThen(() -> elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)).andThen(() -> arm.setAlgaePos(false)).schedule();
       } else if(intake.inBasket()) {
-        new PickupCoralCommand(arm, elevator, false).withTimeout(3.2).schedule();
+        new PickupCoralCommand(arm, elevator, false).withTimeout(3.7).schedule();
       } else {
         new ReadyToPickupCommand(arm, elevator).schedule();
       }
@@ -374,7 +378,7 @@ public class RobotContainer
       }
     }));
 
-    operatorController.start().onTrue(intake.reverseIntake(-0.3));
+    operatorController.start().whileTrue(intake.reverseIntake(-0.3));
     
   //   driverXbox.leftBumper().whileTrue(new InstantCommand(() -> {
 

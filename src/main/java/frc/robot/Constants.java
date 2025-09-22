@@ -85,7 +85,7 @@ public final class Constants
         GROUND(10),
         PROCESSOR(120),
         GROUNDALG(85.0224609375),
-        READY(109.015380859375),
+        READY(112),
         PICKUP(85),
         L1(97),
         L2SCORE(50),
@@ -93,10 +93,9 @@ public final class Constants
         L3SCORE(110),
         L3(124.666259765625),
         L4(230),
-        L4AUTO(225),
+        L4AUTO(228.5),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
-        
         BARGE(233);
 
         private final double height;

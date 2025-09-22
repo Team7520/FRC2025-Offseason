@@ -17,17 +17,16 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import frc.robot.Constants;
 import frc.robot.subsystems.IntakeSubsystem;
 
-public class IntakeCommand extends Command {
+public class ReverseIntakeCommand extends Command {
 
     IntakeSubsystem intake;
     DoubleSupplier leftTrigger;
     Boolean cancelled = false;
     Boolean inAuto = false;
     
-    public IntakeCommand(IntakeSubsystem intake, DoubleSupplier leftTrigger, Boolean inAuto) {
+    public ReverseIntakeCommand(IntakeSubsystem intake, DoubleSupplier leftTrigger) {
         this.intake = intake;
         this.leftTrigger = leftTrigger;
-        this.inAuto = inAuto;
     }
 
     @Override
@@ -46,9 +45,8 @@ public class IntakeCommand extends Command {
 
     @Override
     public void end(boolean interrupted) {
-        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).alongWith(new InstantCommand(() -> intake.stopAll())).schedule();
-        
-        
+        intake.stopAll();
+        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
     }
 
     @Override
