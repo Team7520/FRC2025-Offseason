@@ -23,15 +23,17 @@ public class HandIntakeCommand extends Command {
     ArmSubsystem arm;
     DoubleSupplier leftTrigger;
     Boolean cancelled = false;
+    Boolean inAuto = false;
     
-    public HandIntakeCommand(ArmSubsystem arm, DoubleSupplier leftTrigger) {
+    public HandIntakeCommand(ArmSubsystem arm, DoubleSupplier leftTrigger, Boolean inAuto) {
         this.arm = arm;
         this.leftTrigger = leftTrigger;
+        this.inAuto = inAuto;
     }
 
     @Override
     public void execute() {
-        if(leftTrigger.getAsDouble() < 0.5) {
+        if(leftTrigger.getAsDouble() < 0.5 && !inAuto) {
             cancelled = true;            
         } 
         

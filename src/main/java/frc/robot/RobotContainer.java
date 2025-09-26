@@ -185,9 +185,13 @@ public class RobotContainer
     NamedCommands.registerCommand("ElevatorDown", new ElevatorDownAuto(arm, elevator));
     NamedCommands.registerCommand("ArmPickup", new PickupCoralCommand(arm, elevator, true).withTimeout(3.7));
     NamedCommands.registerCommand("ReadyPos", new ReadyToPickupCommand(arm, elevator));
-    NamedCommands.registerCommand("Intake", new IntakeCommand(intake, operatorController::getLeftTriggerAxis, true));
+    NamedCommands.registerCommand("Intake", new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true));
     NamedCommands.registerCommand("L4ElevatorFirst", new L4Command(arm, elevator, false, false));
     NamedCommands.registerCommand("IntakeUp", new InstantCommand(() -> intake.setPivotPosition(Constants.IntakeConstants.PivotPosition.UP)));
+    NamedCommands.registerCommand("LowAlgae", new LowAlgaeCommand(arm, elevator, false));
+    NamedCommands.registerCommand("HighAlgae", new HighAlgaeCommand(arm, elevator, false));
+    NamedCommands.registerCommand("AlgaePickup", new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, true));
+    NamedCommands.registerCommand("Barge", new BargeCommand(arm, elevator, false));
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
@@ -215,7 +219,7 @@ public class RobotContainer
     operatorController.povDown().onTrue(new InstantCommand(() -> intake.manaulSetPos()));
 
     operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
-      new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis).schedule();
+      new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, false).schedule();
     }));
     
     driverXbox.leftTrigger().whileTrue(new InstantCommand(() -> {
