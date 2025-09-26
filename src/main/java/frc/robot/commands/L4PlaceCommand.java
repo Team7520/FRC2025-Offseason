@@ -13,12 +13,12 @@ public class L4PlaceCommand extends SequentialCommandGroup {
         if(flip) {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE),
-                arm.ejectPiece(1)
+                arm.ejectPiece(0.2)
             );
         } else {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-                arm.ejectPiece(1)
+                arm.ejectPiece(0.2)
             );
         }
         

@@ -122,6 +122,12 @@ public class ElevatorSubsystem extends SubsystemBase {
         return leftMotor.getPosition().getValueAsDouble();
     }
 
+    public boolean atTarget(ElevatorPosition position) {
+        double current = leftMotor.getPosition().getValueAsDouble();
+        double error = Math.abs(position.getHeight() - current);
+        return error < 0.05;
+    }
+
     public Angle getCurrentPosition() {
         return leftMotor.getPosition().getValue();
     }

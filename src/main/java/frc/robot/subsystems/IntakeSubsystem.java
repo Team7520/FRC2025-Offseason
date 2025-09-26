@@ -69,7 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.7) // tune
+            .p(0.9) // tune
             .i(0)
             .d(0)
             .outputRange(-1, 1);
@@ -99,6 +99,10 @@ public class IntakeSubsystem extends SubsystemBase {
         intakeRoller.setControl(duty.withOutput(speed * ROLLER_MULTIPLIER));
     }
 
+    public Command reverseIntake(double speed) {
+        return Commands.run(() -> runIntake(speed), this).finallyDo(() -> stopAll());
+    }
+
     public Command intakePiece() {
         return Commands.run(
             () -> runIntake(1), 
@@ -123,7 +127,7 @@ public class IntakeSubsystem extends SubsystemBase {
     }
 
     public void manaulSetPos() {
-        pivotEncoder.setPosition(0);
+        pivotEncoder.setPosition(16.754045486450195);
     }
 
     public void setPivotPosition(Constants.IntakeConstants.PivotPosition position) {
@@ -141,6 +145,7 @@ public class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         SmartDashboard.putNumber("Analog Sensor", sensor.getVoltage());
+        SmartDashboard.putBoolean("In Basket?", inBasket());
         SmartDashboard.putNumber("Intake Pivot", leftPivot.getEncoder().getPosition());
     }
 }

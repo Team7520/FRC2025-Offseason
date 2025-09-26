@@ -10,8 +10,7 @@ import frc.robot.Constants;
 public class ElevatorDownAuto extends SequentialCommandGroup {
     public ElevatorDownAuto(ArmSubsystem arm, ElevatorSubsystem elevator) {
         addCommands(
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
-            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.GROUND)
+            elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY)
         );
     }
 }

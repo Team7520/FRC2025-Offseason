@@ -12,6 +12,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BooleanSupplier;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 
@@ -61,6 +62,7 @@ import frc.robot.AprilTagMultiCameraVision;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
 import frc.robot.Constants.ApriltagConstants;
+import frc.robot.RobotContainer;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
 import swervelib.SwerveController;
@@ -103,6 +105,7 @@ public class SwerveSubsystem extends SubsystemBase
   private final SwerveDrivePoseEstimator poseEstimator;
 
   private final Field2d field = new Field2d();
+  private BooleanSupplier speedCutOff;
 
   
   StructPublisher<Pose2d> currentPosePublisher = NetworkTableInstance.getDefault()
@@ -205,6 +208,7 @@ public class SwerveSubsystem extends SubsystemBase
     // vision.periodic(poseEstimator.getEstimatedPosition());
     
     SmartDashboard.putString("SwervePose",swerveDrive.getPose().toString());
+    // SmartDashboard.putBoolean("SpeedCutOff?", speedCutOff.getAsBoolean());
     
     // Ensure AprilTag layout is loaded
     if (!aprilTagSystem.aprilTagLayoutLoaded) {

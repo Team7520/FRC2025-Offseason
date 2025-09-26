@@ -11,14 +11,14 @@ public class L1Command extends SequentialCommandGroup {
     public L1Command(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
         if(flip) {
             addCommands(
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOW),   
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L1),   
                 new WaitCommand(1),
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL1)
                 //arm.eject();
             );
         } else {
             addCommands(
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.LOW),   
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L1),   
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.L1)
                 //arm.eject();
             );
