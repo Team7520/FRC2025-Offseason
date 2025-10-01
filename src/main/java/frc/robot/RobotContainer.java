@@ -34,6 +34,7 @@ import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.commands.ElevatorDownAuto;
+import frc.robot.commands.HandIntakeAuto;
 import frc.robot.commands.DriveToPoseCommand.TurnToAngleCommand;
 import frc.robot.commands.HandIntakeCommand;
 import frc.robot.commands.HighAlgaeCommand;
@@ -46,6 +47,7 @@ import frc.robot.commands.L3PlaceCommand;
 import frc.robot.commands.L4Command;
 import frc.robot.commands.L4PlaceCommand;
 import frc.robot.commands.L4PlaceCommandAuto;
+import frc.robot.commands.LowAlgaeAuto;
 import frc.robot.commands.LowAlgaeCommand;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
@@ -176,6 +178,7 @@ public class RobotContainer
 
     autoChooser.setDefaultOption("one coral", drivebase.getAutonomousCommand("1-coral"));
     autoChooser.addOption("wippee", drivebase.getAutonomousCommand("processor-3-coral"));
+    autoChooser.addOption("CentreAuto", drivebase.getAutonomousCommand("Copy of Centre Auto"));
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 
@@ -192,6 +195,8 @@ public class RobotContainer
     NamedCommands.registerCommand("HighAlgae", new HighAlgaeCommand(arm, elevator, false));
     NamedCommands.registerCommand("AlgaePickup", new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, true));
     NamedCommands.registerCommand("Barge", new BargeCommand(arm, elevator, false));
+    NamedCommands.registerCommand("LowAlgaeAuto", new LowAlgaeAuto(arm, elevator));
+    NamedCommands.registerCommand("HandIntakeAuto", new HandIntakeAuto(arm));
   }
   /**
    * Use this method to define your trigger->command mappings. Triggers can be created via the
