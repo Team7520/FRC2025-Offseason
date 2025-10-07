@@ -47,7 +47,7 @@ public class IntakeCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).alongWith(new InstantCommand(() -> intake.stopAll())).schedule();
-        
+        new InstantCommand(() -> intake.stopAll()).schedule();
         
     }
 

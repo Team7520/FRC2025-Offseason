@@ -51,6 +51,7 @@ import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
 import frc.robot.commands.PickupCoralCommand;
 import frc.robot.commands.ReadyToPickupCommand;
+import frc.robot.commands.VisionAssistedDriveCommand;
 import frc.robot.commands.ProcessorAlgae;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ClimberSubsystem;
@@ -91,7 +92,7 @@ public class RobotContainer
                                                                 () -> driverXbox.getLeftX() * -SpeedCutOff)
                                                             .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.6)
                                                             .deadband(OperatorConstants.DEADBAND)
-                                                            .scaleTranslation(0.8)
+                                                            .scaleTranslation(0.5)
                                                             .allianceRelativeControl(false);
 
   /**
@@ -149,11 +150,11 @@ public class RobotContainer
         22, // right indexer X44
         23, // intake roller X60
         28,  // right pivot
-        29   // left pivot
+        36   // left pivot
     );
   private final ElevatorSubsystem elevator = new ElevatorSubsystem();
   private final AprilTagSystem aprilTagSystem = new AprilTagSystem();
-  private final CoralDetection coralDetection = new CoralDetection(drivebase);
+  private final CoralDetectionSystem coralDetectionSystem = new CoralDetectionSystem("CoralCam", drivebase);
   private boolean algaePos = false;
   private String coralLevel = "none";
   private SendableChooser<Command> autoChooser;
@@ -203,6 +204,16 @@ public class RobotContainer
 
   private void configureBindings()
   {
+    
+    driverXbox.leftTrigger().whileTrue(
+      new VisionAssistedDriveCommand(
+          drivebase,
+          coralDetectionSystem,
+          intake,
+          driverXbox
+      )
+  );
+      
     operatorController.povUp().onTrue(new InstantCommand(() -> {
         if (mode.equals("Coral")) {
             mode = "Algae";
@@ -225,8 +236,10 @@ public class RobotContainer
     driverXbox.leftTrigger().whileTrue(new InstantCommand(() -> {
       if(!intake.inBasket()) {
         new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false).schedule();
+        System.out.println("HIHIHIHIH");
       } else {
         intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
+
       }
     }));
     
