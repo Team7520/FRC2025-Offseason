@@ -43,7 +43,7 @@ public class IntakeSubsystem extends SubsystemBase {
     private static final double LEFT_INDEXER_MULTIPLIER = 0.5;
     private static final double RIGHT_INDEXER_MULTIPLIER = -0.5;
     private static final double ROLLER_MULTIPLIER = -0.5;
-    private static final double PIVOT_MULTIPLIER = 0.2;
+    private static final double PIVOT_MULTIPLIER = 0.5;
 
     // PID for pivot hold
     private double pivotHoldPosition = 0;
@@ -69,7 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.9) // tune
+            .p(0.5) // tune
             .i(0)
             .d(0)
             .outputRange(-1, 1);
