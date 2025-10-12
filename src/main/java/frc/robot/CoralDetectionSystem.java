@@ -3,17 +3,26 @@ package frc.robot;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.InterpolatingYawPitch2D;
 
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
+
 import org.photonvision.PhotonCamera;
 import org.photonvision.targeting.PhotonPipelineResult;
 import org.photonvision.targeting.PhotonTrackedTarget;
 
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
+import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.interpolation.InterpolatingDoubleTreeMap;
 import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.networktables.StructPublisher;
+import edu.wpi.first.units.DistanceUnit;
+import edu.wpi.first.units.measure.Angle;
+import edu.wpi.first.units.measure.Distance;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -24,6 +33,13 @@ public class CoralDetectionSystem extends SubsystemBase {
     private final PhotonCamera camera;
     private Pose2d robotPose;
     private final SwerveSubsystem swerveSubsystem;
+
+    // Relitive to robot
+    Pose3d cameraPose = new Pose3d(new Translation3d(0.255, 0.178, 0.697), new Rotation3d(0, 0.872665, 0.261799));
+    private class ObjectClasses{
+        public static final int Algae = 0;
+        public static final int Coral = 1;
+    }
 
     // Interpolating maps for estimating distances
     private final InterpolatingDoubleTreeMap areaToDistanceMap = new InterpolatingDoubleTreeMap();
@@ -65,6 +81,23 @@ public class CoralDetectionSystem extends SubsystemBase {
 
         interpolator.put(-15, 15.2, 0.25, -1.25);
         interpolator.put(-1.90, 14.75, -0.25, -1.25);
+    }
+    // Convets a Rotation3d relitive to the camera to a Translation2d relitive to the robot
+    public Translation2d getObjectPos(Rotation3d objRotation) {
+
+        // Correct for camera mounting
+        Rotation3d correctedRotation = cameraPose.getRotation().plus(objRotation);
+
+        // Calculate y
+
+        Double yDistance = cameraPose.getZ() * Math.tan(correctedRotation.getY());
+
+        Double xDistance = yDistance * Math.tan(correctedRotation.getZ());
+
+        // xDistance = xDistance
+
+        return new Translation2d(xDistance - cameraPose.getX(), yDistance + cameraPose.getY());
+        
     }
 
     /** @return true if a valid gamepiece (coral) is detected above confidence threshold */
@@ -146,7 +179,7 @@ public class CoralDetectionSystem extends SubsystemBase {
     private PhotonTrackedTarget getBestTarget() {
         PhotonPipelineResult result = camera.getLatestResult();
         if (!result.hasTargets()) return null;
-        return result.getBestTarget();
+        return result.targets.stream().filter(t -> t.getDetectedObjectClassID() == ObjectClasses.Coral).collect(Collectors.toList()).get(0);
     }
 
     /** @return estimated Pose2d of the gamepiece relative to the robot, or null if not detected */
@@ -184,6 +217,12 @@ public class CoralDetectionSystem extends SubsystemBase {
         SmartDashboard.putNumber("Coral Pitch", getPitch());
         SmartDashboard.putNumber("Coral Y", getEstimatedY());
         SmartDashboard.putNumber("Coral X", getEstimatedX());
+
+        Translation2d coralPose = getObjectPos(new Rotation3d(0, getPitch()*Math.PI/180, getYaw()*Math.PI/180));
+
+        // publish the position of object relitive to the robot
+        SmartDashboard.putNumber("X", coralPose.getX());
+        SmartDashboard.putNumber("Y", coralPose.getY());
     }
 
     // TODO: Add methods to update/populate interpolating maps from calibration data, if needed

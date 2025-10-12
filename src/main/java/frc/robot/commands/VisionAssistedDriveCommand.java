@@ -42,7 +42,7 @@ public class VisionAssistedDriveCommand extends Command {
         // Driver joystick values (field-oriented)
         double driverY = -driverController.getLeftY(); // Forward/backward
         double driverX = -driverController.getLeftX(); // Left/right
-        double driverRotation = driverController.getRightX(); // Rotation
+        double driverRotation = -driverController.getRightX(); // Rotation
 
         // Default: no steering assist
         // double xFieldCorrection = 0.0;
