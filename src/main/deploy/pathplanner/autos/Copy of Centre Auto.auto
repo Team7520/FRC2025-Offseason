@@ -88,9 +88,73 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "Centre Barge"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Centre Barge"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Barge Command Needed"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Hand Outtake Needed"
+                }
+              },
+              {
+                "type": "wait",
+                "data": {
+                  "waitTime": 1.5
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "parallel",
+          "data": {
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "Barge Left Algae"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "High Algae Needed"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "HandIntakeAuto"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
