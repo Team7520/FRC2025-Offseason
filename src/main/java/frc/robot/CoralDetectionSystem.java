@@ -49,7 +49,7 @@ public class CoralDetectionSystem extends SubsystemBase {
     private static final double CONFIDENCE_THRESHOLD = 0.6; /* TODO: set confidence threshold, e.g. 0.6 */
 
     // The class label you want to detect (may not be available if using standard PhotonVision)
-    private static final String TARGET_CLASS = "coral"; // TODO: change if needed
+    // private static final String TARGET_CLASS = "coral";
 
     StructPublisher<Pose2d> coralPosePublisher = NetworkTableInstance.getDefault()
         .getStructTopic("coralPose", Pose2d.struct).publish();
@@ -58,29 +58,29 @@ public class CoralDetectionSystem extends SubsystemBase {
         camera = new PhotonCamera(cameraName);
         this.swerveSubsystem = swerveSubsystem;
 
-        interpolator.put(1.2, -1, 0, -0.5); // yaw, pitch,,
-        interpolator.put(5, 11.29, 0, -1);
-        interpolator.put(6.89, 18, 0, -1.5);
+        // interpolator.put(1.2, -1, 0, -0.5); // yaw, pitch,,
+        // interpolator.put(5, 11.29, 0, -1);
+        // interpolator.put(6.89, 18, 0, -1.5);
 
-        interpolator.put(14, -1.9, 0.25, -0.5);
-        interpolator.put(14.3, 6, 0.25, -0.75);
-        interpolator.put(14.9, 10.8, 0.25, -1);
-        interpolator.put(14.8, 15.3, 0.25, -1.25);
+        // interpolator.put(14, -1.9, 0.25, -0.5);
+        // interpolator.put(14.3, 6, 0.25, -0.75);
+        // interpolator.put(14.9, 10.8, 0.25, -1);
+        // interpolator.put(14.8, 15.3, 0.25, -1.25);
 
-        interpolator.put(24.64, -2.05, 0.5, -0.5);
-        interpolator.put(24.31, 11.02, 0.5, -1);
-        interpolator.put(23.64, 17.91, 0.5, -1.5);
+        // interpolator.put(24.64, -2.05, 0.5, -0.5);
+        // interpolator.put(24.31, 11.02, 0.5, -1);
+        // interpolator.put(23.64, 17.91, 0.5, -1.5);
 
-        interpolator.put(-7.5, 6.14, -0.25, -0.75);
-        interpolator.put(-4.6, 10.96, -0.25, -1);
-        interpolator.put(-2.8, 14.9, -0.25, -1.25);
+        // interpolator.put(-7.5, 6.14, -0.25, -0.75);
+        // interpolator.put(-4.6, 10.96, -0.25, -1);
+        // interpolator.put(-2.8, 14.9, -0.25, -1.25);
 
-        interpolator.put(-21.54, -0.93, -0.5, -0.5);
-        interpolator.put(-12.15, 10.37, -0.5, -1);
-        interpolator.put(-6.8, 17.19, -0.5, -1.5);
+        // interpolator.put(-21.54, -0.93, -0.5, -0.5);
+        // interpolator.put(-12.15, 10.37, -0.5, -1);
+        // interpolator.put(-6.8, 17.19, -0.5, -1.5);
 
-        interpolator.put(-15, 15.2, 0.25, -1.25);
-        interpolator.put(-1.90, 14.75, -0.25, -1.25);
+        // interpolator.put(-15, 15.2, 0.25, -1.25);
+        // interpolator.put(-1.90, 14.75, -0.25, -1.25);
     }
     // Convets a Rotation3d relitive to the camera to a Translation2d relitive to the robot
     public Translation2d getObjectPos(Rotation3d objRotation) {
@@ -146,34 +146,34 @@ public class CoralDetectionSystem extends SubsystemBase {
     /**
      * @return estimated straight-line distance (Y) to the gamepiece based on area
      */
-    public double getEstimatedDistance() {
-        double area = getArea();
-        if (area <= 0) return -1;
-        Double distance = areaToDistanceMap.get(area);
-        return distance != null ? distance : -1;
-    }
+    // public double getEstimatedDistance() {
+    //     double area = getArea();
+    //     if (area <= 0) return -1;
+    //     Double distance = areaToDistanceMap.get(area);
+    //     return distance != null ? distance : -1;
+    // }
 
     /**
      * @return estimated X offset to the gamepiece based on yaw
      */
-    public double getEstimatedX() {
-        double yaw = getYaw();
-        double pitch = getPitch();
-        double[] xy = interpolator.getInterpolated(yaw, pitch);
-        if (xy == null) return -1;
-        return xy[1];
-    }
+    // public double getEstimatedX() {
+    //     double yaw = getYaw();
+    //     double pitch = getPitch();
+    //     double[] xy = interpolator.getInterpolated(yaw, pitch);
+    //     if (xy == null) return -1;
+    //     return xy[1];
+    // }
 
     /**
      * @return estimated Y offset to the gamepiece based on pitch or area
      */
-    public double getEstimatedY() {
-        double yaw = getYaw();
-        double pitch = getPitch();
-        double[] xy = interpolator.getInterpolated(yaw, pitch);
-        if (xy == null) return -1;
-        return xy[0];
-    }
+    // public double getEstimatedY() {
+    //     double yaw = getYaw();
+    //     double pitch = getPitch();
+    //     double[] xy = interpolator.getInterpolated(yaw, pitch);
+    //     if (xy == null) return -1;
+    //     return xy[0];
+    // }
 
     /** @return the best detected target, or null if none */
     private PhotonTrackedTarget getBestTarget() {
@@ -183,47 +183,50 @@ public class CoralDetectionSystem extends SubsystemBase {
     }
 
     /** @return estimated Pose2d of the gamepiece relative to the robot, or null if not detected */
-    public Translation2d getRobotCoralTranslation() {
-        if (!isGamepieceDetected()) return null;
-        double x = getEstimatedX();
-        double y = getEstimatedY();
-        if (x == -1 || y == -1) return null;
-        robotCoralTranslation = new Translation2d(x, y);
-        return robotCoralTranslation;
-    }
+    // public Translation2d getRobotCoralTranslation() {
+    //     if (!isGamepieceDetected()) return null;
+    //     double x = getEstimatedX();
+    //     double y = getEstimatedY();
+    //     if (x == -1 || y == -1) return null;
+    //     robotCoralTranslation = new Translation2d(x, y);
+    //     return robotCoralTranslation;
+    // }
 
     /**
      * @param robotPose The robot's field pose.
      * @return The field-relative pose of the coral, or null if not detected.
      */
-    public Pose2d getCoralPose(Pose2d robotPose) {
-        Translation2d translation = getRobotCoralTranslation();
-        if (translation != null) {
-            return robotPose.plus(new Transform2d(translation, new Rotation2d()));
-        } else {
-            return null;
-        }
+    // public Pose2d getCoralPose(Pose2d robotPose) {
+    //     Translation2d translation = getRobotCoralTranslation();
+    //     if (translation != null) {
+    //         return robotPose.plus(new Transform2d(translation, new Rotation2d()));
+    //     } else {
+    //         return null;
+    //     }
+    // }
+    public Pose2d getCoralPose() {
+        coralPose = robotPose.transformBy(new Transform2d(robotCoralTranslation, new Rotation2d()));
+        return coralPose;
     }
 
     public void periodic() {
         robotPose = swerveSubsystem.getPose();
-        coralPose = getCoralPose(robotPose);
-        SmartDashboard.putString("Coral Pose", coralPose != null ? coralPose.toString() : "None");
+        // coralPose = getCoralPose(robotPose);
+        // SmartDashboard.putString("Coral Pose", coralPose != null ? coralPose.toString() : "None");
         if (coralPose != null) {
             coralPosePublisher.set(coralPose);
         }
         SmartDashboard.putBoolean("VisionCoralDetected", isGamepieceDetected());
         SmartDashboard.putNumber("Coral Yaw", getYaw());
         SmartDashboard.putNumber("Coral Pitch", getPitch());
-        SmartDashboard.putNumber("Coral Y", getEstimatedY());
-        SmartDashboard.putNumber("Coral X", getEstimatedX());
+        // SmartDashboard.putNumber("Coral Y", getEstimatedY());
+        // SmartDashboard.putNumber("Coral X", getEstimatedX());
 
-        Translation2d coralPose = getObjectPos(new Rotation3d(0, getPitch()*Math.PI/180, getYaw()*Math.PI/180));
+        robotCoralTranslation = getObjectPos(new Rotation3d(0, getPitch()*Math.PI/180, getYaw()*Math.PI/180));
 
         // publish the position of object relitive to the robot
-        SmartDashboard.putNumber("X", coralPose.getX());
-        SmartDashboard.putNumber("Y", coralPose.getY());
+        SmartDashboard.putNumber("robotToCoralX", robotCoralTranslation.getX());
+        SmartDashboard.putNumber("robotToCoralY", robotCoralTranslation.getY());
     }
 
-    // TODO: Add methods to update/populate interpolating maps from calibration data, if needed
 }
