@@ -22,8 +22,6 @@ public class MoveToGamepiece extends Command {
     private final IntakeSubsystem intake;
     private static final double turningConstant = 0.09;
     private static final double coralCenterOffset = 3;
-    private DoubleSupplier leftTrigger;
-
     private static final double speedConstant = 0.8;
     int c = 0;
     
@@ -31,14 +29,11 @@ public class MoveToGamepiece extends Command {
     public MoveToGamepiece(
             SwerveSubsystem swerve,
             CoralDetectionSystem coralDetection,
-            IntakeSubsystem intake,
-            DoubleSupplier leftTrigger
+            IntakeSubsystem intake
     ) {
         this.swerve = swerve;
         this.coralDetection = coralDetection;
         this.intake = intake;
-        this.leftTrigger = leftTrigger;
-
         addRequirements(swerve);
     }
 
@@ -51,7 +46,6 @@ public class MoveToGamepiece extends Command {
             rotationCorrection,
             false
         );
-        new IntakeCommand(intake, leftTrigger, true).schedule();
     }
 
     @Override
@@ -62,8 +56,7 @@ public class MoveToGamepiece extends Command {
             c = 0;
         }
         // End if driver releases assist button or intake detects gamepiece in basket
-        return c>13;
-            // || intake.inBasket();
+        return c>13 || intake.inBasket();
     }
 
     @Override
