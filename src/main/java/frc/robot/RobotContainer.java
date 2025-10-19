@@ -23,6 +23,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -93,8 +94,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -/*SpeedCutOff*/0.3,
-                                                                () -> driverXbox.getLeftX() * -/*SpeedCutOff*/0.3)
+                                                                () -> driverXbox.getLeftY() * -SpeedCutOff,
+                                                                () -> driverXbox.getLeftX() * -SpeedCutOff)
                                                             .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.6)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
@@ -170,10 +171,20 @@ public class RobotContainer
 
   SequentialCommandGroup fullAuto = new SequentialCommandGroup(
     coral1,
-    new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis),
-    coral2,
-    new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis),
-    coral3
+    new ParallelCommandGroup(
+      new SequentialCommandGroup(
+        new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
+        coral2
+      ),
+      new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, robotMode)
+    ),
+    new ParallelCommandGroup(
+      new SequentialCommandGroup(
+        new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
+        coral3
+      ),
+      new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, robotMode)
+    )    
   );
   
 
@@ -260,11 +271,11 @@ public class RobotContainer
       }
     }));
 
-    driverXbox.b().onTrue(new InstantCommand(() -> {
-      if(coralDetectionSystem.isGamepieceDetected()) {
-        new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis).schedule();
-      } 
-    }));
+    // driverXbox.b().onTrue(new InstantCommand(() -> {
+    //   if(coralDetectionSystem.isGamepieceDetected()) {
+    //     new MoveToGamepiece(drivebase, coralDetectionSystem, intake).schedule();
+    //   } 
+    // }));
     
     
 
@@ -502,13 +513,13 @@ driverXbox.rightBumper().whileTrue(
     }, Set.of(drivebase))
 );
 
-// driverXbox.b().onTrue(new InstantCommand(() -> {
-//   if(SpeedCutOff == 1) {
-//      SpeedCutOff = 0.4;
-//   } else {
-//     SpeedCutOff = 1;
-//   }
-//   }));
+driverXbox.b().onTrue(new InstantCommand(() -> {
+  if(SpeedCutOff == 1) {
+     SpeedCutOff = 0.4;
+  } else {
+    SpeedCutOff = 1;
+  }
+  }));
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);
