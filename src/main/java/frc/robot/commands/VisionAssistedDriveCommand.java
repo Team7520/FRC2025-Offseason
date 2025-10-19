@@ -43,15 +43,25 @@ public class VisionAssistedDriveCommand extends Command {
         double driverY = -driverController.getLeftY(); // Forward/backward
         double driverX = -driverController.getLeftX(); // Left/right
         double driverRotation = -driverController.getRightX(); // Rotation
-
+        Rotation2d target = coralDetection.getCoralPose().getRotation();
         // Default: no steering assist
         // double xFieldCorrection = 0.0;
         // double yFieldCorrection = 0.0;
         double rotationCorrection = 0;
+        double thresholdDegrees = 90; // threshold in degrees
+        Rotation2d joystickDirection = new Rotation2d(driverX, driverY);
+        double angleDifference = Math.abs(target.minus(joystickDirection).getRadians());
+        double thresholdRadians = Math.toRadians(thresholdDegrees);
 
+        if (angleDifference < thresholdRadians) {
+            System.out.println("Joystick is in the general direction");
+        } else {
+            System.out.println("Joystick is NOT in the general direction.");
+        }
         if (driverController.getLeftTriggerAxis() > 0.5
             && coralDetection.isGamepieceDetected()
-            && !intake.inBasket()) {
+            && !intake.inBasket()       
+            && angleDifference < thresholdRadians) {
             // double xErrorRobot = coralDetection.robotCoralTranslation.getY();
             // double yErrorRobot = coralDetection.robotCoralTranslation.getX();
             double coralYaw = coralDetection.getYaw();
