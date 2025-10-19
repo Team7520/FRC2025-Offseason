@@ -83,7 +83,8 @@ public class CoralDetectionSystem extends SubsystemBase {
         // interpolator.put(-1.90, 14.75, -0.25, -1.25);
     }
     // Convets a Rotation3d relitive to the camera to a Translation2d relitive to the robot
-    public Translation2d getObjectPos(Rotation3d objRotation) {
+    public Translation2d calculateObjPos() {
+        Rotation3d objRotation = new Rotation3d(0, getPitch()*Math.PI/180, getYaw()*Math.PI/180);
 
         // Correct for camera mounting
         Rotation3d correctedRotation = cameraPose.getRotation().plus(objRotation);
@@ -96,7 +97,7 @@ public class CoralDetectionSystem extends SubsystemBase {
 
         // xDistance = xDistance
 
-        return new Translation2d(xDistance - cameraPose.getX(), yDistance + cameraPose.getY());
+        return new Translation2d((xDistance * 1 - cameraPose.getX()), (yDistance + cameraPose.getY()));
         
     }
 
@@ -205,7 +206,10 @@ public class CoralDetectionSystem extends SubsystemBase {
     //     }
     // }
     public Pose2d getCoralPose() {
-        coralPose = robotPose.transformBy(new Transform2d(robotCoralTranslation, new Rotation2d()));
+        Translation2d coralTranslation = robotPose.transformBy(new Transform2d(calculateObjPos(), new Rotation2d()))
+            .rotateAround(robotPose.getTranslation(), Rotation2d.kCCW_90deg)
+            .getTranslation(); 
+        coralPose = new Pose2d(coralTranslation, robotPose.getRotation());
         return coralPose;
     }
 
@@ -213,6 +217,7 @@ public class CoralDetectionSystem extends SubsystemBase {
         robotPose = swerveSubsystem.getPose();
         // coralPose = getCoralPose(robotPose);
         // SmartDashboard.putString("Coral Pose", coralPose != null ? coralPose.toString() : "None");
+        coralPose = getCoralPose();
         if (coralPose != null) {
             coralPosePublisher.set(coralPose);
         }
@@ -222,7 +227,7 @@ public class CoralDetectionSystem extends SubsystemBase {
         // SmartDashboard.putNumber("Coral Y", getEstimatedY());
         // SmartDashboard.putNumber("Coral X", getEstimatedX());
 
-        robotCoralTranslation = getObjectPos(new Rotation3d(0, getPitch()*Math.PI/180, getYaw()*Math.PI/180));
+        robotCoralTranslation = calculateObjPos();
 
         // publish the position of object relitive to the robot
         SmartDashboard.putNumber("robotToCoralX", robotCoralTranslation.getX());

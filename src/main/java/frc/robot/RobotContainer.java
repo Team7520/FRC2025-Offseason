@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
+
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -21,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
@@ -49,6 +53,7 @@ import frc.robot.commands.L4PlaceCommandAuto;
 import frc.robot.commands.LowAlgaeCommand;
 import frc.robot.commands.ManualElevator;
 import frc.robot.commands.ManualIntake;
+import frc.robot.commands.MoveToGamepiece;
 import frc.robot.commands.PickupCoralCommand;
 import frc.robot.commands.ReadyToPickupCommand;
 import frc.robot.commands.VisionAssistedDriveCommand;
@@ -73,7 +78,7 @@ public class RobotContainer
 {
 
   // Replace with CommandPS4Controller or CommandJoystick if needed
-  final         CommandXboxController driverXbox = new CommandXboxController(0);
+  final CommandXboxController driverXbox = new CommandXboxController(0);
   final CommandXboxController operatorController = new CommandXboxController(1);
   private double SpeedCutOff = 1;
   private boolean sped = false;
@@ -88,8 +93,8 @@ public class RobotContainer
    * Converts driver input into a field-relative ChassisSpeeds that is controlled by angular velocity.
    */
   SwerveInputStream driveAngularVelocity = SwerveInputStream.of(drivebase.getSwerveDrive(),
-                                                                () -> driverXbox.getLeftY() * -SpeedCutOff,
-                                                                () -> driverXbox.getLeftX() * -SpeedCutOff)
+                                                                () -> driverXbox.getLeftY() * -/*SpeedCutOff*/0.3,
+                                                                () -> driverXbox.getLeftX() * -/*SpeedCutOff*/0.3)
                                                             .withControllerRotationAxis(() -> driverXbox.getRightX() * -0.6)
                                                             .deadband(OperatorConstants.DEADBAND)
                                                             .scaleTranslation(0.8)
@@ -158,6 +163,18 @@ public class RobotContainer
   private boolean algaePos = false;
   private String coralLevel = "none";
   private SendableChooser<Command> autoChooser;
+
+  Command coral1 = drivebase.getAutonomousCommand("coral1-source");
+  Command coral2 = drivebase.getAutonomousCommand("source-coral2-source");
+  Command coral3 = drivebase.getAutonomousCommand("source-coral3-source");
+
+  SequentialCommandGroup fullAuto = new SequentialCommandGroup(
+    coral1,
+    new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis),
+    coral2,
+    new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis),
+    coral3
+  );
   
 
   public RobotContainer()
@@ -172,11 +189,11 @@ public class RobotContainer
 
   private void registerAutos() {
     registerNamedCommands();
-
     autoChooser = new SendableChooser<>();
 
     autoChooser.setDefaultOption("one coral", drivebase.getAutonomousCommand("1-coral"));
     autoChooser.addOption("wippee", drivebase.getAutonomousCommand("processor-3-coral"));
+    autoChooser.addOption("3-coral", new PathPlannerAuto(fullAuto));
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 
@@ -241,6 +258,12 @@ public class RobotContainer
         intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
 
       }
+    }));
+
+    driverXbox.b().onTrue(new InstantCommand(() -> {
+      if(coralDetectionSystem.isGamepieceDetected()) {
+        new MoveToGamepiece(drivebase, coralDetectionSystem, intake, driverXbox::getLeftTriggerAxis).schedule();
+      } 
     }));
     
     
@@ -479,13 +502,13 @@ driverXbox.rightBumper().whileTrue(
     }, Set.of(drivebase))
 );
 
-driverXbox.b().onTrue(new InstantCommand(() -> {
-  if(SpeedCutOff == 1) {
-     SpeedCutOff = 0.4;
-  } else {
-    SpeedCutOff = 1;
-  }
-  }));
+// driverXbox.b().onTrue(new InstantCommand(() -> {
+//   if(SpeedCutOff == 1) {
+//      SpeedCutOff = 0.4;
+//   } else {
+//     SpeedCutOff = 1;
+//   }
+//   }));
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);

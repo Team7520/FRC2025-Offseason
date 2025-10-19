@@ -25,9 +25,13 @@ import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
+import com.pathplanner.lib.path.ConstraintsZone;
+import com.pathplanner.lib.path.EventMarker;
 import com.pathplanner.lib.path.GoalEndState;
 import com.pathplanner.lib.path.PathConstraints;
 import com.pathplanner.lib.path.PathPlannerPath;
+import com.pathplanner.lib.path.PointTowardsZone;
+import com.pathplanner.lib.path.RotationTarget;
 import com.pathplanner.lib.path.Waypoint;
 import com.pathplanner.lib.util.DriveFeedforwards;
 import com.pathplanner.lib.util.swerve.SwerveSetpoint;
@@ -55,6 +59,7 @@ import edu.wpi.first.wpilibj.smartdashboard.Field2d;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.button.RobotModeTriggers;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Config;
@@ -62,6 +67,7 @@ import frc.robot.AprilTagMultiCameraVision;
 import frc.robot.AprilTagSystem;
 import frc.robot.Constants;
 import frc.robot.Constants.ApriltagConstants;
+import frc.robot.CoralDetectionSystem;
 import frc.robot.RobotContainer;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.Vision.Cameras;
@@ -82,6 +88,7 @@ public class SwerveSubsystem extends SubsystemBase
 {
   //Change these names based on actual camera names
   public AprilTagSystem aprilTagSystem = new AprilTagSystem();
+  public CoralDetectionSystem coralDetectionSystem = new CoralDetectionSystem("CoralCam", this);
 
   //Matrix for Pose Estimator, tune values here
   private static final Vector<N3> stateStdDevs = VecBuilder.fill(1.5, 1.5, Units.degreesToRadians(5));
@@ -912,4 +919,30 @@ public class SwerveSubsystem extends SubsystemBase
   {
     return swerveDrive;
   }
+
+  public PathPlannerPath Drive2Coral() {
+
+    Pose2d coralPose = coralDetectionSystem.getCoralPose();
+    Pose2d robotPose = getPose();
+    
+    
+    Rotation2d endRotation = new Rotation2d(Math.atan2(coralPose.getY()-robotPose.getY(), coralPose.getX()-robotPose.getX()));
+
+    List<Waypoint> wayPoints = PathPlannerPath.waypointsFromPoses(
+        robotPose,
+        new Pose2d(coralPose.getTranslation(), endRotation)
+    );
+                
+    PathConstraints constraints = new PathConstraints(0.5, 0.5, 2 * Math.PI, 2 * Math.PI); // The constraints for this path.
+            
+    PathPlannerPath path = new PathPlannerPath( 
+        wayPoints,
+        constraints,
+        null, // The ideal starting state, this is only relevant for pre-planned paths, so can be null for on-the-fly paths.
+        new GoalEndState(0.0, coralDetectionSystem.getCoralPose().getRotation()) // Goal end state. You can set a holonomic rotation here. If using a differential drivetrain, the rotation will have no effect.
+    );
+                
+    path.preventFlipping =true;
+    return path;
+  } 
 }
