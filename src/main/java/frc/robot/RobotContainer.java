@@ -36,6 +36,9 @@ import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.AlignToLeftCommand;
+import frc.robot.commands.AlignToLeftFarCommand;
+import frc.robot.commands.AlignToRightCommand;
+import frc.robot.commands.AlignToRightFarCommand;
 import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
@@ -149,6 +152,7 @@ public class RobotContainer
    */
 
   private String mode = "Coral";
+  private String lastAlign = "";
   private Boolean robotMode = false; //false for coral, true for algae
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
   private final ArmSubsystem arm = new ArmSubsystem(() -> robotMode);
@@ -407,26 +411,57 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      if(!arm.checkScoreSide()) {
-        if(coralLevel.equals("L4")) {
-          new L4PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L3")) {
-          new L3PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L2")) {
-          new L2PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
+      Runnable align = null;
+      if ("right".equals(lastAlign)) {
+        align = () -> new AlignToRightFarCommand(drivebase, aprilTagSystem).schedule();
+      } else {
+        align = () -> new AlignToLeftFarCommand(drivebase, aprilTagSystem).schedule();
+      }
+    
+      if (!arm.checkScoreSide()) {
+        if (coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
         } else {
           arm.ejectPiece(0.2).schedule();
-        }  
-      } else if(arm.checkScoreSide()) {
-        if(coralLevel.equals("L4")) {
-          new L4PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L3")) {
-          new L3PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L2")) {
-          new L2PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
+        }
+      } else if (arm.checkScoreSide()) {
+        if (coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
         } else {
           arm.ejectPiece(0.5).schedule();
-        }  
+        }
       }
     }));
 
@@ -434,12 +469,20 @@ public class RobotContainer
 
 // LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
 driverXbox.leftBumper().whileTrue(
-  new AlignToLeftCommand(drivebase, aprilTagSystem)
+    Commands.either(
+        new AlignToLeftFarCommand(drivebase, aprilTagSystem),
+        new AlignToLeftCommand(drivebase, aprilTagSystem),
+        () -> coralLevel.equals("none")
+    ).andThen(() -> lastAlign = "left")
 );
 
 // RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
-driverXbox.leftBumper().whileTrue(
-  new AlignToLeftCommand(drivebase, aprilTagSystem)
+driverXbox.rightBumper().whileTrue(
+    Commands.either(
+        new AlignToRightFarCommand(drivebase, aprilTagSystem),
+        new AlignToRightCommand(drivebase, aprilTagSystem),
+        () -> coralLevel.equals("none")
+    ).andThen(() -> lastAlign = "right")
 );
 
 driverXbox.b().onTrue(new InstantCommand(() -> {
