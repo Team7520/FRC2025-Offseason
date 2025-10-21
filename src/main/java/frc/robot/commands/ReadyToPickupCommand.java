@@ -19,7 +19,7 @@ public class ReadyToPickupCommand extends SequentialCommandGroup {
         } else {
             addCommands(
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
-                new WaitCommand(0.3),
+                new WaitCommand(0.7),
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
 
             );

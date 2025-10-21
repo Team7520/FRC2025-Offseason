@@ -12,7 +12,6 @@ public class PickupCoralCommand extends SequentialCommandGroup {
     public PickupCoralCommand(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean inAuto) {
         if(inAuto) {
             addCommands(
-                arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP),
                 new ParallelCommandGroup(
                     arm.intakePiece(),
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP)
@@ -28,9 +27,9 @@ public class PickupCoralCommand extends SequentialCommandGroup {
                         elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP)
                     ),  
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    new WaitCommand(0.55),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+                    new WaitCommand(0.55)
+                    // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                    // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
                 );    
             } else {
                 addCommands(
@@ -41,9 +40,9 @@ public class PickupCoralCommand extends SequentialCommandGroup {
                         arm.intakePiece()
                     ),
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    new WaitCommand(0.7520),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
+                    new WaitCommand(0.7520)
+                    // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
+                    // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
                 );  
             }
         }

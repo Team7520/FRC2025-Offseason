@@ -39,14 +39,16 @@ public class IntakeCommand extends Command {
         if(!cancelled) {
             intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.GROUND).schedule();
             new WaitCommand(2);
-            intake.runIntake(0.9990);
+            intake.runIntake(1.5);
             
         }
     }
 
     @Override
     public void end(boolean interrupted) {
-        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).alongWith(new InstantCommand(() -> intake.stopAll())).schedule();
+        if(!inAuto) {
+            intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).alongWith(new InstantCommand(() -> intake.stopAll())).schedule();
+        }
         new InstantCommand(() -> intake.stopAll()).schedule();
         
     }

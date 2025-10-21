@@ -87,16 +87,16 @@ public final class Constants
         GROUNDALG(85.0224609375),
         READY(112),
         PICKUP(85),
-        L1(97),
+        L1(126.4),
         L2SCORE(50),
-        L2(62.855712890625),
+        L2(64),
         L3SCORE(110),
-        L3(124.666259765625),
+        L3(127),
         L4(230),
         L4AUTO(228.5),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
-        BARGE(233);
+        BARGE(245);
 
         private final double height;
 
@@ -124,24 +124,22 @@ public final class Constants
       public static final double MAX_ACCELERATION = 2000; // 20 inches per second squared
       public static final double MAX_JERK = 500; // 60 inches per second cubed
       public static final double ALLOWABLE_ERROR = 0.5; // 0.5 inches
-  
       public static final int CURRENT_LIMIT = 150;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
-          DEFAULT(-0.1806640625),
-          PICKUP(1.8),
+          DEFAULT(0.367),
+          PICKUP(-1.68),
           SCORE(0.927),
-          L1(1), //Placeholder, change when tuning
-          L2_3(0.46630859375),
+          L1(-0.958), //Placeholder, change when tuning
+          L2_3(-0.305),//0.46630859375
           FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
-          L4(0.385),
+          L4(-0.24),
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
-          GROUND_ALGAE(1.3),
-          PROCESSOR(1.1),
-          ALGAE(0.74),
+          GROUND_ALGAE(-1.09),
+          PROCESSOR(0.367), //not tuned
+          ALGAE(-0.6),
           FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
-          BARGE(0.06), //Placeholder
+          BARGE(0.367), //not tuned
           FLIPBARGE(2*DEFAULT.getPosition()-BARGE.getPosition()),
-          LOLLYPOP(1.682373046875),
           MOVEPOSSIBLE(1.767),
           FLIPL1(2*DEFAULT.getPosition()-L1.getPosition());
           

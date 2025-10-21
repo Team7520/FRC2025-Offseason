@@ -165,26 +165,168 @@ public class RobotContainer
   private String coralLevel = "none";
   private SendableChooser<Command> autoChooser;
 
-  Command coral1 = drivebase.getAutonomousCommand("coral1-source");
-  Command coral2 = drivebase.getAutonomousCommand("source-coral2-source");
-  Command coral3 = drivebase.getAutonomousCommand("source-coral3-source");
-
-  SequentialCommandGroup fullAuto = new SequentialCommandGroup(
-    coral1,
-    new ParallelCommandGroup(
-      new SequentialCommandGroup(
-        new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
-        coral2
+  PathPlannerAuto fullAuto = new PathPlannerAuto(
+    new SequentialCommandGroup(
+      //Start to F to Source
+      new ParallelCommandGroup(
+        new InstantCommand(() -> intake.setPivotPosition(Constants.IntakeConstants.PivotPosition.GROUND)),
+        new L4Command(arm, elevator, false, true),
+        // Commands.defer(() -> {
+        //   Pose2d robotPose = drivebase.getPose();
+        //   Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+        //   if (tagPose == null) {
+        //       System.out.println("No AprilTag found on field (left bumper)!");
+        //       return new InstantCommand();
+        //   }
+  
+        //   double xOffset = ApriltagConstants.xOffsetLeft;
+        //   double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+  
+        //   // Find translation for left side
+        //   Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+        //   Rotation2d facingTag = offsetPose.getRotation();
+        //   Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+  
+        //   Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+        //   Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+  
+        //   Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+  
+        //   System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
+        //   System.out.println("Current POSE: " + robotPose);
+        //   return new DriveToPoseCommand(
+        //       drivebase, 
+        //       optimalAlign
+        //   );
+        // }, Set.of(drivebase)) 
+        // Commented cuz the our initial left branch got hella touched
+        Commands.defer(() -> {
+          Pose2d robotPose = drivebase.getPose();
+          Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+          if (tagPose == null) {
+              System.out.println("No AprilTag found on field (right bumper)!");
+              return new InstantCommand();
+          }
+  
+          double xOffset = ApriltagConstants.xOffsetRight + 0.03;
+          double yOffset = ApriltagConstants.yOffsetRight - 0.03;
+  
+          // Find translation for right side
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+          Rotation2d facingTag = offsetPose.getRotation();
+          Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+  
+          Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+          Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+  
+          Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+  
+          System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
+  
+          return new DriveToPoseCommand(
+              drivebase,
+              optimalAlign
+          );
+        }, Set.of(drivebase))
       ),
-      new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, robotMode)
-    ),
-    new ParallelCommandGroup(
-      new SequentialCommandGroup(
-        new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
-        coral3
+      new L4PlaceCommand(arm, elevator, false).withTimeout(1.3),
+      new ParallelCommandGroup(
+        new SequentialCommandGroup(
+          new WaitCommand(0.22),
+          new ElevatorDownAuto(arm, elevator),
+          new WaitCommand(0.35),
+          new ReadyToPickupCommand(arm, elevator)
+        ),
+        new PathPlannerAuto("F-Source")
       ),
-      new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, robotMode)
-    )    
+      new ParallelCommandGroup(
+        new SequentialCommandGroup(
+          new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
+          Commands.defer(() -> {
+            Pose2d robotPose = drivebase.getPose();
+            Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+            if (tagPose == null) {
+                System.out.println("No AprilTag found on field (right bumper)!");
+                return new InstantCommand();
+            }
+    
+            double xOffset = ApriltagConstants.xOffsetRight;
+            double yOffset = ApriltagConstants.yOffsetRight;
+    
+            // Find translation for right side
+            Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+            Rotation2d facingTag = offsetPose.getRotation();
+            Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+    
+            Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+            Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+    
+            Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+    
+            System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
+    
+            return new DriveToPoseCommand(
+                drivebase,
+                optimalAlign
+            );
+          }, Set.of(drivebase))
+        ),
+        new SequentialCommandGroup(
+          new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true),
+          new PickupCoralCommand(arm, elevator, true).withTimeout(3.7),
+          new L4Command(arm, elevator, false, false)
+        )
+      ),
+      new L4PlaceCommand(arm, elevator, false).withTimeout(1.3),
+      new ParallelCommandGroup(
+        new SequentialCommandGroup(
+          new WaitCommand(0.33),
+          new ElevatorDownAuto(arm, elevator),
+          new WaitCommand(0.5),
+          new ReadyToPickupCommand(arm, elevator)
+        ),
+        new PathPlannerAuto("D-Source")
+      ),
+      new ParallelCommandGroup(
+        new SequentialCommandGroup(
+          new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
+          Commands.defer(() -> {
+            Pose2d robotPose = drivebase.getPose();
+            Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+            if (tagPose == null) {
+                System.out.println("No AprilTag found on field (left bumper)!");
+                return new InstantCommand();
+            }
+    
+            double xOffset = ApriltagConstants.xOffsetLeft;
+            double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+    
+            // Find translation for left side
+            Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+            Rotation2d facingTag = offsetPose.getRotation();
+            Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+    
+            Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+            Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+    
+            Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+    
+            System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
+            System.out.println("Current POSE: " + robotPose);
+            return new DriveToPoseCommand(
+                drivebase, 
+                optimalAlign
+            );
+          }, Set.of(drivebase))
+        ),
+        new SequentialCommandGroup(
+          new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true),
+          new PickupCoralCommand(arm, elevator, true).withTimeout(3.7),
+          new L4Command(arm, elevator, false, false)
+        )
+      ),
+      new L4PlaceCommand(arm, elevator, false).withTimeout(1.3)
+    )
   );
   
 
@@ -204,7 +346,7 @@ public class RobotContainer
 
     autoChooser.setDefaultOption("one coral", drivebase.getAutonomousCommand("1-coral"));
     autoChooser.addOption("wippee", drivebase.getAutonomousCommand("processor-3-coral"));
-    autoChooser.addOption("3-coral", new PathPlannerAuto(fullAuto));
+    autoChooser.addOption("3-coral", fullAuto);
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 
@@ -295,7 +437,7 @@ public class RobotContainer
   // Default command → pivot follows right joystick Y (scaled down)
   arm.setDefaultCommand(
     new RunCommand(
-        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * 0.2),
+        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * -0.2),
         arm
     )
   );
@@ -414,7 +556,7 @@ public class RobotContainer
         } else if(coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
         } else {
-          arm.ejectPiece(0.2).schedule();
+          arm.ejectPiece(0.7520).schedule();
         }  
       } else if(arm.checkScoreSide()) {
         if(coralLevel.equals("L4")) {
@@ -424,7 +566,7 @@ public class RobotContainer
         } else if(coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
         } else {
-          arm.ejectPiece(0.5).schedule();
+          arm.ejectPiece(0.7520).schedule();
         }  
       }
     }));

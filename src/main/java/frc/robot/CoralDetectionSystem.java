@@ -180,7 +180,10 @@ public class CoralDetectionSystem extends SubsystemBase {
     private PhotonTrackedTarget getBestTarget() {
         PhotonPipelineResult result = camera.getLatestResult();
         if (!result.hasTargets()) return null;
-        return result.targets.stream().filter(t -> t.getDetectedObjectClassID() == ObjectClasses.Coral).collect(Collectors.toList()).get(0);
+        if(result.targets.stream().filter(t -> t.getDetectedObjectClassID() == ObjectClasses.Coral).collect(Collectors.toList()).size() > 0){
+            return result.targets.stream().filter(t -> t.getDetectedObjectClassID() == ObjectClasses.Coral).collect(Collectors.toList()).get(0);
+        }
+        return null;
     }
 
     /** @return estimated Pose2d of the gamepiece relative to the robot, or null if not detected */
