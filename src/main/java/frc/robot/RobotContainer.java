@@ -35,6 +35,10 @@ import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlgaePickupCommand;
+import frc.robot.commands.AlignToLeftCommand;
+import frc.robot.commands.AlignToLeftFarCommand;
+import frc.robot.commands.AlignToRightCommand;
+import frc.robot.commands.AlignToRightFarCommand;
 import frc.robot.commands.BargeCommand;
 import frc.robot.commands.CoralPlaceCommand;
 import frc.robot.commands.DriveToPoseCommand;
@@ -148,6 +152,7 @@ public class RobotContainer
    */
 
   private String mode = "Coral";
+  private String lastAlign = "";
   private Boolean robotMode = false; //false for coral, true for algae
   private final ClimberSubsystem climber = new ClimberSubsystem(35);
   private final ArmSubsystem arm = new ArmSubsystem(() -> robotMode);
@@ -548,111 +553,78 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      if(!arm.checkScoreSide()) {
-        if(coralLevel.equals("L4")) {
-          new L4PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L3")) {
-          new L3PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L2")) {
-          new L2PlaceCommand(arm, elevator, false).andThen(() -> coralLevel = "none").schedule();
+      Runnable align = null;
+      if ("right".equals(lastAlign)) {
+        align = () -> new AlignToRightFarCommand(drivebase, aprilTagSystem).schedule();
+      } else {
+        align = () -> new AlignToLeftFarCommand(drivebase, aprilTagSystem).schedule();
+      }
+    
+      if (!arm.checkScoreSide()) {
+        if (coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, false)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
         } else {
-          arm.ejectPiece(0.7520).schedule();
-        }  
-      } else if(arm.checkScoreSide()) {
-        if(coralLevel.equals("L4")) {
-          new L4PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L3")) {
-          new L3PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
-        } else if(coralLevel.equals("L2")) {
-          new L2PlaceCommand(arm, elevator, true).andThen(() -> coralLevel = "none").schedule();
+          arm.ejectPiece(0.2).schedule();
+        }
+      } else if (arm.checkScoreSide()) {
+        if (coralLevel.equals("L4")) {
+          new L4PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L3")) {
+          new L3PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
+        } else if (coralLevel.equals("L2")) {
+          new L2PlaceCommand(arm, elevator, true)
+            .andThen(() -> coralLevel = "none")
+            .andThen(align)
+            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .schedule();
         } else {
-          arm.ejectPiece(0.7520).schedule();
-        }  
+          arm.ejectPiece(0.5).schedule();
+        }
       }
     }));
 
     operatorController.start().whileTrue(intake.reverseIntake(-0.3));
-    
-  //   driverXbox.leftBumper().whileTrue(new InstantCommand(() -> {
 
-  //     Pose2d tagPose = aprilTagSystem.getClosestTagPose();
-  //     System.out.println("LEFT BUMPER PRESSED");
-  //     if (tagPose != null) {
-  //         Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, ApriltagConstants.xOffsetLeft, ApriltagConstants.yOffsetLeft);
-  //         System.out.println("TARGET POSE:");
-  //         System.out.println(offsetPose);
-  //         Pose2d robotPose = drivebase.getPose();
-  
-  //         new DriveToPoseCommand(
-  //             robotPose,
-  //             offsetPose,
-  //             driverXbox::getLeftX,  // x input
-  //             driverXbox::getLeftY   // y input (forward/back)
-  //         ).schedule();
-  //     }
-  // }));
-  // LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
-  driverXbox.leftBumper().whileTrue(
-    Commands.defer(() -> {
-        Pose2d robotPose = drivebase.getPose();
-        Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
-        if (tagPose == null) {
-            System.out.println("No AprilTag found on field (left bumper)!");
-            return new InstantCommand();
-        }
-
-        double xOffset = ApriltagConstants.xOffsetLeft;
-        double yOffset = ApriltagConstants.yOffsetLeft;
-
-        // Find translation for left side
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
-        Rotation2d facingTag = offsetPose.getRotation();
-        Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
-
-        Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
-        Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
-
-        Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
-
-        System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
-        System.out.println("Current POSE: " + robotPose);
-        return new DriveToPoseCommand(
-            drivebase, 
-            optimalAlign
-        );
-    }, Set.of(drivebase))
+// LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
+driverXbox.leftBumper().whileTrue(
+    Commands.either(
+        new AlignToLeftFarCommand(drivebase, aprilTagSystem),
+        new AlignToLeftCommand(drivebase, aprilTagSystem),
+        () -> coralLevel.equals("none")
+    ).andThen(() -> lastAlign = "left")
 );
 
 // RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
 driverXbox.rightBumper().whileTrue(
-    Commands.defer(() -> {
-        Pose2d robotPose = drivebase.getPose();
-        Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
-        if (tagPose == null) {
-            System.out.println("No AprilTag found on field (right bumper)!");
-            return new InstantCommand();
-        }
-
-        double xOffset = ApriltagConstants.xOffsetRight;
-        double yOffset = ApriltagConstants.yOffsetRight;
-
-        // Find translation for right side
-        Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
-        Rotation2d facingTag = offsetPose.getRotation();
-        Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
-
-        Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
-        Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
-
-        Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
-
-        System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
-
-        return new DriveToPoseCommand(
-            drivebase,
-            optimalAlign
-        );
-    }, Set.of(drivebase))
+    Commands.either(
+        new AlignToRightFarCommand(drivebase, aprilTagSystem),
+        new AlignToRightCommand(drivebase, aprilTagSystem),
+        () -> coralLevel.equals("none")
+    ).andThen(() -> lastAlign = "right")
 );
 
 driverXbox.b().onTrue(new InstantCommand(() -> {
