@@ -261,7 +261,7 @@ public class ArmSubsystem extends SubsystemBase {
     public boolean atTarget(ArmPositions position) {
         double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
-        return error < 0.05;
+        return error < 0.085;
     }
 
     public double pivotAngleRad() {
@@ -335,7 +335,7 @@ public class ArmSubsystem extends SubsystemBase {
         SmartDashboard.putBoolean("Is encoder working", encoder.isConnected());
         SmartDashboard.putNumber("Hold Position", holdPivotRot);
         SmartDashboard.putBoolean("Is Scoring Side Switched?", sideChange);
-        SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.GROUND_ALGAE));
+        SmartDashboard.putBoolean("At Target?", atTarget(ArmConstants.ArmPositions.PICKUP));
         SmartDashboard.putBoolean("Current Mode", modeSupplier.getAsBoolean()); //green for algae
         SmartDashboard.putBoolean("Scoring Side Flipped?", checkScoreSide());
         

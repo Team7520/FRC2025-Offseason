@@ -16,18 +16,17 @@ public class PickupCoralCommand extends SequentialCommandGroup {
                     arm.intakePiece(),
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP)
                 ),
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                new WaitCommand(0.5)
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY)
             );    
         } else {
             if(arm.atTarget(Constants.ArmConstants.ArmPositions.PICKUP)) {
+                System.out.print("At target!");
                 addCommands(
                     new ParallelCommandGroup(
                         arm.intakePiece(),
                         elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP)
                     ),  
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    new WaitCommand(0.55)
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY)
                     // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
                     // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
                 );    
@@ -39,8 +38,7 @@ public class PickupCoralCommand extends SequentialCommandGroup {
                         elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
                         arm.intakePiece()
                     ),
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),
-                    new WaitCommand(0.7520)
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY)
                     // arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
                     // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
                 );  

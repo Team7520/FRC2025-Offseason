@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import frc.robot.CoralDetectionSystem;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
@@ -56,7 +57,7 @@ public class MoveToGamepiece extends Command {
             c = 0;
         }
         // End if driver releases assist button or intake detects gamepiece in basket
-        return c>13 || intake.inBasket();
+        return c>16 || intake.inBasket();
     }
 
     @Override

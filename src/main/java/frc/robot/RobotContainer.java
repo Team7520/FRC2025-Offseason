@@ -35,6 +35,7 @@ import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
 import frc.robot.commands.AlgaePickupCommand;
+import frc.robot.commands.AlignAuto;
 import frc.robot.commands.AlignToLeftCommand;
 import frc.robot.commands.AlignToLeftFarCommand;
 import frc.robot.commands.AlignToRightCommand;
@@ -247,6 +248,7 @@ public class RobotContainer
       new ParallelCommandGroup(
         new SequentialCommandGroup(
           new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
+          new WaitCommand(1),
           Commands.defer(() -> {
             Pose2d robotPose = drivebase.getPose();
             Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
@@ -256,7 +258,7 @@ public class RobotContainer
             }
     
             double xOffset = ApriltagConstants.xOffsetRight;
-            double yOffset = ApriltagConstants.yOffsetRight;
+            double yOffset = ApriltagConstants.yOffsetRight - 0.05;
     
             // Find translation for right side
             Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -270,7 +272,7 @@ public class RobotContainer
     
             System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
     
-            return new DriveToPoseCommand(
+            return new AlignAuto(
                 drivebase,
                 optimalAlign
             );
@@ -279,9 +281,10 @@ public class RobotContainer
         new SequentialCommandGroup(
           new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true),
           new PickupCoralCommand(arm, elevator, true).withTimeout(3.7),
-          new L4Command(arm, elevator, false, false)
+          new L4Command(arm, elevator, false, true)
         )
       ),
+      new WaitCommand(0.3),
       new L4PlaceCommand(arm, elevator, false).withTimeout(1.3),
       new ParallelCommandGroup(
         new SequentialCommandGroup(
@@ -318,7 +321,7 @@ public class RobotContainer
     
             System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
             System.out.println("Current POSE: " + robotPose);
-            return new DriveToPoseCommand(
+            return new AlignAuto(
                 drivebase, 
                 optimalAlign
             );
@@ -410,11 +413,14 @@ public class RobotContainer
     
     driverXbox.leftTrigger().whileTrue(new InstantCommand(() -> {
       if(!intake.inBasket()) {
-        new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false).schedule();
+        new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false).andThen(
+          if(!arm.hasPiece() && intake.inBasket()) {
+            new PickupCoralCommand(arm, elevator, true).withTimeout(3.7)
+          }
+        ).schedule();
         System.out.println("HIHIHIHIH");
       } else {
         intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
-
       }
     }));
 
