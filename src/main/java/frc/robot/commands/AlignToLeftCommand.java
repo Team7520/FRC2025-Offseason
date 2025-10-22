@@ -3,17 +3,22 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 
 import frc.robot.Constants.ApriltagConstants;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.AprilTagSystem;
 
-public class AlignToLeftCommand extends ProxyCommand {
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+
+public class AlignToLeftCommand extends DeferredCommand {
   public AlignToLeftCommand(
       SwerveSubsystem drivebase,
-      AprilTagSystem aprilTagSystem
+      AprilTagSystem aprilTagSystem,
+      Supplier<String> level
   ) {
     super(() -> {
       Pose2d robotPose = drivebase.getPose();
@@ -22,9 +27,11 @@ public class AlignToLeftCommand extends ProxyCommand {
         System.out.println("No AprilTag found on field (left bumper)!");
         return new InstantCommand();
       }
-
       double xOffset = ApriltagConstants.xOffsetLeft;
       double yOffset = ApriltagConstants.yOffsetLeft;
+      if ("none".equals(level.get())){
+        xOffset += 0.3;
+      }
 
       Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
       Rotation2d facingTag = offsetPose.getRotation();
@@ -39,8 +46,6 @@ public class AlignToLeftCommand extends ProxyCommand {
       System.out.println("Current POSE: " + robotPose);
 
       return new DriveToPoseCommand(drivebase, optimalAlign);
-    });
-
-    addRequirements(drivebase);
+    }, Set.of(drivebase));
   }
 }

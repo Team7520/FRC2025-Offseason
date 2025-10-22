@@ -11,16 +11,22 @@ public class L2Command extends SequentialCommandGroup {
     public L2Command(ArmSubsystem arm, ElevatorSubsystem elevator, Boolean flip) {
             if(flip) {
                 addCommands(
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2),
-                    new WaitCommand(0.3),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL2_3)
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL2_3),
+                    new WaitCommand(0.1),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2)
+                    // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2),
+                    // new WaitCommand(0.3),
+                    // arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPL2_3)
                     // arm.eject()
                 );
             } else {
                 addCommands(
-                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2),
-                    new WaitCommand(0.3),
-                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L2_3)
+                    arm.moveToPosition(Constants.ArmConstants.ArmPositions.L2_3),
+                    new WaitCommand(0.1),
+                    elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2)
+                    // elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2),
+                    // new WaitCommand(0.3),
+                    // arm.moveToPosition(Constants.ArmConstants.ArmPositions.L2_3)
                     
                     // arm.eject()
                 );

@@ -3,14 +3,16 @@ package frc.robot.commands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.ProxyCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
 
 import frc.robot.Constants.ApriltagConstants;
 import frc.robot.commands.DriveToPoseCommand;
 import frc.robot.subsystems.swervedrive.SwerveSubsystem;
 import frc.robot.AprilTagSystem;
 
-public class AlignToRightFarCommand extends ProxyCommand {
+import java.util.Set;
+
+public class AlignToRightFarCommand extends DeferredCommand {
   public AlignToRightFarCommand(
       SwerveSubsystem drivebase,
       AprilTagSystem aprilTagSystem
@@ -23,7 +25,7 @@ public class AlignToRightFarCommand extends ProxyCommand {
         return new InstantCommand();
       }
 
-      double xOffset = ApriltagConstants.xOffsetRight + 0.4;
+      double xOffset = ApriltagConstants.xOffsetRight + 0.2;
       double yOffset = ApriltagConstants.yOffsetRight;
 
       Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -38,8 +40,6 @@ public class AlignToRightFarCommand extends ProxyCommand {
       System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
 
       return new DriveToPoseCommand(drivebase, optimalAlign);
-    });
-
-    addRequirements(drivebase);
+    }, Set.of(drivebase));
   }
 }

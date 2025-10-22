@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
+import edu.wpi.first.wpilibj2.command.ProxyCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -390,7 +391,7 @@ public class RobotContainer
           intake,
           driverXbox
       )
-  );
+    );
       
     operatorController.povUp().onTrue(new InstantCommand(() -> {
         if (mode.equals("Coral")) {
@@ -411,19 +412,18 @@ public class RobotContainer
       new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, false).schedule();
     }));
     
-    driverXbox.leftTrigger().whileTrue(new InstantCommand(() -> {
-      if(!intake.inBasket()) {
-        new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false).andThen(
-          if(!arm.hasPiece() && intake.inBasket()) {
-            new PickupCoralCommand(arm, elevator, true).withTimeout(3.7)
-          }
-        ).schedule();
-        System.out.println("HIHIHIHIH");
-      } else {
-        intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP).schedule();
-      }
-    }));
-
+    driverXbox.leftTrigger().whileTrue(
+    new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false)
+        .until(intake::inBasket)
+        .finallyDo(() -> {
+            if (!arm.hasPiece() && intake.inBasket()) {
+                new SequentialCommandGroup(
+                    new ReadyToPickupCommand(arm, elevator),
+                    new PickupCoralCommand(arm, elevator, true).withTimeout(3.7)
+                ).schedule();
+            }
+        })
+  );
     // driverXbox.b().onTrue(new InstantCommand(() -> {
     //   if(coralDetectionSystem.isGamepieceDetected()) {
     //     new MoveToGamepiece(drivebase, coralDetectionSystem, intake).schedule();
@@ -434,28 +434,28 @@ public class RobotContainer
 
 
     // B button → intake until piece detected, then hold
-  // operatorController.b().whileTrue(
-  //   Commands.run(() -> arm.intake(), arm)   // run intake
-  //       .until(arm::hasPiece)              // stop if sensor detects piece
-  //       .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
-  // );
+    // operatorController.b().whileTrue(
+    //   Commands.run(() -> arm.intake(), arm)   // run intake
+    //       .until(arm::hasPiece)              // stop if sensor detects piece
+    //       .finallyDo(interrupted -> arm.captureHoldFromEncoder()) // hold when finished
+    // );
 
-  // A button → eject while held, stop when released
-  // operatorController.a()
-  //   .whileTrue(Commands.run(arm::eject, arm))
-  //   .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
+    // A button → eject while held, stop when released
+    // operatorController.a()
+    //   .whileTrue(Commands.run(arm::eject, arm))
+    //   .onFalse(Commands.runOnce(arm::stopOpenLoop, arm));
 
-  // Default command → pivot follows right joystick Y (scaled down)
-  arm.setDefaultCommand(
-    new RunCommand(
-        () -> arm.updatePivotWithJoystick(operatorController.getRightX() * -0.2),
-        arm
-    )
-  );
+    // Default command → pivot follows right joystick Y (scaled down)
+    arm.setDefaultCommand(
+      new RunCommand(
+          () -> arm.updatePivotWithJoystick(operatorController.getRightX() * -0.2),
+          arm
+      )
+    );
 
 
 
-  intake.setDefaultCommand(
+    intake.setDefaultCommand(
         new ManualIntake(
           intake, 
             () -> operatorController.getRightY()
@@ -559,30 +559,24 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      Runnable align = null;
-      if ("right".equals(lastAlign)) {
-        align = () -> new AlignToRightFarCommand(drivebase, aprilTagSystem).schedule();
-      } else {
-        align = () -> new AlignToLeftFarCommand(drivebase, aprilTagSystem).schedule();
-      }
-    
+      double driveTime = 0.25;
       if (!arm.checkScoreSide()) {
         if (coralLevel.equals("L4")) {
           new L4PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else if (coralLevel.equals("L3")) {
           new L3PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else if (coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else {
@@ -592,19 +586,19 @@ public class RobotContainer
         if (coralLevel.equals("L4")) {
           new L4PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else if (coralLevel.equals("L3")) {
           new L3PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else if (coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(align)
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
             .andThen(new ReadyToPickupCommand(arm, elevator))
             .schedule();
         } else {
@@ -615,31 +609,22 @@ public class RobotContainer
 
     operatorController.start().whileTrue(intake.reverseIntake(-0.3));
 
-// LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
-driverXbox.leftBumper().whileTrue(
-    Commands.either(
-        new AlignToLeftFarCommand(drivebase, aprilTagSystem),
-        new AlignToLeftCommand(drivebase, aprilTagSystem),
-        () -> coralLevel.equals("none")
-    ).andThen(() -> lastAlign = "left")
-);
+    // LEFT BUMPER: Align to left side of nearest tag, optimal facing direction
+    driverXbox.leftBumper().whileTrue(new AlignToLeftCommand(drivebase, aprilTagSystem,() -> coralLevel));
+    driverXbox.leftBumper().onTrue(new InstantCommand(() -> lastAlign = "left"));
 
-// RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
-driverXbox.rightBumper().whileTrue(
-    Commands.either(
-        new AlignToRightFarCommand(drivebase, aprilTagSystem),
-        new AlignToRightCommand(drivebase, aprilTagSystem),
-        () -> coralLevel.equals("none")
-    ).andThen(() -> lastAlign = "right")
-);
+    // RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
+    driverXbox.rightBumper().whileTrue(new AlignToRightCommand(drivebase, aprilTagSystem,() -> coralLevel));
+    driverXbox.rightBumper().onTrue(new InstantCommand(() -> lastAlign = "right"));
 
-driverXbox.b().onTrue(new InstantCommand(() -> {
-  if(SpeedCutOff == 1) {
-     SpeedCutOff = 0.4;
-  } else {
-    SpeedCutOff = 1;
-  }
-  }));
+
+    driverXbox.b().onTrue(new InstantCommand(() -> {
+      if(SpeedCutOff == 1) {
+        SpeedCutOff = 0.4;
+      } else {
+        SpeedCutOff = 1;
+      }
+    }));
 
 
     Command driveFieldOrientedDirectAngle      = drivebase.driveFieldOriented(driveDirectAngle);

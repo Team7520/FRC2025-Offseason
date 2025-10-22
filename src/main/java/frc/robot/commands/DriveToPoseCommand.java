@@ -76,6 +76,7 @@ public class DriveToPoseCommand extends Command {
     @Override
     public void end(boolean interrupted) {
         sequentialCommand.end(interrupted);
+        drivebase.drive(new Translation2d(0, 0), 0, true);
     }
 
     @Override
