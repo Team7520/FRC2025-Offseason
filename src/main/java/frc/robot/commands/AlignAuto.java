@@ -45,14 +45,14 @@ public class AlignAuto extends Command {
             targetPose
         );
 
-        PathConstraints constraints = new PathConstraints(2, 2, 4 * Math.PI, 4 * Math.PI);
+        PathConstraints constraints = new PathConstraints(1.3, 1.3, 4 * Math.PI, 4 * Math.PI);
 
         GoalEndState goalEndState = new GoalEndState(
             0.0,
             targetPose.getRotation()
         );
 
-        ConstraintsZone zones = new ConstraintsZone(50, 100, new PathConstraints(1, 1, 4 * Math.PI, 4 * Math.PI));
+        ConstraintsZone zones = new ConstraintsZone(40, 100, new PathConstraints(1, 1, 4 * Math.PI, 4 * Math.PI));
         List<RotationTarget> lst_rt = Arrays.asList();
         List<ConstraintsZone> lst_cz = Arrays.asList(zones);
         List<PointTowardsZone> lst_ptz = Arrays.asList();

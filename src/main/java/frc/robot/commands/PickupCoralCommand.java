@@ -33,7 +33,6 @@ public class PickupCoralCommand extends SequentialCommandGroup {
             } else {
                 addCommands(
                     new ReadyToPickupCommand(arm, elevator),
-                    new WaitCommand(0.3),
                     new ParallelCommandGroup(
                         elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PICKUP),
                         arm.intakePiece()

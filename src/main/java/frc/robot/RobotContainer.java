@@ -215,7 +215,7 @@ public class RobotContainer
               return new InstantCommand();
           }
   
-          double xOffset = ApriltagConstants.xOffsetRight + 0.03;
+          double xOffset = ApriltagConstants.xOffsetRight + 0.075;
           double yOffset = ApriltagConstants.yOffsetRight - 0.03;
   
           // Find translation for right side
@@ -282,6 +282,7 @@ public class RobotContainer
         new SequentialCommandGroup(
           new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true),
           new PickupCoralCommand(arm, elevator, true).withTimeout(3.7),
+          new WaitCommand(0.5),
           new L4Command(arm, elevator, false, true)
         )
       ),
@@ -417,10 +418,7 @@ public class RobotContainer
         .until(intake::inBasket)
         .finallyDo(() -> {
             if (!arm.hasPiece() && intake.inBasket()) {
-                new SequentialCommandGroup(
-                    new ReadyToPickupCommand(arm, elevator),
-                    new PickupCoralCommand(arm, elevator, true).withTimeout(3.7)
-                ).schedule();
+                new PickupCoralCommand(arm, elevator, false).withTimeout(3.7).schedule();
             }
         })
   );

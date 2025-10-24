@@ -93,7 +93,7 @@ public final class Constants
         L3SCORE(110),
         L3(127),
         L4(230),
-        L4AUTO(228.5),
+        L4AUTO(236),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
         BARGE(245);
@@ -127,7 +127,7 @@ public final class Constants
       public static final int CURRENT_LIMIT = 150;
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(0.367),
-          PICKUP(-1.68),
+          PICKUP(-1.707),
           SCORE(0.927),
           L1(-0.958), //Placeholder, change when tuning
           L2_3(-0.305),//0.46630859375
