@@ -418,7 +418,7 @@ public class RobotContainer
         .until(intake::inBasket)
         .finallyDo(() -> {
             if (!arm.hasPiece() && intake.inBasket()) {
-                new PickupCoralCommand(arm, elevator, false).withTimeout(3.7).schedule();
+                new PickupCoralCommand(arm, elevator, false).withTimeout(2).schedule();
             }
         })
   );
@@ -557,25 +557,22 @@ public class RobotContainer
     operatorController.rightBumper().onTrue(arm.changeScoreSide());
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
-      double driveTime = 0.25;
+      double driveTime = 0.1;
       if (!arm.checkScoreSide()) {
         if (coralLevel.equals("L4")) {
           new L4PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else if (coralLevel.equals("L3")) {
           new L3PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else if (coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else {
           arm.ejectPiece(0.2).schedule();
@@ -584,20 +581,17 @@ public class RobotContainer
         if (coralLevel.equals("L4")) {
           new L4PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else if (coralLevel.equals("L3")) {
           new L3PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else if (coralLevel.equals("L2")) {
           new L2PlaceCommand(arm, elevator, true)
             .andThen(() -> coralLevel = "none")
-            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(1,0), 0,false), drivebase).withTimeout(driveTime))
-            .andThen(new ReadyToPickupCommand(arm, elevator))
+            .andThen(Commands.run(() -> drivebase.drive(new Translation2d(-1.5,0), 0,false), drivebase).withTimeout(driveTime).alongWith(new ReadyToPickupCommand(arm, elevator)))
             .schedule();
         } else {
           arm.ejectPiece(0.5).schedule();

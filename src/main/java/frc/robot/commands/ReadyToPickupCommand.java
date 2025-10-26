@@ -2,6 +2,10 @@ package frc.robot.commands;
 
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ElevatorSubsystem;
+
+import java.io.SequenceInputStream;
+
+import edu.wpi.first.wpilibj2.command.ParallelCommandGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
@@ -12,7 +16,7 @@ public class ReadyToPickupCommand extends SequentialCommandGroup {
         if(elevator.getPositionDouble() > Constants.ElevatorConstants.ElevatorPosition.READY.getHeight()) {
             addCommands(
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.READY),  
-                new WaitCommand(1.2),
+                //new WaitCommand(0),
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.PICKUP)
 
             );
