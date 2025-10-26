@@ -30,6 +30,8 @@ public class L4Command extends SequentialCommandGroup {
                             arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
                             new SequentialCommandGroup(
                                 new WaitCommand(0.35),
+                                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4First),
+                                new WaitCommand(0.8),
                                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
                             )
                         )               

@@ -12,7 +12,7 @@ public class ProcessorAlgae extends SequentialCommandGroup {
         addCommands(
             elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.PROCESSOR),
             new WaitCommand(0.3),
-            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PROCESSOR)
+            arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE)
         );
         
     }

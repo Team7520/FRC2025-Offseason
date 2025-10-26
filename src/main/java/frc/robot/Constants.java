@@ -83,7 +83,7 @@ public final class Constants
     public static final int CURRENT_LIMIT = 90;
     public static enum ElevatorPosition {
         GROUND(10),
-        PROCESSOR(120),
+        PROCESSOR(15),
         GROUNDALG(85.0224609375),
         READY(112),
         PICKUP(85),
@@ -92,7 +92,8 @@ public final class Constants
         L2(64),
         L3SCORE(110),
         L3(127),
-        L4(230),
+        L4(210),
+        L4First(230),
         L4AUTO(236),
         LOWALG(95.2470703125), 
         HIGHALG(173.50126953125),
@@ -128,11 +129,11 @@ public final class Constants
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(0.367),
           PICKUP(-1.707),
-          SCORE(0.927),
+          SCORE(-0.45),
           L1(-0.958), //Placeholder, change when tuning
-          L2_3(-0.305),//0.46630859375
+          L2_3(-0.23),//0.46630859375
           FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
-          L4(-0.24),
+          L4(-0.125),
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
           GROUND_ALGAE(-1.09),
           PROCESSOR(0.367), //not tuned

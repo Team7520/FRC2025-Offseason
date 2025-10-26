@@ -13,14 +13,14 @@ public class L2PlaceCommand extends SequentialCommandGroup {
         if(flip) {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPALGAE),
-                arm.ejectPiece(0.2),
+                arm.ejectPiece(0.3),
                 new WaitCommand(0.5),
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
             );
         } else {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
-                arm.ejectPiece(0.2),
+                arm.ejectPiece(0.3),
                 new WaitCommand(0.5),
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)
             );
