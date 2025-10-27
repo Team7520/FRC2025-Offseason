@@ -39,6 +39,7 @@ import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.AlignAuto;
 import frc.robot.commands.AlignToLeftCommand;
 import frc.robot.commands.AlignToLeftFarCommand;
+import frc.robot.commands.AlignToMiddleCommand;
 import frc.robot.commands.AlignToRightCommand;
 import frc.robot.commands.AlignToRightFarCommand;
 import frc.robot.commands.BargeCommand;
@@ -558,7 +559,9 @@ public class RobotContainer
 
     operatorController.rightTrigger().onTrue(new InstantCommand(() -> {
       double driveTime = 0.1;
-      if (!arm.checkScoreSide()) {
+      if (mode.equals("Algae")){
+        arm.ejectPiece(1).schedule();
+      } else if (!arm.checkScoreSide()) {
         if (coralLevel.equals("L4")) {
           new L4PlaceCommand(arm, elevator, false)
             .andThen(() -> coralLevel = "none")
@@ -607,8 +610,10 @@ public class RobotContainer
 
     // RIGHT BUMPER: Align to right side of nearest tag, optimal facing direction
     driverXbox.rightBumper().whileTrue(new AlignToRightCommand(drivebase, aprilTagSystem,() -> coralLevel));
+
     driverXbox.rightBumper().onTrue(new InstantCommand(() -> lastAlign = "right"));
 
+    driverXbox.rightTrigger().onTrue(new AlignToMiddleCommand(drivebase, aprilTagSystem,() -> coralLevel));
 
     driverXbox.b().onTrue(new InstantCommand(() -> {
       if(SpeedCutOff == 1) {

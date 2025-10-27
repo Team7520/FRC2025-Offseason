@@ -250,6 +250,10 @@ public class ArmSubsystem extends SubsystemBase {
         return Commands.run(() -> setPosition(position), this).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
     }
 
+    public Command moveToPositionWithSpeed(ArmPositions position, double speed) {
+        return Commands.run(() -> setPositionWithSpeed(position,speed), this).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
+    }
+
     public Command moveWhileRolling(ArmPositions position) {
         return Commands.run(() -> setPosition(position), this).alongWith(new InstantCommand(() -> eject(0.5))).until(() -> atTarget(position)).andThen(() -> startHoldPivot());
     }
@@ -257,7 +261,7 @@ public class ArmSubsystem extends SubsystemBase {
     public Command moveWhileIntake(ArmPositions position) {
         return Commands.run(() -> setPosition(position), this).until(() -> atTarget(position)).andThen(() -> intakePiece()).andThen(() -> captureHoldFromEncoder());
     }
-    
+
     public boolean atTarget(ArmPositions position) {
         double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
@@ -278,6 +282,11 @@ public class ArmSubsystem extends SubsystemBase {
         // }
         armPosition = position.getPosition();
         pivot.setControl(pivotPosReq.withPosition(armPosition));
+    }
+
+    public void setPositionWithSpeed(ArmConstants.ArmPositions position, double speed) {
+        armPosition = position.getPosition();
+        pivot.setControl(pivotPosReq.withPosition(armPosition).withVelocity(speed));
     }
     
     public Command changeScoreSide() {

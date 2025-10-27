@@ -135,7 +135,7 @@ public final class Constants
           FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
           L4(-0.125),
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
-          GROUND_ALGAE(-1.09),
+          GROUND_ALGAE(-1.07),
           PROCESSOR(0.367), //not tuned
           ALGAE(-0.6),
           FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
