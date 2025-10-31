@@ -211,14 +211,14 @@ public class RobotContainer
           Pose2d robotPose = drivebase.getPose();
           Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
           if (tagPose == null) {
-              System.out.println("No AprilTag found on field (right bumper)!");
+              System.out.println("No AprilTag found on field (left bumper)!");
               return new InstantCommand();
           }
   
-          double xOffset = ApriltagConstants.xOffsetRight + 0.075;
-          double yOffset = ApriltagConstants.yOffsetRight - 0.03;
+          double xOffset = ApriltagConstants.xOffsetLeft + 0.05;
+          double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
   
-          // Find translation for right side
+          // Find translation for left side
           Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
           Rotation2d facingTag = offsetPose.getRotation();
           Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
@@ -228,10 +228,10 @@ public class RobotContainer
   
           Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
   
-          System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
-  
+          System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
+          System.out.println("Current POSE: " + robotPose);
           return new DriveToPoseCommand(
-              drivebase,
+              drivebase, 
               optimalAlign
           );
         }, Set.of(drivebase))
@@ -249,12 +249,12 @@ public class RobotContainer
       new ParallelCommandGroup(
         new SequentialCommandGroup(
           new MoveToGamepiece(drivebase, coralDetectionSystem, intake),
-          new WaitCommand(1),
+          new WaitCommand(0.65),
           Commands.defer(() -> {
             Pose2d robotPose = drivebase.getPose();
             Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
             if (tagPose == null) {
-                System.out.println("No AprilTag found on field (right bumper)!");
+                System.out.println("No AprilTag found on field(right bumper)!");
                 return new InstantCommand();
             }
     
@@ -332,7 +332,7 @@ public class RobotContainer
         new SequentialCommandGroup(
           new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, true),
           new PickupCoralCommand(arm, elevator, true).withTimeout(3.7),
-          new L4Command(arm, elevator, false, false)
+          new L4Command(arm, elevator, false, true)
         )
       ),
       new L4PlaceCommand(arm, elevator, false).withTimeout(1.3)

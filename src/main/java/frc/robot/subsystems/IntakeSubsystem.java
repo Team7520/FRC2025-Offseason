@@ -69,7 +69,7 @@ public class IntakeSubsystem extends SubsystemBase {
         pivotConfig.idleMode(IdleMode.kBrake);
         pivotConfig.closedLoop
             .feedbackSensor(FeedbackSensor.kPrimaryEncoder)
-            .p(0.4) // tune
+            .p(0.6) // tune
             .i(0)
             .d(0)
             .outputRange(-1, 1);

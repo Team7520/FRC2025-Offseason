@@ -15,26 +15,34 @@ public class L4Command extends SequentialCommandGroup {
                     elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4) ,  
                     new WaitCommand(1), 
                     arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4)               
-                        // arm.eject()
+                    // arm.eject()
                 );
             } else {
                 if(inAuto) {
                     addCommands(
-                        arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
-                        elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4AUTO)                       
-                        // arm.eject()
-                    );
-                } else {
-                    addCommands(
                         new ParallelCommandGroup(
                             arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4),
                             new SequentialCommandGroup(
-                                new WaitCommand(0.35),
+                                new WaitCommand(0.1),
                                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4First),
                                 new WaitCommand(0.8),
                                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
                             )
-                        )               
+                        )
+                    );
+                } else {
+                    addCommands(
+                        arm.moveToPosition(Constants.ArmConstants.ArmPositions.PREL4),
+                        new ParallelCommandGroup(
+                            new SequentialCommandGroup(
+                                new WaitCommand(0.1),
+                                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4First),
+                                new WaitCommand(0.8),
+                                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
+                            )
+                        ),
+                        new WaitCommand(0.5406),
+                        arm.moveToPosition(Constants.ArmConstants.ArmPositions.L4)          
                         // arm.eject()
                     );
                 }

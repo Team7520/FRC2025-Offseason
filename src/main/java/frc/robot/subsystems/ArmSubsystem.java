@@ -261,7 +261,7 @@ public class ArmSubsystem extends SubsystemBase {
     public boolean atTarget(ArmPositions position) {
         double current = encoder.getPosition().getValueAsDouble();
         double error = Math.abs(position.getPosition() - current);
-        return error < 0.085;
+        return error < 0.1;
     }
 
     public double pivotAngleRad() {

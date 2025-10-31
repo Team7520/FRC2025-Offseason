@@ -45,7 +45,7 @@ public class AlignAuto extends Command {
             targetPose
         );
 
-        PathConstraints constraints = new PathConstraints(1.3, 1.3, 4 * Math.PI, 4 * Math.PI);
+        PathConstraints constraints = new PathConstraints(2, 2, 4 * Math.PI, 4 * Math.PI);
 
         GoalEndState goalEndState = new GoalEndState(
             0.0,

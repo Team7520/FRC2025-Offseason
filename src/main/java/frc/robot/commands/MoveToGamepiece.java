@@ -23,7 +23,7 @@ public class MoveToGamepiece extends Command {
     private final IntakeSubsystem intake;
     private static final double turningConstant = 0.09;
     private static final double coralCenterOffset = 3;
-    private static final double speedConstant = 0.8;
+    private static final double speedConstant = 0.85;
     int c = 0;
     
 
@@ -43,7 +43,7 @@ public class MoveToGamepiece extends Command {
         double coralYaw = coralDetection.getYaw();
         double rotationCorrection = (coralYaw-coralCenterOffset)*-turningConstant;
         swerve.drive(
-            new Translation2d(-Math.max(Math.abs(1.5),Math.abs(1.5))*speedConstant,0),
+            new Translation2d(-Math.max(Math.abs(1.8),Math.abs(1.8))*speedConstant,0),
             rotationCorrection,
             false
         );
@@ -57,7 +57,7 @@ public class MoveToGamepiece extends Command {
             c = 0;
         }
         // End if driver releases assist button or intake detects gamepiece in basket
-        return c>16 || intake.inBasket();
+        return c>14 || intake.inBasket();
     }
 
     @Override
