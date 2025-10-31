@@ -1,0 +1,47 @@
+package frc.robot.commands;
+
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.DeferredCommand;
+
+import frc.robot.Constants.ApriltagConstants;
+import frc.robot.commands.DriveToPoseCommand;
+import frc.robot.subsystems.swervedrive.SwerveSubsystem;
+import frc.robot.AprilTagSystem;
+
+import java.util.Set;
+import java.util.function.BooleanSupplier;
+import java.util.function.Supplier;
+
+public class AlignToMiddleCommand extends DeferredCommand {
+  public AlignToMiddleCommand(
+      SwerveSubsystem drivebase,
+      AprilTagSystem aprilTagSystem,
+      Supplier<String> level
+  ) {
+    super(() -> {
+      Pose2d robotPose = drivebase.getPose();
+      Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+      if (tagPose == null) {
+        System.out.println("No AprilTag found on field (right trigger)!");
+        return new InstantCommand();
+      }
+      double xOffset = 0.5;
+      double yOffset = 0;
+
+      Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+      Rotation2d facingTag = offsetPose.getRotation();
+      Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+
+      Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+      Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+
+      Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+
+      System.out.println("Driving to OPTIMAL RIGHT align pose: " + optimalAlign);
+
+      return new DriveToPoseCommand(drivebase, optimalAlign);
+    }, Set.of(drivebase));
+  }
+}
