@@ -173,6 +173,62 @@ public class RobotContainer
   private String coralLevel = "none";
   private SendableChooser<Command> autoChooser;
 
+  PathPlannerAuto middleAuto = new PathPlannerAuto(
+    new SequentialCommandGroup(
+      new ParallelCommandGroup(
+        Commands.defer(() -> {
+          Pose2d robotPose = drivebase.getPose();
+          Pose2d tagPose = aprilTagSystem.getNearestTagPose(robotPose);
+          if (tagPose == null) {
+              System.out.println("No AprilTag found on field (left bumper)!");
+              return new InstantCommand();
+          }
+  
+          double xOffset = ApriltagConstants.xOffsetLeft + 0.05;
+          double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+  
+          // Find translation for left side
+          Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
+          Rotation2d facingTag = offsetPose.getRotation();
+          Rotation2d facingAway = facingTag.rotateBy(Rotation2d.fromDegrees(180));
+  
+          Pose2d candidateFront = new Pose2d(offsetPose.getTranslation(), facingTag);
+          Pose2d candidateBack  = new Pose2d(offsetPose.getTranslation(), facingAway);
+  
+          Pose2d optimalAlign = aprilTagSystem.getOptimalAlignPose(robotPose, candidateFront, candidateBack);
+  
+          System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
+          System.out.println("Current POSE: " + robotPose);
+          return new DriveToPoseCommand(
+              drivebase, 
+              optimalAlign
+          );
+        }, Set.of(drivebase)),
+        new L4Command(arm, elevator, false, true)
+      ),
+      new L4PlaceCommand(arm, elevator, false).withTimeout(1.3),
+      new ParallelCommandGroup(
+        new PathPlannerAuto("score2Back"),
+        new SequentialCommandGroup(
+          new WaitCommand(0.4),
+          new HighAlgaeCommand(arm, elevator, true)
+        )
+      ),
+      new ParallelCommandGroup(
+        new AlignToMiddleCommand(drivebase, aprilTagSystem,() -> coralLevel),
+        new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, false)
+      ),
+      new ParallelCommandGroup(
+        new PathPlannerAuto("2barge"),
+        new SequentialCommandGroup(
+          new WaitCommand(0.5),
+          new BargeCommand(arm, elevator, true)
+        )
+      ),
+      new InstantCommand(() -> arm.ejectPiece(1))
+    )
+  );
+
   PathPlannerAuto fullAuto = new PathPlannerAuto(
     new SequentialCommandGroup(
       //Start to F to Source
@@ -358,6 +414,7 @@ public class RobotContainer
     autoChooser.setDefaultOption("one coral", drivebase.getAutonomousCommand("1-coral"));
     autoChooser.addOption("wippee", drivebase.getAutonomousCommand("processor-3-coral"));
     autoChooser.addOption("3-coral", fullAuto);
+    autoChooser.addOption("middle with barge", middleAuto);
     SmartDashboard.putData("AutoPaths", autoChooser);
   }
 

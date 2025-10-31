@@ -14,15 +14,15 @@ public class BargeCommand extends SequentialCommandGroup {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.BARGE),
-                new WaitCommand(0.3),
-                arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPBARGE)        
+                new WaitCommand(0.3)
+                // arm.moveToPosition(Constants.ArmConstants.ArmPositions.FLIPBARGE)        
             );
         } else {
             addCommands(
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT),
                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.BARGE),
-                new WaitCommand(0.3),
-                arm.moveToPosition(Constants.ArmConstants.ArmPositions.BARGE)        
+                new WaitCommand(0.3)
+                // arm.moveToPosition(Constants.ArmConstants.ArmPositions.BARGE)        
             );
         }
         

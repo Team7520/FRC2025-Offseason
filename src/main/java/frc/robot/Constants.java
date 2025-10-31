@@ -140,7 +140,7 @@ public final class Constants
           PROCESSOR(0.367), //not tuned
           ALGAE(-0.6),
           FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
-          BARGE(0.367), //not tuned
+          BARGE(0.1), //not tuned
           FLIPBARGE(2*DEFAULT.getPosition()-BARGE.getPosition()),
           MOVEPOSSIBLE(1.767),
           FLIPL1(2*DEFAULT.getPosition()-L1.getPosition());
