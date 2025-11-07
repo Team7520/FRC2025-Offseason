@@ -85,10 +85,10 @@ public final class Constants
         GROUND(10),
         PROCESSOR(15),
         GROUNDALG(85.0224609375),
-        READY(112),
-        PICKUP(85),
+        READY(113),
+        PICKUP(91),
         L1(126.4),
-        L2SCORE(50),
+        L2SCORE(40),
         L2(64),
         L3SCORE(110),
         L3(127),
@@ -114,7 +114,6 @@ public final class Constants
 
     public static class ArmConstants {
       public static final double PIVOT_HORIZONTAL_OFFSET_ROT = 0.155029;
-
       public static final int ROLLER_CAN_ID = 24;
       public static final int LASER_CAN_ID = 20;
       public static final int PIVOT_CAN_ID = 33;
@@ -129,16 +128,16 @@ public final class Constants
       public static enum ArmPositions { //Remove unneeded ones later, for now just adding everything that comes to mind
           DEFAULT(0.367),
           PREL4(-1.325),
-          PICKUP(-1.68),// -1.707
+          PICKUP(-1.71),// -1.707
           SCORE(-0.45),
-          L1(-0.958), //Placeholder, change when tuning
-          L2_3(-0.23),//0.46630859375
+          L1(-0.7520), //Placeholder, change when tuning
+          L2_3(-0.1690),//0.46630859375
           FLIPL2_3(2*DEFAULT.getPosition()-L2_3.getPosition()),
-          L4(-0.125),
+          L4(-0.07),
           FLIPL4(2*DEFAULT.getPosition()-L4.getPosition()),
           GROUND_ALGAE(-1.07),
           PROCESSOR(0.367), //not tuned
-          ALGAE(-0.6),
+          ALGAE(-0.55),
           FLIPALGAE(2*DEFAULT.getPosition()-ALGAE.getPosition()),  
           BARGE(0.1), //not tuned
           FLIPBARGE(2*DEFAULT.getPosition()-BARGE.getPosition()),
@@ -159,10 +158,10 @@ public final class Constants
       }
     }
     public static class ApriltagConstants{
-      public static final double yOffsetRight = 0.15;
-      public static final double xOffsetRight = 0.51;
-      public static final double yOffsetLeft = -0.2; //0.17
-      public static final double xOffsetLeft = 0.52; //0.6
+      public static final double yOffsetRight = 0.12;
+      public static final double xOffsetRight = 0.485;
+      public static final double yOffsetLeft = -0.16; //0.17
+      public static final double xOffsetLeft = 0.51; //0.6
 
     }
 

@@ -35,6 +35,7 @@ import frc.robot.Constants.ApriltagConstants;
 import frc.robot.Constants.ArmConstants.ArmPositions;
 import frc.robot.Constants.ElevatorConstants.ElevatorPosition;
 import frc.robot.Constants.OperatorConstants;
+import frc.robot.commands.AlgaeCarryCommand;
 import frc.robot.commands.AlgaePickupCommand;
 import frc.robot.commands.AlignAuto;
 import frc.robot.commands.AlignToLeftCommand;
@@ -184,8 +185,8 @@ public class RobotContainer
               return new InstantCommand();
           }
   
-          double xOffset = ApriltagConstants.xOffsetLeft + 0.05;
-          double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+          double xOffset = ApriltagConstants.xOffsetLeft;
+          double yOffset = ApriltagConstants.yOffsetLeft;
   
           // Find translation for left side
           Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -211,7 +212,7 @@ public class RobotContainer
         new PathPlannerAuto("score2Back"),
         new SequentialCommandGroup(
           new WaitCommand(0.4),
-          new HighAlgaeCommand(arm, elevator, true)
+          new HighAlgaeCommand(arm, elevator, false)
         )
       ),
       new ParallelCommandGroup(
@@ -272,8 +273,8 @@ public class RobotContainer
               return new InstantCommand();
           }
   
-          double xOffset = ApriltagConstants.xOffsetLeft + 0.05;
-          double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+          double xOffset = ApriltagConstants.xOffsetLeft;
+          double yOffset = ApriltagConstants.yOffsetLeft - 0.03;
   
           // Find translation for left side
           Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -287,7 +288,7 @@ public class RobotContainer
   
           System.out.println("Driving to OPTIMAL LEFT align pose: " + optimalAlign);
           System.out.println("Current POSE: " + robotPose);
-          return new DriveToPoseCommand(
+          return new AlignAuto(
               drivebase, 
               optimalAlign
           );
@@ -316,7 +317,7 @@ public class RobotContainer
             }
     
             double xOffset = ApriltagConstants.xOffsetRight;
-            double yOffset = ApriltagConstants.yOffsetRight - 0.05;
+            double yOffset = ApriltagConstants.yOffsetRight;
     
             // Find translation for right side
             Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -366,7 +367,7 @@ public class RobotContainer
             }
     
             double xOffset = ApriltagConstants.xOffsetLeft;
-            double yOffset = ApriltagConstants.yOffsetLeft + 0.05;
+            double yOffset = ApriltagConstants.yOffsetLeft;
     
             // Find translation for left side
             Pose2d offsetPose = aprilTagSystem.getOffsetPose(tagPose, xOffset, yOffset);
@@ -467,9 +468,9 @@ public class RobotContainer
 
     operatorController.povDown().onTrue(new InstantCommand(() -> intake.manaulSetPos()));
 
-    operatorController.leftTrigger().whileTrue(new InstantCommand(() -> {
-      new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, false).schedule();
-    }));
+    operatorController.leftTrigger().whileTrue(
+      new HandIntakeCommand(arm, operatorController::getLeftTriggerAxis, false)
+    );
     
     driverXbox.leftTrigger().whileTrue(
     new IntakeCommand(intake, driverXbox::getLeftTriggerAxis, false)
@@ -527,10 +528,14 @@ public class RobotContainer
     driverXbox.x()
         .whileTrue(new RunCommand(() -> climber.setPower(0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+
+    driverXbox.x().onTrue(intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP));
     
     driverXbox.y()
         .whileTrue(new RunCommand(() -> climber.setPower(-0.8), climber))
         .onFalse(new RunCommand(() -> climber.holdPosition(), climber));
+
+    driverXbox.y().onTrue(intake.setPivotPositionCommand(Constants.IntakeConstants.PivotPosition.UP));
       
     // driverXbox.b().onTrue(/*new TurnToAngleCommand(drivebase, drivebase.getPose().getRotation().plus(coralDetection.getYawError())).andThen*/(new DriveToPoseCommand(drivebase, coralDetection.getCoralPos(drivebase.getPose()))));
     //driverXbox.x().onTrue(elevator.moveAndWaitToPosition(ElevatorPosition.L4));
@@ -596,7 +601,7 @@ public class RobotContainer
 
     operatorController.leftBumper().onTrue(new InstantCommand(() -> {
       if(arm.algaePos()) {
-        arm.moveToPosition(Constants.ArmConstants.ArmPositions.DEFAULT).andThen(() -> elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L2SCORE)).andThen(() -> arm.setAlgaePos(false)).schedule();
+        new AlgaeCarryCommand(arm, elevator).andThen(() -> arm.setAlgaePos(false)).schedule();
       } else if(intake.inBasket()) {
         new PickupCoralCommand(arm, elevator, false).withTimeout(3.7).schedule();
       } else {

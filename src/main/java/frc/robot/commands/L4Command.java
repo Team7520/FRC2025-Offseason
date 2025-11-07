@@ -32,12 +32,12 @@ public class L4Command extends SequentialCommandGroup {
                     );
                 } else {
                     addCommands(
-                        arm.moveToPosition(Constants.ArmConstants.ArmPositions.PREL4),
                         new ParallelCommandGroup(
+                            arm.moveToPosition(Constants.ArmConstants.ArmPositions.PREL4),
                             new SequentialCommandGroup(
                                 new WaitCommand(0.1),
                                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4First),
-                                new WaitCommand(0.8),
+                                new WaitCommand(0.7),
                                 elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L4)
                             )
                         ),

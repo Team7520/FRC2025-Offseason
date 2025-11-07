@@ -22,7 +22,8 @@ public class L3PlaceCommand extends SequentialCommandGroup {
                 arm.moveToPosition(Constants.ArmConstants.ArmPositions.ALGAE),
                 arm.ejectPiece(0.3),
                 new WaitCommand(0.5),
-                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3SCORE)
+                elevator.moveToPosition(Constants.ElevatorConstants.ElevatorPosition.L3SCORE),
+                new WaitCommand(0.4)
             );
         }
         

@@ -172,7 +172,7 @@ public class ArmSubsystem extends SubsystemBase {
             () -> intake(), 
             this
         ).until(() -> hasPiece())
-        .andThen(Commands.run(() -> intake(), this).withTimeout(0.15))
+        .andThen(Commands.run(() -> intake(), this).withTimeout(0.25))
          .finallyDo(interrupted -> {stopOpenLoop();
             captureHoldFromEncoder();});
     }
